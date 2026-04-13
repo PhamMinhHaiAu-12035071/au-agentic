@@ -61,4 +61,17 @@ describe('copyFilesToProject', () => {
     expect(results[0]?.result).toBe('failed');
     expect(results[0]?.error).toBeDefined();
   });
+
+  it('does not track copy state after copyFilesToProject returns', async () => {
+    const tmpDir4 = await mkdtemp(join(tmpdir(), 'au-agentic-state-'));
+    await copyFilesToProject(tmpDir4, ['cursor'], { confirmOverwrite: async () => true });
+
+    const results = await copyFilesToProject(tmpDir4, ['cursor'], {
+      confirmOverwrite: async () => true,
+    });
+
+    expect(results[0]?.status).toBe('overwrite');
+    expect(results[0]?.result).toBe('copied');
+    await rm(tmpDir4, { recursive: true, force: true });
+  });
 });

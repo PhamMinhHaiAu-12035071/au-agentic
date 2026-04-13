@@ -164,11 +164,6 @@ export async function stepCopy(projectPath: string, tools: Tool[]): Promise<void
     },
   });
 
-  // Track copied for mid-cancel display
-  for (const r of results) {
-    if (r.result === 'copied') copiedPaths.push(r.targetPath);
-  }
-
   showResults(results);
   showNextSteps(tools);
 
