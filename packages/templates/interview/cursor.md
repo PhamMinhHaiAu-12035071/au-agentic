@@ -1,12 +1,17 @@
-<!-- au-agentic v1.0.0 | tool: cursor | generated: 2026-04-13 -->
+---
+description: Phỏng vấn requirement — biến yêu cầu mơ hồ thành spec rõ ràng trước khi plan hoặc implement
+---
+<!-- au-agentic v1.0.0 | tool: cursor -->
 
-Hãy phỏng vấn tôi bằng Tiếng Việt có dấu thật kỹ và thật sâu nhằm biến một yêu cầu
-còn mơ hồ thành spec và requirement cực kỳ rõ ràng trước khi lập kế hoạch hoặc triển khai.
+Hãy dùng công cụ `AskUserQuestion` để phỏng vấn tôi bằng Tiếng Việt có dấu thật kỹ và thật sâu nhằm biến một yêu cầu còn mơ hồ thành spec và requirement cực kỳ rõ ràng trước khi lập kế hoạch hoặc triển khai.
 
-Sử dụng Cursor's Agent mode để:
+Sử dụng Cursor Agent mode để:
 - Tự đọc codebase, config, docs hiện có trước khi hỏi
-- Đặt câu hỏi qua chat (structured choices khi có thể)
+- Dùng `AskUserQuestion` với `type: "select"` cho multiple-choice, `type: "confirm"` cho yes/no, `type: "text"` cho open-ended
+- Đánh dấu option được khuyến nghị bằng prefix `"(Recommended)"` ở đầu label
 - Ghi spec cuối cùng vào file trong project
+
+## Tiêu chuẩn làm việc
 
 Tiêu chuẩn làm việc:
 - Mặc định ưu tiên hỏi thừa hơn hỏi thiếu nếu điều đó giúp loại bỏ ambiguity quan trọng.
@@ -15,6 +20,8 @@ Tiêu chuẩn làm việc:
 - Không được dừng khi vẫn còn bất kỳ câu hỏi nào mà câu trả lời của nó có thể làm đổi spec, đổi quyết định kỹ thuật, hoặc đổi cách triển khai.
 - Không hỏi những gì có thể tự suy ra nhanh và an toàn từ codebase, config, docs, hoặc pattern hiện có; phải tự kiểm tra trước.
 - Một nhánh được coi là `đủ rõ` khi: (a) có thể viết pseudo-code, mock data, acceptance criteria, hoặc contract cho nó mà không cần đoán; hoặc (b) câu hỏi tiếp theo của nhánh đó không còn làm thay đổi quyết định kỹ thuật hay sản phẩm nào đã chốt.
+
+## Preflight trước mỗi lượt
 
 Preflight trước mỗi lượt:
 - Nếu user cung cấp context từ session trước như `working spec snapshot`, `unresolved ledger`, `decision log`, `coverage matrix`, spec cũ, hoặc nói rõ là đang tiếp tục từ lần trước, hãy render lại snapshot hiện có và hỏi tôi xác nhận trước khi tiếp tục.
@@ -26,6 +33,8 @@ Preflight trước mỗi lượt:
 - Tự duy trì một `coverage matrix` cho các miền và các lớp quan trọng, với trạng thái `unseen`, `in-progress`, `resolved`, hoặc `out-of-scope`.
 - Nếu một câu trả lời vừa mở ra nhánh mới hoặc tạo ra hệ quả mới, phải hỏi đệ quy tiếp trên nhánh đó cho tới khi nhánh đó đủ rõ.
 - Luôn đối chiếu câu trả lời mới với những gì đã chốt trước đó và với codebase hiện có; nếu phát hiện mâu thuẫn, phải dừng để làm rõ mâu thuẫn đó trước khi tiếp tục.
+
+## Sổ theo dõi bắt buộc
 
 Sổ theo dõi bắt buộc:
 - Duy trì một `unresolved ledger` gồm các mục `open questions`, `open decisions`, `assumptions needing confirmation`, và `possible conflicts`.
@@ -51,6 +60,8 @@ Sổ theo dõi bắt buộc:
 - Duy trì `decision log` theo format tối thiểu: `[DEC-###] Decision | Status | Provenance | Risk | Notes`.
 - Sau mỗi lượt, cập nhật ledger này một cách ngắn gọn.
 - Không được kết thúc phỏng vấn khi ledger vẫn còn bất kỳ mục mở nào có thể ảnh hưởng tới spec hoặc cách triển khai.
+
+## Cách phỏng vấn
 
 Cách phỏng vấn:
 - Pha 1: khóa bằng được `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, và `risk/safety`.
@@ -79,6 +90,8 @@ Cách phỏng vấn:
 - Khi một decision bị revise, entry mới phải dùng provenance `user-confirmed` nếu user đang sửa lại một quyết định cũ, hoặc `user-stated` nếu user đang cung cấp thông tin mới từ đầu; không được mặc định tái dùng provenance của entry cũ.
 - Nếu phát hiện requirements không khả thi hoặc mâu thuẫn cơ bản đến mức không thể resolve chỉ bằng cách chọn một option hiện có, hãy dừng lại, trình bày conflict cụ thể cùng lý do kỹ thuật, đề xuất ít nhất 2 hướng giải quyết khả thi, và yêu cầu user ra quyết định trước khi tiếp tục.
 
+## Coverage bắt buộc
+
 Coverage bắt buộc, áp dụng theo ngữ cảnh:
 - Ngay từ đầu, hãy tự xác định dự án này liên quan tới những miền nào trong số: `CLI`, `backend/API`, `frontend/web`, `mobile/app`, `native`, `desktop`, `cloud/infrastructure`, `terraform/IaC`, `data/storage`, `CI/CD`, `security/compliance`, `analytics/telemetry`, `DX/tooling`.
 - Với mỗi miền có liên quan, phải đào sâu cho tới khi rõ ràng; với mỗi miền không liên quan, phải tự xác nhận là `out of scope` thay vì bỏ qua trong im lặng.
@@ -91,6 +104,8 @@ Coverage bắt buộc, áp dụng theo ngữ cảnh:
 - Với `data/storage`, phải làm rõ ít nhất: schema/model, source of truth, migrations, retention, consistency, indexing/query patterns, backup/recovery, và privacy requirements.
 - Với `CI/CD`, `DX/tooling`, hoặc `analytics/telemetry`, phải làm rõ ít nhất: local dev flow, automation, build/release gates, observability hooks, event taxonomy, dashboards/alerts, và maintenance burden.
 - Nếu một câu trả lời chạm tới nhiều miền cùng lúc, phải tiếp tục đào riêng từng miền cho tới khi mỗi miền đều đủ rõ.
+
+## Sau mỗi lượt
 
 Sau mỗi câu trả lời:
 - Tóm tắt ngắn gọn `đã rõ`.
@@ -106,12 +121,16 @@ Sau mỗi câu trả lời:
 - Sau khi cập nhật tất cả trackers, nếu mọi ambiguity vật liệu đã được xử lý xong và các mục còn lại chỉ còn thuộc closing sequence như `assumed-pending`, `ai-recommended-pending-confirmation`, coverage validation, hoặc final confirmation, hãy thông báo ngắn gọn rằng interview đã đủ và bắt đầu closing sequence ngay lượt đó.
 - Nếu chưa bước vào closing sequence, hãy hỏi tiếp câu có leverage cao nhất kế tiếp.
 
+## Điều kiện dừng
+
 Điều kiện dừng:
 - Chỉ kết thúc khi không còn ambiguity vật liệu nào và một người khác có thể plan hoặc implement mà không cần đoán các điểm quan trọng.
 - Nếu vẫn còn chỗ phải giả định, coi như phỏng vấn chưa hoàn tất.
 - Nếu còn mâu thuẫn chưa được resolve hoặc `unresolved ledger` chưa rỗng, coi như phỏng vấn chưa hoàn tất.
 - Nếu `coverage matrix` còn mục `unseen` hoặc `in-progress` ở bất kỳ miền hay lớp nào có liên quan, coi như phỏng vấn chưa hoàn tất.
 - Các stopping condition này không áp dụng trong lúc đang thực thi closing sequence; closing sequence có cơ chế xử lý riêng cho các item còn lại.
+
+## Khi kết thúc
 
 Khi kết thúc:
 - Nếu closing sequence đã phải restart quá 2 lần vì cùng một domain hoặc cùng một decision, hãy dừng vòng lặp, nêu rõ domain hoặc decision đó đang thay đổi lặp lại vì sao, và yêu cầu tôi ra quyết định dứt khoát trước khi tiếp tục.
