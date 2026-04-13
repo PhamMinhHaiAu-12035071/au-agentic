@@ -1,5 +1,6 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
+import pkg from '../package.json' with { type: 'json' };
 import { stepInputPath } from './steps/path.js';
 import { stepSelectTools } from './steps/tools.js';
 import { stepCopy } from './steps/copy.js';
@@ -20,7 +21,7 @@ process.on('SIGINT', () => {
 
 async function main(): Promise<void> {
   p.intro(
-    `${pc.blue('◆ au-agentic')} ${pc.dim('v1.0.0')}\n` +
+    `${pc.blue('◆ au-agentic')} ${pc.dim(`v${pkg.version}`)}\n` +
     `${pc.gray('Scaffold enterprise slash commands for AI coding tools')}`,
   );
 
