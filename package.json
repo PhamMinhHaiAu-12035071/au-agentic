@@ -1,0 +1,12 @@
+{
+  "name": "au-agentic-monorepo",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "bun run packages/cli/src/index.ts",
+    "build": "cd packages/cli && bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
+    "test": "bun test packages/cli/src/__tests__/",
+    "lint": "eslint packages/",
+    "prepublish": "bun run lint && bun run test && bun run build"
+  }
+}

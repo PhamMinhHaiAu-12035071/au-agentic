@@ -1,0 +1,24 @@
+{
+  "name": "au-agentic",
+  "version": "1.0.0",
+  "description": "Scaffold enterprise slash commands for AI coding tools",
+  "type": "module",
+  "bin": {
+    "au-agentic": "dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
+    "test": "bun test src/__tests__/"
+  },
+  "dependencies": {
+    "@au-agentic/templates": "workspace:*",
+    "@clack/prompts": "^0.9.1",
+    "@clack/core": "^0.4.1",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  }
+}
