@@ -123,6 +123,37 @@ GitHub-specific configuration and automation.
 - `ISSUE_TEMPLATE/` — Structured issue forms (bug reports, feature requests, questions)
 - `workflows/` — GitHub Actions CI/CD automation (docs-check.yml, security.yml)
 
+## Root-Level Files
+
+Project documentation, governance, and configuration files at repository root.
+
+**Documentation & Governance:**
+```
+README.md                 # Project overview, quick start, badges
+AGENTS.md                 # Universal AI agent contract (Layer 1 shim)
+CLAUDE.md                 # Claude-specific rules, imports AGENTS.md
+CONTRIBUTING.md           # Contribution guidelines, setup, PR process
+LICENSE                   # MIT license full text
+CHANGELOG.md              # Version history and release notes
+SECURITY.md               # Security policy, vulnerability reporting
+SUPPORT.md                # Support channels, getting help
+CITATION.cff              # Citation metadata for academic use
+```
+
+**Configuration:**
+```
+package.json              # Monorepo root, workspaces, scripts, devDependencies
+tsconfig.json             # TypeScript compiler config (ESNext, Bun types)
+eslint.config.ts          # ESLint config (@typescript-eslint plugins)
+commitlint.config.ts      # Conventional Commits enforcement config
+bun.lock                  # Bun lockfile for dependency resolution
+```
+
+**Purpose by category:**
+- **AGENTS.md / CLAUDE.md** — Always-loaded shims (≤5KB total), JIT routing to docs/ai/
+- **CONTRIBUTING.md** — Links to docs/development/* for workflows and testing
+- **Configuration files** — Runtime (Bun), type checking (tsc), linting (eslint), commit messages (commitlint)
+
 ## Sensitive Zones
 
 **packages/cli/src/templates.ts:**
