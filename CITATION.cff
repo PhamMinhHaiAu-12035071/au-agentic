@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: au-agentic
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "au-agentic"
+    given-names: "Contributors"
+repository-code: "https://github.com/phamau/au-agentic"
+version: 1.0.0
+date-released: 2026-01-01

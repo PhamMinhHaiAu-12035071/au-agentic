@@ -1,37 +1,38 @@
-# Contributing
+# Contributing to au-agentic
 
-## Adding a new slash command
+Thank you for contributing!
 
-1. Create a new folder under `packages/templates/`:
-   ```
-   packages/templates/<command-name>/
-   ├── cursor.md
-   ├── claude.md
-   ├── copilot.md
-   └── codex/
-       └── SKILL.md
-   ```
+## Setup
 
-2. Add a version header to each file:
-   ```
-   <!-- au-agentic v<VERSION> | tool: <TOOL> | generated: <DATE> -->
-   ```
+```bash
+git clone https://github.com/phamau/au-agentic
+cd au-agentic
+bun install
+bun run verify  # typecheck + lint + test
+```
 
-3. Update `packages/cli/src/utils/templates.ts`:
-   - Add the new template imports
-   - Add to `TEMPLATE_MAP` and `TARGET_PATH_MAP`
+## Commit Conventions
 
-4. Add manual QA steps to `TESTING.md`
+We use [Conventional Commits](https://www.conventionalcommits.org/):
+- `feat:` — New features
+- `fix:` — Bug fixes
+- `docs:` — Documentation changes
+- `chore:` — Maintenance tasks
+- `refactor:` — Code restructuring
+- `test:` — Test changes
 
-5. Submit a PR with:
-   - All 4 template variants
-   - Updated `templates.ts`
-   - Updated `TESTING.md`
-   - Evidence that the command works on at least 2 AI tools
+Enforced by commitlint pre-commit hook.
 
-## Template quality checklist
+## Pull Requests
 
-- [ ] Content leverages native features of the tool (e.g., AskUserQuestion for Claude Code)
-- [ ] Version header present in all 4 files
-- [ ] Content does not reference tool-specific APIs that don't exist
-- [ ] Manual QA completed on at least 2 tools
+See [Branching and PRs guide](docs/development/branching-and-prs.md) and [Development Workflow](docs/development/workflow.md).
+
+Before submitting:
+1. Run `bun run verify` — all checks must pass
+2. Update docs if you changed behavior/API
+3. Add tests for new functionality
+4. Follow [Code Style Guide](docs/development/styleguide.md)
+
+## Questions?
+
+See [SUPPORT.md](SUPPORT.md) or open a discussion.
