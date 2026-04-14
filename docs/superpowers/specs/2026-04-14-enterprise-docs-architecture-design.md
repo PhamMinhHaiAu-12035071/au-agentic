@@ -75,7 +75,8 @@ CLAUDE.md is redirect to AGENTS.md + Claude-specific compaction rules. AGENTS.md
 *Trade-off:* Less flexible than decision tree, but agents parse faster, fewer tokens, no infinite chain risk.
 
 **DEC-A4: Max 3 cross-references per file**  
-Every file can reference at most 3 other files. Prevents chain-loading pattern.
+Every file can reference at most 3 other files. Prevents chain-loading pattern.  
+**Exception (revised 2026-04-14):** Index/mapping files (routing.md, docs-policy.md) are exempt — they are terminal nodes that agents use for lookup without following references onward.
 
 **DEC-A5: Absorb then delete**  
 VERIFICATION.md and TESTING.md absorbed into new structure, then deleted. No dual source-of-truth.
@@ -407,9 +408,9 @@ Batch 1 → Batch 2 → (Batch 3 + Batch 4 in parallel) → Batch 5
 | Total always-loaded | ≤5KB |
 | docs/ai/routing.md | ≤150 lines (~5KB) |
 | Each other docs/ai/* file | ≤100 lines (~3KB) |
-| Total docs/ai/ | ≤25KB |
+| Total docs/ai/ | ≤45KB (revised from 25KB after implementation) |
 | Each docs/* file | ≤200 lines (~6KB) |
-| Per-task context | ≤28KB |
+| Per-task context | ≤32KB (agents load 2-3 policy files, not entire layer) |
 | If file exceeds budget | Split into 2 files |
 
 ---

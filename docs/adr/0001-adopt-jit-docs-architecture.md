@@ -12,6 +12,11 @@
 
 Accepted
 
+**Revised 2026-04-14 after implementation:**
+- DEC-A4: Exempts index/mapping files (routing.md, docs-policy.md) from max 3 cross-references rule
+- Layer 2 budget: Revised from ≤25KB to ≤45KB based on actual content density
+- Per-task context budget: Remains ≤28-32KB (agents load 2-3 policy files, not entire layer)
+
 ## Context
 
 The repository historically relied on short [AGENTS.md](../../AGENTS.md) and longer [CLAUDE.md](../../CLAUDE.md) loaded into every session. Human-oriented material had no canonical home under `docs/`, and there was no AI-facing routing layer.
