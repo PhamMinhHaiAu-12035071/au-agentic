@@ -1,3 +1,11 @@
+**Purpose:** Landing page and navigation hub for all au-agentic documentation  
+**Read this when:** Starting with docs, looking for where specific information lives  
+**Do not use for:** Direct technical references (use specific section pages)  
+**Related:** docs/ai/routing.md (for AI agents)  
+**Update when:** New documentation sections added or structure changes  
+
+---
+
 # au-agentic Documentation
 
 **Welcome to au-agentic docs.** This is your landing page — use the navigation below to find what you need.
