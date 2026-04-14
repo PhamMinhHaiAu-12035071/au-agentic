@@ -44,7 +44,7 @@ Apply these **in addition to** primary row when task also involves:
 
 ## Routing Rules
 
-- **No chain-loading:** Max 3 cross-references per file
+- **No chain-loading:** Max 3 cross-references per file (exception: index/mapping files like routing.md and docs-policy.md are terminal nodes)
 - **Budget:** Per-task context ≤28KB (shim 5KB + routing 5KB + policies 6KB + canonical 12KB)
 - **Unclear task?** Expand 1 layer minimal context → if still unclear → stop and ask user before changing code
 - **Docs contradict?** Expand 1 layer minimal context → if conflict remains → stop and ask user
@@ -55,9 +55,9 @@ Apply these **in addition to** primary row when task also involves:
 |-------|--------|---------|
 | Shim (AGENTS.md + CLAUDE.md) | ≤5KB | Always-loaded mission + routing pointer |
 | Routing (this file) | ≤5KB | Task type lookup table |
-| Policies (1-2 files from table) | ≤6KB | Task-specific rules |
+| Policies (1-2 files from table) | ≤10KB | Task-specific rules (agents load 2-3 files, not entire 45KB layer) |
 | Canonical (on-demand) | ≤12KB | Detailed references when needed |
-| **Total per task** | **≤28KB** | |
+| **Total per task** | **≤32KB** | |
 
 ---
 
