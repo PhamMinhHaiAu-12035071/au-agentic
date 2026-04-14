@@ -1,0 +1,7 @@
+header:
+  schema-version: 1.0.0
+  project-url: https://github.com/phamau/au-agentic
+  changelog: https://github.com/phamau/au-agentic/blob/main/CHANGELOG.md
+security-testing:
+  - tool-type: sca
+    tool-name: bun-audit

@@ -1,0 +1,16 @@
+name: Docs Check
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: Add docs validation when tooling ready
+      # For now: basic link checking only
+      - run: echo "Docs check placeholder - add validation tooling"
