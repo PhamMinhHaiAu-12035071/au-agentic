@@ -1,0 +1,10 @@
+# Currently not applicable: au-agentic has no HTTP API.
+# Trigger: replace this stub when a served OpenAPI contract exists.
+openapi: 3.1.0
+info:
+  title: au-agentic
+  version: 0.0.0
+  description: |
+    Placeholder. No OpenAPI surface is published for this repository.
+servers: []
+paths: {}
