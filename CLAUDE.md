@@ -1,5 +1,7 @@
 @AGENTS.md
 
+**Read [AGENTS.md](./AGENTS.md) first.** It contains the universal contract for all AI agents. This file adds Claude-specific rules only.
+
 ---
 
 # Claude-Specific Compaction Rules

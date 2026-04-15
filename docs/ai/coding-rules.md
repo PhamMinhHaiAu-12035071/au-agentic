@@ -10,7 +10,7 @@
 
 ## Runtime and Module Format
 
-**Runtime:** Bun (not Node). Use `bun`, not `npm` or `node`. Bun-specific features are allowed (for example `with { type: 'text' }` imports).
+**Runtime:** Bun (not Node). This repo is currently validated on Bun 1.3.10. Use `bun`, not `npm` or `node`. Bun-specific features are allowed (for example `with { type: 'text' }` imports).
 
 **Module format:** ESM throughout (`"type": "module"` in package.json). Use `import`/`export`, not `require()`. File extensions in imports are optional where TypeScript config allows.
 

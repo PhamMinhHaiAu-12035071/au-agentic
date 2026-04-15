@@ -6,6 +6,6 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["bun-types"]
+    "types": ["bun"]
   }
 }

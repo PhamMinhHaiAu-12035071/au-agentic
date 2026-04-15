@@ -34,5 +34,5 @@ Tested with: Claude Sonnet 4.6 (Claude Code), GPT-4o (Copilot), Cursor Agent mod
 
 ## Requirements
 
-- Node.js 18+ (for `npx`) or Bun 1.0+ (for `bunx`)
+- Node.js 18+ (for `npx`) or Bun 1.3.10 (for `bunx`)
 - An interactive terminal (TTY required)
