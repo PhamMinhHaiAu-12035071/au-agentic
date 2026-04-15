@@ -2,6 +2,12 @@
 
 Smallest correct change. Preserve conventions. Verify before claiming complete.
 
+# Universal Standards
+
+**Read [docs/ai/gold-rules.md](./docs/ai/gold-rules.md) first.** It contains universal coding quality, agent behavior, and efficiency standards that apply across all projects.
+
+All agents must internalize these principles before starting any task. Project-specific rules (below) extend but never contradict these foundational standards.
+
 # Non-Negotiables
 
 - Run `bun run verify` before claiming work complete
