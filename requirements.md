@@ -1,3 +1,9 @@
+# Requirements (Historical Reference)
+
+**Note:** The content below has been integrated into [docs/ai/gold-rules.md](./docs/ai/gold-rules.md) as universal standards for all projects. This file is kept as historical reference showing the original source.
+
+---
+
 # Coding standards
 1. Use latest versions of libraries and idiomatic approaches as of today
 2. Keep it simple - NEVER over-engineer, ALWAYS simplify, NO unnecessary defensive programming. No extra features - focus on simplicity.
