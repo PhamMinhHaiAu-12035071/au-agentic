@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'bun:test';
-import { writeFile } from '#utils/files';
+import { writeTemplate } from '#utils/files';
 import { copyFilesToProject } from '#steps/copy';
 
 describe('package.json imports field aliases', () => {
   it('resolves #utils/* to packages/cli/src/utils/*', () => {
-    expect(typeof writeFile).toBe('function');
+    expect(typeof writeTemplate).toBe('function');
   });
 
   it('resolves #steps/* to packages/cli/src/steps/*', () => {
