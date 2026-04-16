@@ -26,7 +26,7 @@ Run in your terminal (requires interactive mode). The wizard will:
 
 ## Using `/interview`
 
-After scaffolding, open your AI tool and type `/interview` (Cursor, Claude Code, Copilot, Codex — tất cả đều dùng `/` popup; Codex cũng hỗ trợ `$interview`).
+After scaffolding, open your AI tool and type `/interview` (Cursor, Claude Code, Copilot, and Codex all use the `/` popup; Codex also supports `$interview`).
 The command will conduct a structured requirement interview to help you turn vague ideas
 into clear specs.
 

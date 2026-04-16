@@ -136,4 +136,3 @@ These standards apply to all projects regardless of technology stack or framewor
 **User instructions ALWAYS take precedence.** If the user asks for a different approach (including style choices such as emojis or explicit checks), follow the user request.
 
 When these rules conflict with project requirements or explicit preferences, follow project/user context first.
-

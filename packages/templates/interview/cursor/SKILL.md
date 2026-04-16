@@ -1,194 +1,191 @@
 ---
 name: interview
-description: Phỏng vấn requirement theo methodology có cấu trúc — biến yêu cầu mơ hồ thành spec rõ ràng bằng Tiếng Việt. Dùng khi user nói "interview me", "phỏng vấn requirement", "biến ý tưởng thành spec", hoặc trước khi plan/implement feature mới.
+description: Structured requirement interview that transforms vague requirements into a crystal-clear spec. Use when the user says "interview me", "help me define requirements", "turn this idea into a spec", or before planning/implementing a new feature.
 disable-model-invocation: true
 ---
-<!-- au-agentic v2.0.0 | tool: cursor -->
+<!-- au-agentic v1.0.0 | tool: cursor -->
 
-Hãy dùng công cụ `AskUserQuestion` để phỏng vấn tôi bằng Tiếng Việt có dấu thật kỹ và thật sâu nhằm biến một yêu cầu còn mơ hồ thành spec và requirement cực kỳ rõ ràng trước khi lập kế hoạch hoặc triển khai.
+Use the `AskUserQuestion` tool to interview me thoroughly and deeply so we can turn a vague requirement into a crystal-clear spec and requirements document before planning or implementation.
 
-Sử dụng Cursor Agent mode để:
-- Tự đọc codebase, config, docs hiện có trước khi hỏi
-- Dùng `AskUserQuestion` với `type: "select"` cho multiple-choice, `type: "confirm"` cho yes/no, `type: "text"` cho open-ended
-- Đánh dấu option được khuyến nghị bằng prefix `"(Recommended)"` ở đầu label
-- Ghi spec cuối cùng vào file trong project
+Use Cursor Agent mode to:
+- Read the existing codebase, config, and docs before asking
+- Use `AskUserQuestion` with `type: "select"` for multiple-choice, `type: "confirm"` for yes/no, `type: "text"` for open-ended
+- Mark the recommended option with a `"(Recommended)"` prefix on the label
+- Render the final interview report (rounds + decisions + trackers) as markdown directly in chat; do not write to a file
 
-## Tiêu chuẩn làm việc
+## Working Standards
 
-Tiêu chuẩn làm việc:
-- Mặc định ưu tiên hỏi thừa hơn hỏi thiếu nếu điều đó giúp loại bỏ ambiguity quan trọng.
-- `Ambiguity` là `material` nếu câu trả lời khác nhau của nó có thể làm thay đổi scope, data model, API contract, UX flow, auth model, deployment strategy, test strategy, risk profile, hoặc effort/migration cost một cách đáng kể.
-- Coi mọi giả định có thể làm thay đổi scope, hành vi, kiến trúc, UX, dữ liệu, test, rollout, vận hành, bảo mật, hiệu năng, hoặc trade-off là `chưa rõ` cho tới khi đã được khóa.
-- Không được dừng khi vẫn còn bất kỳ câu hỏi nào mà câu trả lời của nó có thể làm đổi spec, đổi quyết định kỹ thuật, hoặc đổi cách triển khai.
-- Không hỏi những gì có thể tự suy ra nhanh và an toàn từ codebase, config, docs, hoặc pattern hiện có; phải tự kiểm tra trước.
-- Một nhánh được coi là `đủ rõ` khi: (a) có thể viết pseudo-code, mock data, acceptance criteria, hoặc contract cho nó mà không cần đoán; hoặc (b) câu hỏi tiếp theo của nhánh đó không còn làm thay đổi quyết định kỹ thuật hay sản phẩm nào đã chốt.
+Working standards:
+- By default, prefer asking too much over asking too little if that helps eliminate important ambiguity.
+- `Ambiguity` is `material` if different answers could significantly change scope, data model, API contract, UX flow, auth model, deployment strategy, test strategy, risk profile, or effort/migration cost.
+- Treat every assumption that could change scope, behavior, architecture, UX, data, tests, rollout, operations, security, performance, or trade-offs as `unclear` until it is locked down.
+- Do not stop while any question remains whose answer could change the spec, a technical decision, or the implementation approach.
+- Do not ask what can be inferred quickly and safely from the codebase, config, docs, or existing patterns; check those first.
+- A branch counts as `clear enough` when: (a) you could write pseudo-code, mock data, acceptance criteria, or a contract for it without guessing; or (b) the next question on that branch would no longer change any technical or product decision already locked in.
 
-## Preflight trước mỗi lượt
+## Preflight Before Each Turn
 
-Preflight trước mỗi lượt:
-- Nếu user cung cấp context từ session trước như `working spec snapshot`, `unresolved ledger`, `decision log`, `coverage matrix`, spec cũ, hoặc nói rõ là đang tiếp tục từ lần trước, hãy render lại snapshot hiện có và hỏi tôi xác nhận trước khi tiếp tục.
-- Nếu user nói context cũ đã lỗi thời hoặc sai, hãy hỏi rõ tôi muốn: `(a)` bắt đầu lại hoàn toàn, hay `(b)` giữ lại phần nào và cập nhật phần còn lại; rồi xử lý theo lựa chọn đó.
-- Nếu user không cung cấp context nào từ session trước, hãy coi đây là session mới.
-- Khi bắt đầu session mới và user chưa cung cấp requirement rõ ràng, hãy mở đầu bằng đúng 1 câu hỏi mời tôi mô tả yêu cầu hoặc vấn đề cần làm rõ. Không hỏi gì khác ở lượt này.
-- Tự xác định `đã có`, `còn thiếu`, `chưa chắc`, và `nhánh nào cần đào sâu tiếp`.
-- Chỉ ước tính sơ bộ complexity của dự án là `nano`, `small`, `medium`, `large`, hoặc `enterprise` sau khi user đã cung cấp mô tả ban đầu đủ để ước lượng. Với `nano` hoặc `small`, vẫn phải khóa mọi `material ambiguity`, nhưng có thể bỏ qua các lớp coverage không liên quan và nói rõ phần nào được bỏ qua.
-- Tự duy trì một `coverage matrix` cho các miền và các lớp quan trọng, với trạng thái `unseen`, `in-progress`, `resolved`, hoặc `out-of-scope`.
-- Nếu một câu trả lời vừa mở ra nhánh mới hoặc tạo ra hệ quả mới, phải hỏi đệ quy tiếp trên nhánh đó cho tới khi nhánh đó đủ rõ.
-- Luôn đối chiếu câu trả lời mới với những gì đã chốt trước đó và với codebase hiện có; nếu phát hiện mâu thuẫn, phải dừng để làm rõ mâu thuẫn đó trước khi tiếp tục.
+Preflight before each turn:
+- If the user provides context from a previous session such as a `working spec snapshot`, `unresolved ledger`, `decision log`, `coverage matrix`, an old spec, or explicitly says they are continuing, re-render the existing snapshot and ask me to confirm before continuing.
+- If the user says the old context is outdated or wrong, ask clearly whether I want to: `(a)` start completely over, or `(b)` keep part of it and update the rest; then act on the choice.
+- If the user provides no prior-session context, treat this as a new session.
+- When starting a new session and the user has not yet provided a clear requirement, open with exactly one question inviting me to describe the requirement or problem. Ask nothing else this turn.
+- Determine on your own what is `already known`, `still missing`, `uncertain`, and `which branch needs deeper exploration`.
+- Only estimate the project's rough complexity as `nano`, `small`, `medium`, `large`, or `enterprise` after the user has given enough initial description. For `nano` or `small`, still lock all `material ambiguity`, but you may skip irrelevant coverage layers while explicitly naming what is skipped.
+- Maintain a `coverage matrix` for relevant domains and layers with statuses `unseen`, `in-progress`, `resolved`, or `out-of-scope`.
+- If an answer opens a new branch or creates new consequences, recursively keep asking on that branch until it is clear enough.
+- Always cross-check new answers against what was previously locked in and against the existing codebase; if you find a contradiction, stop to resolve it before continuing.
 
-## Sổ theo dõi bắt buộc
+## Mandatory Trackers
 
-Sổ theo dõi bắt buộc:
-- Duy trì một `unresolved ledger` gồm các mục `open questions`, `open decisions`, `assumptions needing confirmation`, và `possible conflicts`.
-- `open questions` là những chỗ chưa có đủ thông tin để chốt.
-- `open decisions` là những chỗ đã có đủ options khả dĩ nhưng chưa được user hoặc AI chốt thành quyết định.
-- Duy trì một `decision log` cho mọi quyết định quan trọng, ghi rõ `decision`, `status`, `provenance`, `risk`, và `notes`.
-- Provenance nên phản ánh nguồn gốc chính của quyết định, ví dụ: `user-stated`, `user-confirmed`, `ai-recommended`, hoặc `system-inferred`.
-- `system-inferred` chỉ được dùng khi AI suy ra từ codebase, config, docs, hoặc pattern hiện có và có evidence cụ thể từ artifact đang tồn tại; không được dùng để hợp thức hóa assumption không có cơ sở.
-- Status hợp lệ cho `decision log` là: `proposed`, `accepted`, `assumed-pending`, `ai-recommended-pending-confirmation`, `superseded`, và `rejected`.
-- `proposed` là một option đã được nêu ra nhưng chưa được đánh giá đủ để chốt, thường dùng khi đang thảo luận các lựa chọn.
-- Một decision được chuyển từ `proposed` sang `accepted` khi user explicit đồng ý, chọn option đó, hoặc xác nhận lại sau khi AI hỏi làm rõ.
-- `ai-recommended-pending-confirmation` là trạng thái khi AI đã chọn một option cụ thể làm default hoặc khuyến nghị chính, nhưng user chưa explicit xác nhận.
-- `assumed-pending` là trạng thái khi AI tạm đặt một giả định để unblock flow trước khi hỏi user.
-- `assumed-pending` chỉ được tạo khi: `(a)` cần tiếp tục interview nhưng câu trả lời hiện tại chưa đủ để chốt, và `(b)` item đó sẽ được hỏi lại trong vòng 2-3 lượt tiếp theo.
-- Không được để item ở trạng thái `assumed-pending` quá 3 lượt mà không hỏi lại user, trừ khi user đã chủ động chọn defer theo fatigue protocol và item đó đang chờ được batch-confirm trong closing sequence.
-- `assumed-pending` và `ai-recommended-pending-confirmation` không được dùng thay thế cho nhau.
-- `high-risk` là một cờ bổ sung cho mỗi quyết định hoặc assumption, không thay thế `status`.
-- Duy trì một `working spec snapshot` ngắn gọn phản ánh cách hiểu hiện tại của bạn về yêu cầu.
-- Duy trì một `scope boundary log` cho các mục đã được xác nhận là `out-of-scope`.
-- Duy trì một `scope extension backlog` cho các ý tưởng hoặc mở rộng được user xác nhận là không thuộc scope hiện tại.
-- Duy trì `coverage matrix` theo format: `Domain | Status | Last Updated`, trong đó `Last Updated` là số lượt phỏng vấn gần nhất, ví dụ `Turn 7`.
-- Duy trì `working spec snapshot` theo format tối thiểu: `Goal | Actors | Core flows | Constraints | Open`.
-- Duy trì `decision log` theo format tối thiểu: `[DEC-###] Decision | Status | Provenance | Risk | Notes`.
-- Sau mỗi lượt, cập nhật ledger này một cách ngắn gọn.
-- Không được kết thúc phỏng vấn khi ledger vẫn còn bất kỳ mục mở nào có thể ảnh hưởng tới spec hoặc cách triển khai.
+Mandatory trackers:
+- Maintain an `unresolved ledger` with `open questions`, `open decisions`, `assumptions needing confirmation`, and `possible conflicts`.
+- `open questions` are places where there is not yet enough information to decide.
+- `open decisions` are places where enough viable options exist but neither user nor AI has locked one in.
+- Maintain a `decision log` for every important decision, recording `decision`, `status`, `provenance`, `risk`, and `notes`.
+- Provenance should reflect the primary source of the decision, e.g. `user-stated`, `user-confirmed`, `ai-recommended`, or `system-inferred`.
+- `system-inferred` may only be used when the AI inferred from the codebase, config, docs, or existing patterns with concrete evidence from an existing artifact; it must not be used to legitimize an unsupported assumption.
+- Valid statuses for the `decision log` are: `proposed`, `accepted`, `assumed-pending`, `ai-recommended-pending-confirmation`, `superseded`, and `rejected`.
+- `proposed` is an option that has been raised but not yet evaluated enough to lock, typically during options discussion.
+- A decision moves from `proposed` to `accepted` when the user explicitly agrees, picks that option, or confirms it after the AI asks for clarification.
+- `ai-recommended-pending-confirmation` is the status when the AI has chosen a specific option as the default or main recommendation, but the user has not yet explicitly confirmed it.
+- `assumed-pending` is the status when the AI temporarily adopts an assumption to unblock flow before asking the user.
+- `assumed-pending` may only be created when: `(a)` the interview needs to continue but the current answer is not enough to lock, and `(b)` the item will be re-asked within the next 2–3 turns.
+- Do not leave an item in `assumed-pending` for more than 3 turns without re-asking the user, unless the user proactively chose to defer under the fatigue protocol and the item is waiting to be batch-confirmed in the closing sequence.
+- `assumed-pending` and `ai-recommended-pending-confirmation` must not be used interchangeably.
+- `high-risk` is an additional flag on a decision or assumption; it does not replace `status`.
+- Maintain a concise `working spec snapshot` reflecting your current understanding of the requirement.
+- Maintain a `scope boundary log` for items confirmed as `out-of-scope`.
+- Maintain a `scope extension backlog` for ideas or extensions the user has confirmed are not part of the current scope.
+- Maintain the `coverage matrix` in this format: `Domain | Status | Last Updated`, where `Last Updated` is the most recent interview turn number, e.g. `Turn 7`.
+- Maintain the `working spec snapshot` in this minimum format: `Goal | Actors | Core flows | Constraints | Open`.
+- Maintain the `decision log` in this minimum format: `[DEC-###] Decision | Status | Provenance | Risk | Notes`.
+- After each turn, update the ledger concisely.
+- Do not end the interview while the ledger still has any open item that could affect the spec or implementation.
 
-## Preflight Check cho Câu Hỏi Multiple-Choice
+## Preflight Check for Multiple-Choice Questions
 
-**BẮT BUỘC:** Trước khi hiển thị BẤT KỲ câu hỏi multiple-choice nào (từ 2 options trở lên), bạn PHẢI tự kiểm tra và tự sửa:
+**REQUIRED:** Before showing ANY multiple-choice question (2+ options), you MUST self-check and self-correct:
 
-1. **Có Option Recommended:** Ít nhất 1 option được đánh dấu rõ ràng là `(Recommended)` hoặc có nhãn recommended
-2. **Có Giải Thích:** Option recommended phải kèm 1-2 câu giải thích VÌ SAO bạn chọn nó
-3. **Chất Lượng Giải Thích:** Giải thích phải dựa trên context cụ thể: pattern codebase hiện tại, constraints, trade-offs, hoặc blast radius
+1. **Has Recommended Option:** At least 1 option clearly marked `(Recommended)` or carrying a recommended label
+2. **Has Explanation:** The recommended option must include 1–2 sentences explaining WHY you chose it
+3. **Quality of Explanation:** The explanation must be grounded in concrete context: current codebase patterns, constraints, trade-offs, or blast radius
 
-**Quy Trình Auto-Fix:**
-- Nếu bạn sắp hiển thị câu hỏi multiple-choice mà thiếu bất kỳ điều nào ở trên, DỪNG LẠI
-- Tự bổ sung nhãn recommended và giải thích NGAY BÂY GIỜ trước khi show cho user
-- Cơ sở để recommend: context codebase hiện tại, conservative defaults (blast radius nhỏ nhất + migration cost thấp nhất), hoặc pattern đã có
-- Nếu không có context codebase, hãy chọn option có blast radius nhỏ nhất và migration cost thấp nhất, rồi nói rõ "Đây là conservative default vì chưa có context cụ thể"
+**Auto-Fix Process:**
+- If you are about to show a multiple-choice question that is missing any of the above, STOP
+- Add the recommended label and explanation RIGHT NOW before showing it to the user
+- Basis for the recommendation: current codebase context, conservative defaults (smallest blast radius + lowest migration cost), or existing patterns
+- If you have no codebase context, pick the option with the smallest blast radius and lowest migration cost, and state clearly "This is a conservative default since we lack specific context"
 
-**Format Bắt Buộc:**
+**Required Format:**
 
-**Recommended:** Option X — [1-2 câu giải thích cụ thể dựa trên context]
+**Recommended:** Option X — [1–2 sentences of specific, context-grounded reasoning]
 
 **Options:**
 1. Option X (Recommended)
 2. Option Y  
 3. Option Z
 
-**Ví Dụ:**
+**Example:**
 ```
-**Recommended:** Option A — Tôi chọn cách này vì codebase hiện tại đã dùng pattern X trong module Y, giữ consistency sẽ giảm blast radius khi maintain.
+**Recommended:** Option A — I pick this because the current codebase already uses pattern X in module Y; keeping consistency reduces blast radius during maintenance.
 
 **Options:**
 1. Option A (Recommended)
 2. Option B
-3. Không chắc, dùng recommended
+3. Not sure, use recommended
 ```
 
-**Đảm Bảo Fail-Fast:** Check này xảy ra TRƯỚC KHI bạn hiển thị câu hỏi. User chỉ nhìn thấy phiên bản đã được sửa đúng.
+**Fail-Fast Guarantee:** This check happens BEFORE you show the question. The user only ever sees the corrected version.
 
-## Cách phỏng vấn
+## How to Interview
 
-Cách phỏng vấn:
-- Pha 1: khóa bằng được `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, và `risk/safety`.
-- Chỉ được chuyển từ Pha 1 sang Pha 2 khi cả 8 mục `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, và `risk/safety` đều có ít nhất một entry active trong `decision log` với status `accepted`. `Active` ở đây nghĩa là không phải `superseded` và không phải `rejected`. Đồng thời, không mục nào trong 8 mục này còn status `proposed`, `assumed-pending`, hoặc `ai-recommended-pending-confirmation`.
-- Pha 2: đào sâu toàn diện về technical implementation, UI/UX, data model, business rules, edge cases, error handling, state transitions, testing, rollout, observability, performance, security, migration, backward compatibility, failure modes, và trade-offs.
-- `Leverage cao` là câu hỏi mà câu trả lời khác nhau có thể làm thay đổi ít nhất một trong các thứ sau: architecture, scope boundary, data model, security model, deployment strategy, hoặc test strategy.
-- Ưu tiên các câu hỏi có leverage cao nhất trước, nhưng phải quay lại đào tiếp các nhánh con cho tới khi rõ tận gốc. Các câu hỏi leverage thấp như wording, label, hoặc chi tiết cosmetic nên để sau.
-- Khi có nhiều domain cùng đang `unseen` hoặc `in-progress`, mặc định ưu tiên theo thứ tự: `(1)` `data/storage` và `security/compliance`, `(2)` `backend/API` và `frontend/web`, `(3)` các domain còn lại theo độ phức tạp ước tính giảm dần, trừ khi một domain khác có leverage cao hơn rõ rệt.
-- Mặc định mỗi lượt chỉ hỏi 1 câu hỏi quan trọng nhất.
-- Exception duy nhất: chỉ được gộp tối đa 3 câu nếu và chỉ nếu cả 3 đều là yes/no hoặc multiple-choice với không quá 3 options, cùng phục vụ một quyết định duy nhất, và việc tách ra sẽ chỉ tạo thêm các lượt chờ đợi vô nghĩa.
-- Nếu một rule, flow, API, UX, data contract, hoặc hành vi vẫn còn trừu tượng, phải hỏi thêm `example`, `counterexample`, hoặc input/output cụ thể trước khi coi nó là đã rõ.
-- Ưu tiên multiple-choice hơn open-ended. Câu hỏi phải ngắn, sắc, không hiển nhiên, không chung chung, và khó trả lời hời hợt.
-- Khi đưa lựa chọn, hãy trình bày dưới dạng danh sách đánh số (1. Option A, 2. Option B) để tôi có thể trả lời ngắn gọn.
-- Khi đưa lựa chọn, luôn phải có ít nhất 1 option `recommended` do chính bạn chọn là phù hợp nhất với codebase hoặc dự án hiện tại.
-- Mỗi option `recommended` phải kèm giải thích ngắn gọn vì sao bạn chọn nó, dựa trên codebase, pattern hiện có, constraints, hoặc trade-off của dự án để tôi có thể học từ cách bạn lập luận.
-- Không được gắn `recommended` một cách chung chung hoặc theo mặc định; nếu chưa đủ context để recommend tốt, phải tự đọc thêm context trước rồi mới hỏi.
-- Nếu chưa có codebase hoặc context đủ để recommend, hãy chọn phương án có `blast radius` nhỏ nhất và `migration cost` thấp nhất, rồi nói rõ đây là `conservative default`.
-- **CHÚ Ý:** Xem "Preflight Check cho Câu Hỏi Multiple-Choice" ở trên để biết cách tự kiểm tra và tự sửa trước khi hiển thị câu hỏi.
-- Nếu `blast radius` và `migration cost` xung đột, hãy ưu tiên `blast radius` nhỏ hơn trong môi trường production, và ưu tiên `migration cost` thấp hơn trong môi trường greenfield hoặc prototype. Ghi rõ lý do chọn trong `decision log`.
-- Khi phù hợp, thêm option `không chắc, dùng recommended/default`.
-- Nếu có nhiều lựa chọn trong cùng lượt, cho phép tôi trả lời ngắn như `1b 2a 3c` hoặc `defaults`.
-- Với câu hỏi multiple-choice, mặc định trình bày theo format: `Question`, `Recommended`, `Why`, `Options`, `How to answer`.
-- `Recommended` phải được đặt nổi bật trước danh sách options, không được chôn ở cuối.
-- Khi user trả lời `không biết`, `tùy bạn`, `chưa nghĩ tới`, hoặc tương đương: (1) đề xuất default an toàn nhất cùng lý do cụ thể, (2) ghi vào `decision log` với status `ai-recommended-pending-confirmation`, (3) nếu nó ảnh hưởng scope, architecture, security, hoặc data model thì đánh dấu là `high-risk assumption`, rồi tiếp tục phỏng vấn.
-- Khi gắn nhãn `high-risk` cho một assumption hoặc decision, phải nói rõ cho user biết vì sao bạn coi nó là `high-risk` để user có cơ hội phản bác hoặc điều chỉnh classification đó.
-- Khi phát hiện mâu thuẫn giữa hai câu trả lời: (1) nêu lại rõ hai ý mâu thuẫn, (2) hỏi câu nào là ý định chính xác, (3) cập nhật `decision log`, và (4) mark phương án bị loại là `superseded`.
-- Khi một decision bị revise, entry mới phải dùng provenance `user-confirmed` nếu user đang sửa lại một quyết định cũ, hoặc `user-stated` nếu user đang cung cấp thông tin mới từ đầu; không được mặc định tái dùng provenance của entry cũ.
-- Nếu phát hiện requirements không khả thi hoặc mâu thuẫn cơ bản đến mức không thể resolve chỉ bằng cách chọn một option hiện có, hãy dừng lại, trình bày conflict cụ thể cùng lý do kỹ thuật, đề xuất ít nhất 2 hướng giải quyết khả thi, và yêu cầu user ra quyết định trước khi tiếp tục.
+How to interview:
+- Phase 1: lock down `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, and `risk/safety`.
+- You may only move from Phase 1 to Phase 2 when all 8 items (`objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, `risk/safety`) have at least one active `decision log` entry with status `accepted`. `Active` means not `superseded` and not `rejected`. Additionally, none of the 8 items may still be at status `proposed`, `assumed-pending`, or `ai-recommended-pending-confirmation`.
+- Phase 2: exhaustively explore technical implementation, UI/UX, data model, business rules, edge cases, error handling, state transitions, testing, rollout, observability, performance, security, migration, backward compatibility, failure modes, and trade-offs.
+- `High leverage` means a question whose different answers could change at least one of: architecture, scope boundary, data model, security model, deployment strategy, or test strategy.
+- Prioritize the highest-leverage questions first, but keep digging into sub-branches until each is clear to the root. Low-leverage questions like wording, labels, or cosmetic details come later.
+- When multiple domains are `unseen` or `in-progress`, default to this priority: `(1)` `data/storage` and `security/compliance`, `(2)` `backend/API` and `frontend/web`, `(3)` other domains by decreasing estimated complexity, unless another domain clearly has higher leverage.
+- By default, ask only the single most important question per turn.
+- Only exception: you may batch up to 3 questions if and only if all 3 are yes/no or multiple-choice with at most 3 options, all serve a single decision, and splitting them would just create pointless waiting turns.
+- If a rule, flow, API, UX, data contract, or behavior is still abstract, ask for an `example`, `counterexample`, or concrete input/output before considering it clear.
+- Prefer multiple-choice over open-ended. Questions must be short, sharp, non-obvious, non-generic, and hard to answer glibly.
+- When offering choices, present them as a numbered list (1. Option A, 2. Option B) so I can reply tersely.
+- When offering choices, there must always be at least one `recommended` option that you have chosen as the best fit for the current codebase or project.
+- Every `recommended` option must include a short explanation of why you chose it, grounded in the codebase, existing patterns, constraints, or trade-offs, so the user can learn from your reasoning.
+- Do not mark `recommended` in a generic or default way; if you lack the context to recommend well, read more context before asking.
+- If there is no codebase or enough context to recommend, choose the option with the smallest `blast radius` and lowest `migration cost`, and state explicitly that this is a `conservative default`.
+- **NOTE:** See "Preflight Check for Multiple-Choice Questions" above for how to self-check and self-correct before showing a question.
+- If `blast radius` and `migration cost` conflict, prefer smaller `blast radius` in production environments, and lower `migration cost` in greenfield or prototype environments. Record the reason in the `decision log`.
+- Where appropriate, add a `not sure, use recommended/default` option.
+- If there are multiple choices in one turn, let me answer tersely like `1b 2a 3c` or `defaults`.
+- For multiple-choice questions, default to this format: `Question`, `Recommended`, `Why`, `Options`, `How to answer`.
+- `Recommended` must be placed prominently before the options list; never buried at the bottom.
+- When the user answers `don't know`, `up to you`, `haven't thought about it`, or similar: (1) propose the safest default with a concrete reason, (2) record it in the `decision log` with status `ai-recommended-pending-confirmation`, (3) if it affects scope, architecture, security, or data model, flag it as a `high-risk assumption`, then continue the interview.
+- When you flag an assumption or decision as `high-risk`, state explicitly why you consider it high-risk so the user can push back or adjust the classification.
+- When you detect a contradiction between two answers: (1) restate the two conflicting points clearly, (2) ask which is the correct intent, (3) update the `decision log`, and (4) mark the rejected option as `superseded`.
+- When a decision is revised, the new entry must use provenance `user-confirmed` if the user is correcting a prior decision, or `user-stated` if the user is providing new information for the first time; do not reuse the old entry's provenance by default.
+- If you detect requirements that are infeasible or fundamentally contradictory beyond what picking an existing option can resolve, stop, state the specific conflict with technical reasoning, propose at least 2 viable resolution paths, and ask the user to decide before continuing.
 
-## Coverage bắt buộc
+## Mandatory Coverage
 
-Coverage bắt buộc, áp dụng theo ngữ cảnh:
-- Ngay từ đầu, hãy tự xác định dự án này liên quan tới những miền nào trong số: `CLI`, `backend/API`, `frontend/web`, `mobile/app`, `native`, `desktop`, `cloud/infrastructure`, `terraform/IaC`, `data/storage`, `CI/CD`, `security/compliance`, `analytics/telemetry`, `DX/tooling`.
-- Với mỗi miền có liên quan, phải đào sâu cho tới khi rõ ràng; với mỗi miền không liên quan, phải tự xác nhận là `out of scope` thay vì bỏ qua trong im lặng.
-- Bất kể loại dự án nào, luôn rà tối thiểu các lớp sau nếu có liên quan: `inputs/outputs`, `interfaces/contracts`, `state/data`, `business rules`, `error/failure modes`, `config/env/secrets`, `permissions/auth/authz`, `observability`, `performance/scalability`, `testing/verification`, `deployment/release/rollback`, `migration/backward compatibility`, `operational concerns`, và `trade-offs`.
-- Với `CLI`, phải làm rõ ít nhất: command surface, flags/options, input/output format, exit codes, TTY vs non-TTY, piping/scripting, config files, shell completion, và error messaging.
-- Với `backend/API`, phải làm rõ ít nhất: API contracts, schemas, validation, auth/authz, idempotency, retries/timeouts, pagination/filtering, concurrency/consistency, background jobs, rate limits, và failure handling.
-- Với `frontend/web`, phải làm rõ ít nhất: information architecture, routing/navigation, state management, loading/empty/error states, forms/validation, accessibility, responsive behavior, browser support, và UI feedback.
-- Với `mobile/app`, `native`, hoặc `desktop`, phải làm rõ ít nhất: platform scope/parity, navigation flow, local storage, offline behavior, lifecycle/backgrounding, device permissions, updates/distribution, crash handling, và platform-specific UX constraints.
-- Với `cloud/infrastructure` hoặc `terraform/IaC`, phải làm rõ ít nhất: target environment, provider/account/region, module boundaries, state management, secrets, networking, policy/compliance, drift, blast radius, rollout strategy, rollback, và ownership/operations.
-- Với `data/storage`, phải làm rõ ít nhất: schema/model, source of truth, migrations, retention, consistency, indexing/query patterns, backup/recovery, và privacy requirements.
-- Với `CI/CD`, `DX/tooling`, hoặc `analytics/telemetry`, phải làm rõ ít nhất: local dev flow, automation, build/release gates, observability hooks, event taxonomy, dashboards/alerts, và maintenance burden.
-- Nếu một câu trả lời chạm tới nhiều miền cùng lúc, phải tiếp tục đào riêng từng miền cho tới khi mỗi miền đều đủ rõ.
+Mandatory coverage, applied contextually:
+- At the start, determine which domains this project touches among: `CLI`, `backend/API`, `frontend/web`, `mobile/app`, `native`, `desktop`, `cloud/infrastructure`, `terraform/IaC`, `data/storage`, `CI/CD`, `security/compliance`, `analytics/telemetry`, `DX/tooling`.
+- For each relevant domain, dig until it is clear; for each irrelevant domain, explicitly confirm `out of scope` rather than silently skipping.
+- Regardless of project type, at minimum review these layers when relevant: `inputs/outputs`, `interfaces/contracts`, `state/data`, `business rules`, `error/failure modes`, `config/env/secrets`, `permissions/auth/authz`, `observability`, `performance/scalability`, `testing/verification`, `deployment/release/rollback`, `migration/backward compatibility`, `operational concerns`, and `trade-offs`.
+- For `CLI`, clarify at minimum: command surface, flags/options, input/output format, exit codes, TTY vs non-TTY, piping/scripting, config files, shell completion, and error messaging.
+- For `backend/API`, clarify at minimum: API contracts, schemas, validation, auth/authz, idempotency, retries/timeouts, pagination/filtering, concurrency/consistency, background jobs, rate limits, and failure handling.
+- For `frontend/web`, clarify at minimum: information architecture, routing/navigation, state management, loading/empty/error states, forms/validation, accessibility, responsive behavior, browser support, and UI feedback.
+- For `mobile/app`, `native`, or `desktop`, clarify at minimum: platform scope/parity, navigation flow, local storage, offline behavior, lifecycle/backgrounding, device permissions, updates/distribution, crash handling, and platform-specific UX constraints.
+- For `cloud/infrastructure` or `terraform/IaC`, clarify at minimum: target environment, provider/account/region, module boundaries, state management, secrets, networking, policy/compliance, drift, blast radius, rollout strategy, rollback, and ownership/operations.
+- For `data/storage`, clarify at minimum: schema/model, source of truth, migrations, retention, consistency, indexing/query patterns, backup/recovery, and privacy requirements.
+- For `CI/CD`, `DX/tooling`, or `analytics/telemetry`, clarify at minimum: local dev flow, automation, build/release gates, observability hooks, event taxonomy, dashboards/alerts, and maintenance burden.
+- If an answer touches multiple domains at once, continue digging into each domain separately until each is clear enough.
 
-## Sau mỗi lượt
+## After Each Turn
 
-Sau mỗi câu trả lời:
-- Tóm tắt ngắn gọn `đã rõ`.
-- Liệt kê `còn thiếu` và `điểm chưa chắc`.
-- Cập nhật `unresolved ledger`.
-- Cập nhật `decision log`, `working spec snapshot`, `coverage matrix`, `scope boundary log`, và `scope extension backlog` nếu có liên quan.
-- Nếu câu trả lời mới thêm feature, behavior, constraint, hoặc integration chưa có trong `working spec snapshot`, phải dừng và hỏi rõ đó là phần nằm trong scope ban đầu hay là phần mở rộng.
-- Nếu user xác nhận đó là `in-scope`, hãy cập nhật `working spec snapshot` và tiếp tục.
-- Nếu user xác nhận đó là phần mở rộng, hãy ghi nó vào `scope extension backlog`, không trộn vào spec hiện tại, rồi tiếp tục phỏng vấn theo scope hiện tại.
-- Nếu user trả lời rất ngắn, mơ hồ, hoặc mệt mỏi trong 3 lượt liên tiếp, hãy hỏi liệu tôi có muốn tạm chốt các điểm còn lại bằng `recommended defaults` và đánh dấu chúng là `assumed-pending` để review sau không.
-- Xem là `rất ngắn hoặc mơ hồ` nếu trong 3 lượt liên tiếp mỗi câu trả lời dài không quá 10 từ hoặc không bổ sung thông tin mới có ích so với câu hỏi vừa được hỏi.
-- Xác định `nhánh cần đào tiếp`.
-- Sau khi cập nhật tất cả trackers, nếu mọi ambiguity vật liệu đã được xử lý xong và các mục còn lại chỉ còn thuộc closing sequence như `assumed-pending`, `ai-recommended-pending-confirmation`, coverage validation, hoặc final confirmation, hãy thông báo ngắn gọn rằng interview đã đủ và bắt đầu closing sequence ngay lượt đó.
-- Nếu chưa bước vào closing sequence, hãy hỏi tiếp câu có leverage cao nhất kế tiếp.
+After each answer:
+- Briefly summarize what is `now clear`.
+- List what is `still missing` and `uncertain`.
+- Update the `unresolved ledger`.
+- Update `decision log`, `working spec snapshot`, `coverage matrix`, `scope boundary log`, and `scope extension backlog` as relevant.
+- If the new answer introduces a feature, behavior, constraint, or integration not yet in the `working spec snapshot`, stop and ask clearly whether it is part of the original scope or an extension.
+- If the user confirms it is `in-scope`, update the `working spec snapshot` and continue.
+- If the user confirms it is an extension, record it in the `scope extension backlog`, keep it separate from the current spec, and continue the interview under the current scope.
+- If the user answers very briefly, vaguely, or with fatigue for 3 consecutive turns, ask whether they want to temporarily lock the remaining items with `recommended defaults` marked as `assumed-pending` for later review.
+- Consider an answer `very brief or vague` if, for 3 consecutive turns, each answer is at most 10 words or adds no useful new information beyond the question just asked.
+- Identify the `branch to dig into next`.
+- After updating all trackers, if every material ambiguity is resolved and the remaining items belong only to the closing sequence (`assumed-pending`, `ai-recommended-pending-confirmation`, coverage validation, final confirmation), announce briefly that the interview is sufficient and begin the closing sequence this very turn.
+- If not yet in the closing sequence, ask the next highest-leverage question.
 
-## Điều kiện dừng
+## Stopping Condition
 
-Điều kiện dừng:
-- Chỉ kết thúc khi không còn ambiguity vật liệu nào và một người khác có thể plan hoặc implement mà không cần đoán các điểm quan trọng.
-- Nếu vẫn còn chỗ phải giả định, coi như phỏng vấn chưa hoàn tất.
-- Nếu còn mâu thuẫn chưa được resolve hoặc `unresolved ledger` chưa rỗng, coi như phỏng vấn chưa hoàn tất.
-- Nếu `coverage matrix` còn mục `unseen` hoặc `in-progress` ở bất kỳ miền hay lớp nào có liên quan, coi như phỏng vấn chưa hoàn tất.
-- Các stopping condition này không áp dụng trong lúc đang thực thi closing sequence; closing sequence có cơ chế xử lý riêng cho các item còn lại.
+Stopping condition:
+- End only when there is no material ambiguity left and someone else could plan or implement without having to guess important points.
+- If any spot still requires an assumption, the interview is not yet complete.
+- If any contradiction remains unresolved or the `unresolved ledger` is not empty, the interview is not yet complete.
+- If the `coverage matrix` still has `unseen` or `in-progress` items in any relevant domain or layer, the interview is not yet complete.
+- These stopping conditions do not apply during the closing sequence; the closing sequence has its own handling for remaining items.
 
-## Khi kết thúc
+## Wrap-Up
 
-Khi kết thúc:
-- Nếu closing sequence đã phải restart quá 2 lần vì cùng một domain hoặc cùng một decision, hãy dừng vòng lặp, nêu rõ domain hoặc decision đó đang thay đổi lặp lại vì sao, và yêu cầu tôi ra quyết định dứt khoát trước khi tiếp tục.
-- Bước 1: nếu còn bất kỳ item nào có status `assumed-pending`, hãy trình bày tất cả các item đó cùng một lúc và yêu cầu tôi xác nhận, sửa, hoặc reject từng item một.
-- Sau Bước 1, hãy kiểm tra xem các thay đổi từ user có tạo ra `material ambiguity` mới không; nếu có, phải quay lại phỏng vấn và sau khi phỏng vấn bổ sung hoàn tất thì lặp lại closing sequence này từ đầu.
-- Bước 2: nếu còn bất kỳ item nào có status `ai-recommended-pending-confirmation`, hãy trình bày tất cả các item đó cùng một lúc và yêu cầu tôi xác nhận hoặc sửa từng item một.
-- Sau Bước 2, hãy kiểm tra xem các thay đổi từ user có tạo ra `material ambiguity` mới không; nếu có, phải quay lại phỏng vấn và sau khi phỏng vấn bổ sung hoàn tất thì lặp lại closing sequence này từ đầu.
-- Bước 3: hãy hiển thị toàn bộ `coverage matrix` hiện tại và hỏi tôi: `(1)` có miền nào bạn đang đánh dấu `out-of-scope` nhưng thực ra vẫn cần làm rõ không, và `(2)` có miền nào đang `resolved` nhưng tôi vẫn muốn đào sâu thêm không.
-- Nếu tôi xác nhận có domain nào cần làm rõ thêm ở Bước 3, hãy quay lại phỏng vấn domain đó đầy đủ, rồi lặp lại closing sequence này từ đầu.
-- Bước 4: hãy trình bày một `canonical spec snapshot` cuối cùng và yêu cầu tôi xác nhận hoặc sửa các điểm chốt cuối cùng.
-- Nếu tôi sửa `canonical spec snapshot` ở Bước 4, hãy: `(1)` ghi thay đổi vào `decision log` với provenance `user-confirmed`, `(2)` đánh giá xem thay đổi đó có tạo `material ambiguity` mới không, và `(3)` nếu có thì quay lại phỏng vấn để làm rõ; sau khi phỏng vấn bổ sung hoàn tất thì lặp lại closing sequence này từ đầu.
-- Chỉ sau khi tôi xác nhận snapshot cuối cùng, bạn mới được ghi spec ra file.
-- Final spec phải có header tối thiểu: `Version`, `Date`, `Prepared by (AI-assisted)`, và `Status`.
-- Tóm tắt final spec ngắn gọn theo các mục: `objective`, `scope`, `non-goals`, `done`, `constraints`, `UX/UI`, `data/business rules`, `technical approach`, `testing`, `rollout/ops`, `risks/trade-offs`.
-- Final spec phải có thêm `acceptance criteria`, `happy path`, `edge cases`, `failure cases`, `explicit decisions made`, `open risks`, và `out-of-scope`.
-- Nếu dự án có API, contract, state machine, schema, user flow, hoặc migration quan trọng, hãy ghi chúng ra một cách đủ cụ thể để người khác triển khai mà không cần suy đoán lại.
-- Trong final spec, với mỗi quyết định lớn, hãy ưu tiên thể hiện rõ quyết định đó đến từ người dùng hay là phương án AI đề xuất đã được người dùng chấp thuận.
-- Mọi `high-risk assumption` còn lại trong `decision log` khi kết thúc phải được nêu rõ trong section `open risks` với nhãn `[UNCONFIRMED - HIGH RISK]`, không được trộn vào spec như thể đã được xác nhận.
-- Các mục trong `scope boundary log` và `scope extension backlog` phải được tách rõ khỏi spec chính.
-- Render `scope extension backlog` như một section riêng `Future Scope / Deferred Features`, và ghi rõ các mục trong đó đã được xác nhận là ngoài scope hiện tại, chưa được estimate, và chưa được commit.
-- Nếu có khả năng ghi file, hãy ghi spec cuối cùng vào file mà tôi chỉ định.
-- Nếu user chưa chỉ định path, hãy dùng fallback chain theo thứ tự: `SPEC.md` -> `docs/spec.md` -> `specs/[feature-name]-spec.md`; dùng path đầu tiên đã tồn tại hoặc phù hợp để tạo mới. Nếu không xác định được tên feature hoặc không có repo, dùng `spec.md` trong working directory.
-- Nếu không có khả năng ghi file, hãy render full spec dưới dạng markdown trong chat để tôi có thể dùng ngay.
+Wrap-up:
+- If the closing sequence has had to restart more than 2 times over the same domain or the same decision, stop the loop, explain why that domain or decision keeps changing, and ask me to make a definitive decision before continuing.
+- Step 1: if any items remain at status `assumed-pending`, present them all at once and ask me to confirm, revise, or reject each one.
+- After Step 1, check whether the user's changes introduced any new `material ambiguity`; if so, return to the interview and after the supplementary interview completes, restart this closing sequence from the top.
+- Step 2: if any items remain at status `ai-recommended-pending-confirmation`, present them all at once and ask me to confirm or revise each one.
+- After Step 2, check whether the user's changes introduced any new `material ambiguity`; if so, return to the interview and after the supplementary interview completes, restart this closing sequence from the top.
+- Step 3: display the full current `coverage matrix` and ask me: `(1)` is any domain you marked `out-of-scope` actually still in need of clarification, and `(2)` is any domain currently `resolved` that I still want to dig deeper into?
+- If I confirm at Step 3 that a domain needs more clarification, return to fully interview that domain, then restart this closing sequence from the top.
+- Step 4: present a final `canonical spec snapshot` and ask me to confirm or revise the final decisions.
+- If I revise the `canonical spec snapshot` at Step 4: `(1)` record the change in the `decision log` with provenance `user-confirmed`, `(2)` evaluate whether the change introduces new `material ambiguity`, and `(3)` if so, return to the interview to clarify; after the supplementary interview completes, restart this closing sequence from the top.
+- Only after I confirm the final snapshot may you present the `final interview report`.
+- The `final interview report` is a comprehensive recap of the entire interview for me to review, including:
+  1. `Rounds summary` — a table of the rounds in order, with each row: `Round N | Topic | Question (summary) | Answer (summary) | Locked decision`.
+  2. Full `decision log`, with each major decision clearly showing provenance (from the user, or AI-recommended and accepted by the user).
+  3. Final `working spec snapshot`.
+  4. Final `coverage matrix`.
+  5. `Scope boundary log` and `scope extension backlog` (render as a `Future Scope / Deferred Features` section; clearly mark items as out-of-scope, not estimated, not committed).
+- Every remaining `high-risk assumption` in the `decision log` must be highlighted separately in the report with the `[UNCONFIRMED - HIGH RISK]` label; do not mix them in as if they were confirmed.
+- Render the entire `final interview report` as markdown directly in chat. Do not automatically write it to a file.

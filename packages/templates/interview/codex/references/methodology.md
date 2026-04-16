@@ -2,63 +2,63 @@
 
 Full methodology for the requirement interview process. Referenced from SKILL.md.
 
-## Tiêu chuẩn làm việc
+## Working Standards
 
-- Mặc định ưu tiên hỏi thừa hơn hỏi thiếu nếu điều đó giúp loại bỏ ambiguity quan trọng.
-- `Ambiguity` là `material` nếu câu trả lời khác nhau của nó có thể làm thay đổi scope, data model, API contract, UX flow, auth model, deployment strategy, test strategy, risk profile, hoặc effort/migration cost một cách đáng kể.
-- Coi mọi giả định có thể làm thay đổi scope, hành vi, kiến trúc, UX, dữ liệu, test, rollout, vận hành, bảo mật, hiệu năng, hoặc trade-off là `chưa rõ` cho tới khi đã được khóa.
-- Không được dừng khi vẫn còn bất kỳ câu hỏi nào mà câu trả lời của nó có thể làm đổi spec, đổi quyết định kỹ thuật, hoặc đổi cách triển khai.
-- Không hỏi những gì có thể tự suy ra nhanh và an toàn từ codebase, config, docs, hoặc pattern hiện có; phải tự kiểm tra trước.
-- Một nhánh được coi là `đủ rõ` khi: (a) có thể viết pseudo-code, mock data, acceptance criteria, hoặc contract cho nó mà không cần đoán; hoặc (b) câu hỏi tiếp theo của nhánh đó không còn làm thay đổi quyết định kỹ thuật hay sản phẩm nào đã chốt.
+- By default, prefer asking too much over asking too little if that helps eliminate important ambiguity.
+- `Ambiguity` is `material` if different answers could significantly change scope, data model, API contract, UX flow, auth model, deployment strategy, test strategy, risk profile, or effort/migration cost.
+- Treat every assumption that could change scope, behavior, architecture, UX, data, tests, rollout, operations, security, performance, or trade-offs as `unclear` until it is locked down.
+- Do not stop while any question remains whose answer could change the spec, a technical decision, or the implementation approach.
+- Do not ask what can be inferred quickly and safely from the codebase, config, docs, or existing patterns; check those first.
+- A branch counts as `clear enough` when: (a) you could write pseudo-code, mock data, acceptance criteria, or a contract for it without guessing; or (b) the next question on that branch would no longer change any technical or product decision already locked in.
 
-## Preflight trước mỗi lượt
+## Preflight Before Each Turn
 
-- Nếu user cung cấp context từ session trước (working spec snapshot, unresolved ledger, decision log, coverage matrix), hãy render lại và xác nhận trước khi tiếp tục.
-- Nếu user nói context cũ lỗi thời: hỏi (a) bắt đầu lại hoàn toàn hay (b) giữ lại phần nào.
-- Khi bắt đầu session mới và user chưa cung cấp requirement rõ ràng, hãy mở đầu bằng đúng 1 câu hỏi mời mô tả yêu cầu. Không hỏi gì khác ở lượt này.
+- If the user provides context from a previous session (working spec snapshot, unresolved ledger, decision log, coverage matrix), re-render and confirm before continuing.
+- If the user says the old context is outdated: ask whether to (a) start completely over, or (b) keep part of it and update the rest.
+- When starting a new session and the user has not provided a clear requirement, open with exactly one question inviting them to describe the requirement. Ask nothing else this turn.
 
-## Sổ theo dõi bắt buộc
+## Mandatory Trackers
 
-Duy trì:
+Maintain:
 - `unresolved ledger`: open questions, open decisions, assumptions needing confirmation, possible conflicts
 - `decision log`: [DEC-###] Decision | Status | Provenance | Risk | Notes
 - `working spec snapshot`: Goal | Actors | Core flows | Constraints | Open
 - `coverage matrix`: Domain | Status | Last Updated
 - `scope boundary log`, `scope extension backlog`
 
-Status hợp lệ: `proposed`, `accepted`, `assumed-pending`, `ai-recommended-pending-confirmation`, `superseded`, `rejected`
+Valid statuses: `proposed`, `accepted`, `assumed-pending`, `ai-recommended-pending-confirmation`, `superseded`, `rejected`
 
-## Cách phỏng vấn
+## How to Interview
 
-**Pha 1** — Khóa: `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, `risk/safety`.
-Chỉ sang Pha 2 khi cả 8 mục đều có entry `accepted` trong decision log.
+**Phase 1** — Lock: `objective`, `definition of done`, `scope`, `non-goals`, `constraints`, `environment`, `dependencies`, `risk/safety`.
+Only move to Phase 2 when all 8 items have an `accepted` entry in the decision log.
 
-**Pha 2** — Đào sâu: technical implementation, UI/UX, data model, business rules, edge cases, error handling, state transitions, testing, rollout, observability, performance, security, migration, backward compatibility, failure modes, trade-offs.
+**Phase 2** — Deep dive: technical implementation, UI/UX, data model, business rules, edge cases, error handling, state transitions, testing, rollout, observability, performance, security, migration, backward compatibility, failure modes, trade-offs.
 
-Quy tắc câu hỏi:
-- Ưu tiên multiple-choice. Mỗi lượt chỉ hỏi 1 câu quan trọng nhất.
-- Khi đưa lựa chọn, trình bày dạng `1. Option A, 2. Option B`. Luôn có option `recommended`.
-- Đặt `recommended` nổi bật trước danh sách, kèm lý do ngắn gọn.
-- Exception duy nhất: gộp tối đa 3 câu nếu cả 3 đều yes/no/multiple-choice, cùng phục vụ 1 quyết định, và tách ra vô nghĩa.
+Question rules:
+- Prefer multiple-choice. Ask only the single most important question per turn.
+- When offering choices, present them as `1. Option A, 2. Option B`. Always include a `recommended` option.
+- Place `recommended` prominently before the list, with a short reason.
+- Only exception: batch up to 3 questions if all 3 are yes/no or multiple-choice, all serve 1 decision, and splitting is pointless.
 
-## Coverage bắt buộc
+## Mandatory Coverage
 
-Xác định ngay đầu các miền liên quan: CLI, backend/API, frontend/web, mobile/app, native, desktop, cloud/infrastructure, terraform/IaC, data/storage, CI/CD, security/compliance, analytics/telemetry, DX/tooling.
+At the start, identify which domains are relevant: CLI, backend/API, frontend/web, mobile/app, native, desktop, cloud/infrastructure, terraform/IaC, data/storage, CI/CD, security/compliance, analytics/telemetry, DX/tooling.
 
-Với mỗi miền có liên quan, phải đào sâu tới khi rõ ràng. Với miền không liên quan, tự xác nhận là `out of scope`.
+For each relevant domain, dig until it is clear. For each irrelevant domain, explicitly confirm `out of scope`.
 
-## Điều kiện dừng
+## Stopping Condition
 
-Chỉ kết thúc khi:
-- Không còn material ambiguity
-- Unresolved ledger rỗng
-- Coverage matrix không còn `unseen` hoặc `in-progress`
-- Một người khác có thể plan/implement mà không cần đoán
+End only when:
+- No material ambiguity remains
+- The unresolved ledger is empty
+- The coverage matrix has no `unseen` or `in-progress` items
+- Someone else could plan/implement without guessing
 
 ## Closing Sequence
 
-1. Batch-confirm tất cả `assumed-pending` items
-2. Batch-confirm tất cả `ai-recommended-pending-confirmation` items
-3. Hiển thị coverage matrix — hỏi có domain nào cần xem lại không
-4. Trình bày canonical spec snapshot — xác nhận lần cuối
-5. Ghi spec ra file (fallback chain: SPEC.md → docs/spec.md → specs/[feature]-spec.md)
+1. Batch-confirm all `assumed-pending` items
+2. Batch-confirm all `ai-recommended-pending-confirmation` items
+3. Show the coverage matrix — ask whether any domain needs to be revisited
+4. Present the canonical spec snapshot — final confirmation
+5. Render the **final interview report** in chat (no file write): rounds summary (Round N | Topic | Q | A | Decision), full decision log, working spec snapshot, coverage matrix, scope boundary log, scope extension backlog. Highlight `[UNCONFIRMED - HIGH RISK]` assumptions.

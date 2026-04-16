@@ -1,9 +1,9 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["**/dist/**", "**/.turbo/**", "**/coverage/**", "**/node_modules/**"]
+    "includes": ["**", "!**/dist", "!**/.turbo", "!**/coverage", "!**/node_modules"]
   },
   "formatter": {
     "enabled": true,
@@ -29,7 +29,7 @@
         "noUnusedImports": "error"
       }
     },
-    "ignore": ["packages/templates/**"]
+    "includes": ["**", "!**/packages/templates/**"]
   },
-  "organizeImports": { "enabled": true }
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
 }

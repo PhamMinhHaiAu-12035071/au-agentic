@@ -1,23 +1,23 @@
-import * as p from '@clack/prompts';
-import { resolvePath } from '../utils/paths.js';
-import { isDirectory, hasWritePermission } from '../utils/files.js';
+import * as p from "@clack/prompts";
+import { hasWritePermission, isDirectory } from "../utils/files.js";
+import { resolvePath } from "../utils/paths.js";
 
 export async function stepInputPath(): Promise<string> {
   while (true) {
     const input = await p.text({
-      message: 'Where is your project?',
-      placeholder: '/Users/you/my-project',
+      message: "Where is your project?",
+      placeholder: "/Users/you/my-project",
     });
 
     if (p.isCancel(input)) {
-      p.cancel('Cancelled — no files were modified');
+      p.cancel("Cancelled — no files were modified");
       process.exit(1);
     }
 
     const raw = (input as string).trim();
 
     if (!raw) {
-      p.log.error('Please enter a project path.');
+      p.log.error("Please enter a project path.");
       continue;
     }
 

@@ -1,5 +1,5 @@
-import { stat, access, mkdir, writeFile, constants } from 'fs/promises';
-import { dirname } from 'path';
+import { access, constants, mkdir, stat, writeFile } from "fs/promises";
+import { dirname } from "path";
 
 export async function isDirectory(path: string): Promise<boolean> {
   try {
@@ -34,5 +34,5 @@ export async function ensureDir(path: string): Promise<void> {
 
 export async function writeTemplate(content: string, destPath: string): Promise<void> {
   await ensureDir(dirname(destPath));
-  await writeFile(destPath, content, 'utf-8');
+  await writeFile(destPath, content, "utf-8");
 }
