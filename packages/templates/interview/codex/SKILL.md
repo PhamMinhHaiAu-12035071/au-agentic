@@ -36,6 +36,41 @@ Ask one question at a time to lock these 8 items. Only move to Phase 2 when ALL 
 7. `dependencies` — Phụ thuộc gì ngoài?
 8. `risk/safety` — Rủi ro lớn nhất?
 
+## Preflight Check cho Câu Hỏi Multiple-Choice
+
+**BẮT BUỘC:** Trước khi hiển thị BẤT KỲ câu hỏi multiple-choice nào (từ 2 options trở lên), bạn PHẢI tự kiểm tra và tự sửa:
+
+1. **Có Option Recommended:** Ít nhất 1 option được đánh dấu rõ ràng là `(Recommended)` hoặc có nhãn recommended
+2. **Có Giải Thích:** Option recommended phải kèm 1-2 câu giải thích VÌ SAO bạn chọn nó
+3. **Chất Lượng Giải Thích:** Giải thích phải dựa trên context cụ thể: pattern codebase hiện tại, constraints, trade-offs, hoặc blast radius
+
+**Quy Trình Auto-Fix:**
+- Nếu bạn sắp hiển thị câu hỏi multiple-choice mà thiếu bất kỳ điều nào ở trên, DỪNG LẠI
+- Tự bổ sung nhãn recommended và giải thích NGAY BÂY GIỜ trước khi show cho user
+- Cơ sở để recommend: context codebase hiện tại, conservative defaults (blast radius nhỏ nhất + migration cost thấp nhất), hoặc pattern đã có
+- Nếu không có context codebase, hãy chọn option có blast radius nhỏ nhất và migration cost thấp nhất, rồi nói rõ "Đây là conservative default vì chưa có context cụ thể"
+
+**Format Bắt Buộc:**
+
+**Recommended:** Option X — [1-2 câu giải thích cụ thể dựa trên context]
+
+**Options:**
+1. Option X (Recommended)
+2. Option Y  
+3. Option Z
+
+**Ví Dụ:**
+```
+**Recommended:** Option A — Tôi chọn cách này vì codebase hiện tại đã dùng pattern X trong module Y, giữ consistency sẽ giảm blast radius khi maintain.
+
+**Options:**
+1. Option A (Recommended)
+2. Option B
+3. Không chắc, dùng recommended
+```
+
+**Đảm Bảo Fail-Fast:** Check này xảy ra TRƯỚC KHI bạn hiển thị câu hỏi. User chỉ nhìn thấy phiên bản đã được sửa đúng.
+
 ## Phase 2: Deep Dive
 
 Cover: technical implementation, UI/UX, data model, business rules, edge cases, error handling, testing, rollout, security, performance, trade-offs.
@@ -45,6 +80,7 @@ Cover: technical implementation, UI/UX, data model, business rules, edge cases, 
 - Ask **1 question per turn**, highest leverage first
 - Use numbered choices: `1. Option A  2. Option B (Recommended)`
 - Mark recommended option clearly with `(Recommended)` label
+- **CHÚ Ý:** Xem "Preflight Check cho Câu Hỏi Multiple-Choice" ở trên để biết cách tự kiểm tra và tự sửa trước khi hiển thị câu hỏi.
 - Allow short answers: `1`, `2`, or `defaults`
 - For yes/no: use `ask_user_question` with `type: "confirm"`
 - For free text: use `type: "text"`
