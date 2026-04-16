@@ -1,15 +1,11 @@
 ---
-description: Phỏng vấn requirement theo interview.md methodology — biến yêu cầu mơ hồ thành spec rõ ràng
-allowed-tools:
-  - mcp
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-argument-hint: "[optional: context về project hoặc feature cần phỏng vấn]"
+name: interview
+description: Phỏng vấn requirement theo methodology có cấu trúc — biến yêu cầu mơ hồ thành spec rõ ràng bằng Tiếng Việt. Dùng khi user nói "interview me", "phỏng vấn requirement", "biến ý tưởng thành spec", hoặc trước khi plan/implement feature mới.
+argument-hint: "[optional: context về project hoặc feature]"
+disable-model-invocation: true
+allowed-tools: AskUserQuestion Read Glob Grep
 ---
-<!-- au-agentic v1.0.0 | tool: claude -->
+<!-- au-agentic v2.0.0 | tool: claude -->
 
 Hãy dùng công cụ `AskUserQuestion` để phỏng vấn tôi bằng Tiếng Việt có dấu thật kỹ và thật sâu nhằm biến một yêu cầu còn mơ hồ thành spec và requirement cực kỳ rõ ràng, không còn điểm mù vật liệu nào trước khi lập kế hoạch hoặc triển khai.
 
