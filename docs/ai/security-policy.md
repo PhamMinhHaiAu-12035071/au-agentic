@@ -67,6 +67,16 @@ This repo currently has no secrets handling, auth, or external integrations. The
 - Publish tokens
 - Customer or production data
 
+## Secret scanning
+
+au-agentic uses **gitleaks** to block secrets at commit time and to scan the full repo in CI.
+
+- **Pre-commit:** Lefthook runs `gitleaks protect --staged --redact --no-banner` on every `git commit`. Failures abort the commit.
+- **CI:** `verify.yml` runs `gitleaks detect --redact --no-banner` over the full working tree. (CI is currently `workflow_dispatch` only; see `docs/deployment/runbooks.md`.)
+- **Config:** `.gitleaks.toml` extends the default ruleset and allowlists `packages/templates/**` (placeholder tokens) and known-fake regexes inside `docs/`.
+
+If a real secret has been committed, rotate the credential first, then remove from history with `git filter-repo` or BFG. Gitleaks itself does not remove history.
+
 ## Source Of Truth
 
 When secret-handling is introduced, update `docs/reference/configuration.md` for configuration shape, `docs/reference/integrations.md` for external systems, and `SECURITY.md` for user-facing reporting.
