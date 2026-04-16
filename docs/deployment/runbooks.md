@@ -13,3 +13,29 @@
 **Trigger:** This file should be filled when:
 - On-call rotations or service ownership begins
 - Common tasks (rotate secrets, scale, drain) need checklists
+
+## Activate CI workflows
+
+**When:** You want to re-enable auto-trigger for GitHub Actions (e.g., `push` or `pull_request` triggers).
+
+**Prerequisites:** ADR-0006 updated with rationale; repository branch protection confirms workflows are reliable.
+
+**Steps:**
+
+1. Choose the workflow to re-enable (e.g., `verify.yml` for PR protection)
+2. Edit `.github/workflows/<workflow>.yml`
+3. Change `on: workflow_dispatch` to desired trigger:
+
+```yaml
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+```
+
+4. Commit with message referencing ADR-0006
+5. Test by opening a draft PR — workflow should auto-start
+6. If workflow passes consistently, update branch protection rules to require it
+
+**Rollback:** Revert to `on: workflow_dispatch` if the workflow is unstable or costs exceed budget.
