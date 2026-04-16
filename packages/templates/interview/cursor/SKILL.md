@@ -1,7 +1,9 @@
 ---
-description: Phỏng vấn requirement — biến yêu cầu mơ hồ thành spec rõ ràng trước khi plan hoặc implement
+name: interview
+description: Phỏng vấn requirement theo methodology có cấu trúc — biến yêu cầu mơ hồ thành spec rõ ràng bằng Tiếng Việt. Dùng khi user nói "interview me", "phỏng vấn requirement", "biến ý tưởng thành spec", hoặc trước khi plan/implement feature mới.
+disable-model-invocation: true
 ---
-<!-- au-agentic v1.0.0 | tool: cursor -->
+<!-- au-agentic v2.0.0 | tool: cursor -->
 
 Hãy dùng công cụ `AskUserQuestion` để phỏng vấn tôi bằng Tiếng Việt có dấu thật kỹ và thật sâu nhằm biến một yêu cầu còn mơ hồ thành spec và requirement cực kỳ rõ ràng trước khi lập kế hoạch hoặc triển khai.
 
