@@ -19,14 +19,14 @@ Run in your terminal (requires interactive mode). The wizard will:
 
 | Tool | File created |
 |---|---|
-| Cursor | `.cursor/commands/interview.md` |
-| Claude Code | `.claude/commands/interview.md` |
+| Cursor | `.cursor/skills/interview/SKILL.md` |
+| Claude Code | `.claude/skills/interview/SKILL.md` |
 | GitHub Copilot | `.github/prompts/interview.prompt.md` |
 | Codex CLI | `.agents/skills/interview/SKILL.md` |
 
 ## Using `/interview`
 
-After scaffolding, open your AI tool and type `/interview` (or trigger the skill for Codex).
+After scaffolding, open your AI tool and type `/interview` (Cursor, Claude Code, Copilot, Codex — tất cả đều dùng `/` popup; Codex cũng hỗ trợ `$interview`).
 The command will conduct a structured requirement interview to help you turn vague ideas
 into clear specs.
 
