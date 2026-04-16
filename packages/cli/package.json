@@ -1,8 +1,12 @@
 {
   "name": "au-agentic",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Scaffold enterprise slash commands for AI coding tools",
   "type": "module",
+  "imports": {
+    "#utils/*": "./src/utils/*.ts",
+    "#steps/*": "./src/steps/*.ts"
+  },
   "bin": {
     "au-agentic": "dist/index.js"
   },
