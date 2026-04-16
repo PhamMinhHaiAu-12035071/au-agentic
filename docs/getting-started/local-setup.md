@@ -8,6 +8,20 @@
 
 # Local setup
 
+## System dependencies (install once)
+
+Two binaries must be present on `PATH` because they are not Bun packages:
+
+- **gitleaks** — secret scanning at commit time
+    - macOS: `brew install gitleaks`
+    - Debian/Ubuntu: download from https://github.com/gitleaks/gitleaks/releases and place in `/usr/local/bin`
+    - Windows: `scoop install gitleaks`
+    - Verify: `gitleaks version` returns `8.x`
+
+After installing, run `bunx lefthook install` to wire Lefthook hooks into `.git/hooks/`.
+
+## Setup flow
+
 **Status:** Currently not applicable — overlaps with [CLAUDE.md](../../CLAUDE.md) commands and root README until consolidated here.
 
 **Trigger:** This file should be filled when:
@@ -20,5 +34,6 @@ Typical flow today:
 git clone <repo-url>
 cd au-agentic
 bun install
+bunx lefthook install
 bun run verify
 ```
