@@ -175,7 +175,7 @@ Expected: FAIL `ENOENT`.
   "files": ["dist"],
   "scripts": {
     "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
-    "test": "bun test src/__tests__/",
+    "test": "bun test --concurrent src/__tests__/",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint .",
     "format": "biome format --write ."
@@ -495,7 +495,8 @@ const benches: Bench[] = [
   { name: 'biome check (full)',          cmd: ['bunx','biome','check','.'],                             targetMs: 300,   ceilingMs: 800 },
   { name: 'gitleaks staged',             cmd: ['gitleaks','protect','--staged','--redact','--no-banner'], targetMs: 500, ceilingMs: 1500 },
   { name: 'bun test (single file)',      cmd: ['bun','test','packages/cli/src/__tests__/copy.test.ts'], targetMs: 300,   ceilingMs: 1000 },
-  { name: 'bun test (full)',             cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full sequential)',  cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full concurrent)',  cmd: ['bun','test','--concurrent'],                            targetMs: 500,   ceilingMs: 1500 },
   { name: 'bun typecheck (warm)',        cmd: ['bun','run','typecheck'],                                targetMs: 1000,  ceilingMs: 3000 },
   { name: 'turbo test (cache hit)',      cmd: ['bunx','turbo','run','test'],                            targetMs: 300,   ceilingMs: 1000 },
   { name: 'turbo verify (cache hit)',    cmd: ['bunx','turbo','run','lint','typecheck','test'],         targetMs: 1000,  ceilingMs: 3000 },

@@ -333,6 +333,8 @@ git push --tags
 | Hand-formatting code that Biome would reformat | Run `bun run check` to auto-fix; do not argue with Biome |
 | Bypassing pre-commit with `--no-verify` | The hooks are the safety net (CI is disabled). Never bypass; if a hook is wrong, fix the hook |
 | Running raw `bun install` instead of `bun run install` after Phase 4 | Bypasses cache-env.sh; cache won't be project-scope. Always `bun run install` |
+| Adding `concurrently` package, `npm-run-all -p`, `&` ops, or ad-hoc `Promise.all` over scripts | Five parallelism layers already exist (Turbo siblings, Lefthook, Biome internal, gitleaks internal, `bun test --concurrent`). Stacking more fights the Turbo scheduler and saturates CPU. See `docs/ai/performance-policy.md` Rule 7 |
+| Writing a new test file with a fixed `/tmp/foo` path | Breaks `bun test --concurrent` (per-package default after Phase 4). New test files MUST use `mkdtemp(...)` with unique prefix |
 
 ---
 
@@ -361,3 +363,20 @@ Before declaring "I have read and understood this guide," confirm to your operat
 5. What tag is created at the very end?
 
 If you cannot answer any of these, re-read the relevant section before starting.
+
+
+
+Đọc kỹ @docs/superpowers/EXECUTION-GUIDE-toolchain.md từ đầu đến cuối trước. Sau đó trả lời 5 câu hỏi ở Section 10 để xác nhận đã hiểu. CHỈ KHI tôi confirm bạn pass cả 5 câu, mới bắt đầu execute.
+
+Bạn sẽ chỉ thực hiện PHASE 1 thôi. Sau khi Phase 1 hoàn tất + tag, DỪNG, báo tôi review trước khi sang Phase 2.
+
+/executing-plans @docs/superpowers/plans/2026-04-16-phase-1-foundations.md
+
+
+Đã đọc @docs/superpowers/EXECUTION-GUIDE-toolchain.md trước đó. Bây giờ execute Phase 2.
+
+Pre-flight: confirm `git tag -l "phase-1-foundations"` có kết quả, `git status` clean, đang ở branch `feat/toolchain-phase-2` (cut từ main đã merge Phase 1).
+
+Sau khi Phase 2 hoàn tất + tag, DỪNG, báo tôi review.
+
+/executing-plans @docs/superpowers/plans/2026-04-16-phase-2-biome-swap.md

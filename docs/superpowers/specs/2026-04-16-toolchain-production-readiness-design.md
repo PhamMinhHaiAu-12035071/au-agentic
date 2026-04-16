@@ -164,7 +164,21 @@ bun run verify    # turbo cache hit from main → < 2s
 
 Cache mode: local only for now; remote cache deferred until CI auto-trigger is enabled.
 
-### 3.3 Bun test with coverage
+#### Concurrency model (already-parallel layers — do not double-up)
+
+Five independent parallelism layers exist by default. Together they cover every meaningful workload; adding more (e.g. `concurrently` package, `&` background ops, custom `Promise.all` wrappers) **fights the existing scheduler and produces unpredictable cache results**.
+
+| Layer | What runs in parallel | Notes |
+|---|---|---|
+| **Turbo task graph** | Sibling tasks across packages with no `dependsOn` between them — for au-agentic 2 packages × 3 tasks = up to 6 tasks concurrently | Default behavior; `--parallel` flag would also ignore `dependsOn` (don't use) |
+| **Lefthook pre-commit** | All `pre-commit.commands` (biome, typecheck, gitleaks, knip) | `parallel: true` set; total time = max(slowest), not sum |
+| **Biome (Rust internal)** | File-level work auto-distributed across cores | No flag needed |
+| **gitleaks (Go internal)** | Multi-core regex scan | No flag needed |
+| **Bun install (internal)** | Parallel HTTP fetches and tarball extraction | No flag needed |
+
+Single-tool-with-no-internal-parallelism cases (Knip, markdownlint-cli2) stay single-threaded; their workloads are small enough that adding parallelism would cost more than it saves on a 2-package repo.
+
+### 3.3 Bun test with coverage and file-level concurrency
 
 `bunfig.toml` at repo root:
 
@@ -177,6 +191,19 @@ coverageThreshold = { lines = 0.70, functions = 0.70, statements = 0.70 }
 ```
 
 LCOV output at `coverage/lcov.info` per package. Bun enforces threshold per file, not aggregate; the value 0.70 was chosen because the user prioritizes test quality over coverage volume and wants a realistic floor that does not pressure contributors into hollow tests.
+
+#### Concurrency: `bun test --concurrent`
+
+Per-package `test` script uses `bun test --concurrent` (Bun 1.3+) — the Vitest-equivalent file-level parallelism. Each test FILE runs in a separate worker; tests WITHIN a file remain sequential unless they use `it.concurrent()`.
+
+```json
+// packages/cli/package.json
+"test": "bun test --concurrent src/__tests__/"
+```
+
+**Safety prerequisite:** every test file that touches the filesystem must use a unique tmpdir (`mkdtemp(...)` from `node:fs/promises`, with a per-test prefix). The au-agentic test suite already follows this pattern — verified at spec write time: `copy.test.ts`, `files.test.ts`, `paths.test.ts` all use `mkdtemp(join(tmpdir(), 'au-agentic-...'))`. Any new test file MUST follow the same isolation pattern; otherwise concurrent runs trample shared state and produce flaky failures.
+
+Expected gain: roughly 50–60% wall-time reduction on a 5-test-file suite; scales near-linearly with file count up to logical-CPU count. Validated by the sequential-vs-concurrent benchmark rows in Section 3.13.
 
 ### 3.4 Lefthook (parallel git hooks)
 
@@ -449,7 +476,8 @@ const benches: Bench[] = [
   { name: 'biome check (full)',          cmd: ['bunx','biome','check','.'],                             targetMs: 300,   ceilingMs: 800 },
   { name: 'gitleaks staged',             cmd: ['gitleaks','protect','--staged','--redact','--no-banner'], targetMs: 500, ceilingMs: 1500 },
   { name: 'bun test (single file)',      cmd: ['bun','test','packages/cli/src/__tests__/copy.test.ts'], targetMs: 300,   ceilingMs: 1000 },
-  { name: 'bun test (full)',             cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full sequential)',  cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full concurrent)',  cmd: ['bun','test','--concurrent'],                            targetMs: 500,   ceilingMs: 1500 },
   { name: 'bun typecheck (warm)',        cmd: ['bun','run','typecheck'],                                targetMs: 1000,  ceilingMs: 3000 },
   { name: 'turbo test (cache hit)',      cmd: ['bunx','turbo','run','test'],                            targetMs: 300,   ceilingMs: 1000 },
   { name: 'turbo verify (cache hit)',    cmd: ['bunx','turbo','run','lint','typecheck','test'],         targetMs: 1000,  ceilingMs: 3000 },
@@ -523,7 +551,8 @@ const benches: Bench[] = [
   { name: 'biome check (full)',          cmd: ['bunx','biome','check','.'],                             targetMs: 300,   ceilingMs: 800 },
   { name: 'gitleaks staged',             cmd: ['gitleaks','protect','--staged','--redact','--no-banner'], targetMs: 500,   ceilingMs: 1500 },
   { name: 'bun test (single file)',      cmd: ['bun','test','packages/cli/src/__tests__/copy.test.ts'], targetMs: 300,   ceilingMs: 1000 },
-  { name: 'bun test (full)',             cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full sequential)',  cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun test (full concurrent)',  cmd: ['bun','test','--concurrent'],                            targetMs: 500,   ceilingMs: 1500 },
   { name: 'bun typecheck (warm)',        cmd: ['bun','run','typecheck'],                                targetMs: 1000,  ceilingMs: 3000 },
   { name: 'turbo test (cache hit)',      cmd: ['bunx','turbo','run','test'],                            targetMs: 300,   ceilingMs: 1000 },
   { name: 'turbo verify (cache hit)',    cmd: ['bunx','turbo','run','lint','typecheck','test'],         targetMs: 1000,  ceilingMs: 3000 },

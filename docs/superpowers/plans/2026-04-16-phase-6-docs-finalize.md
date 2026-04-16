@@ -625,6 +625,21 @@ For corruption, the targeted fix is `bunx turbo run <task> --force` to skip cach
 
 If the change touches any tooling config (`biome.json`, `turbo.json`, `lefthook.yml`, `bunfig.toml`, `tsconfig.json`, `package.json` scripts, `scripts/`), run `bun run perf` and confirm zero FAIL rows. The benchmark writes `docs/development/performance-benchmarks.md` — commit if any row drifted by more than 50%.
 
+### Rule 7: Trust the existing concurrency layers — do not add new ones
+
+Five parallelism layers already cover every meaningful workload:
+
+1. **Turbo task graph** — sibling tasks across packages run concurrently by default
+2. **Lefthook pre-commit** — `parallel: true` runs biome + typecheck + gitleaks + knip simultaneously
+3. **Biome (Rust internal)** — multi-threaded file-level work, no flag needed
+4. **gitleaks (Go internal)** — multi-core regex scan, no flag needed
+5. **Bun test `--concurrent`** — file-level worker parallelism (Vitest equivalent), enabled in per-package test scripts
+6. **Bun install (internal)** — parallel HTTP fetches, no tuning needed
+
+Do NOT add `concurrently` package, `npm-run-all -p`, `&` background ops, ad-hoc `Promise.all` over scripts, or any other parallelism wrapper. Stacking parallelism on top of these layers fights the Turbo scheduler, produces unpredictable cache results, and saturates CPU to the point of slowdown. If a workload feels slow, the answer is cache investigation (Rule 4), not more parallelism.
+
+**Test concurrency safety contract:** any new test file that touches the filesystem MUST use `mkdtemp(...)` from `node:fs/promises` with a unique per-test prefix. Sharing a fixed path (e.g. `/tmp/foo`) breaks `--concurrent` and produces flaky failures. Existing files (`copy.test.ts`, `files.test.ts`, `paths.test.ts`) follow this pattern; new files must too.
+
 ## Performance tier acceptance
 
 Spec acceptance requires every row in `bun run perf` to be PASS or WARN; zero FAIL.
