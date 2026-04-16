@@ -226,7 +226,7 @@ Templates excluded because they are content payloads, not documentation. Run via
 
 ### 3.8 commitlint (tightened)
 
-Existing `commitlint.config.ts` extended:
+Existing `commitlint.config.ts` extended. Scope-enum is intentionally omitted — repo subtrees (`docs/ai/`, `docs/reference/`, `docs/development/`, `docs/deployment/`, `docs/explanations/`, `docs/getting-started/`, `docs/adr/`) generate too many distinct scopes to enumerate usefully; type validation plus length and case rules give enough discipline.
 
 ```ts
 import type { UserConfig } from '@commitlint/types';
@@ -234,9 +234,9 @@ import type { UserConfig } from '@commitlint/types';
 const config: UserConfig = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'scope-enum': [2, 'always', ['cli', 'templates', 'docs', 'ci', 'deps', 'tooling', 'tests']],
     'body-max-line-length': [2, 'always', 100],
-    'subject-max-length': [2, 'always', 72]
+    'subject-max-length': [2, 'always', 72],
+    'subject-case': [2, 'never', ['upper-case', 'pascal-case']]
   }
 };
 
