@@ -4,5 +4,12 @@
   "private": true,
   "exports": {
     "./*": "./*"
+  },
+  "scripts": {
+    "lint": "echo 'no TS to lint in templates' && exit 0",
+    "format": "echo 'no TS to format in templates' && exit 0",
+    "typecheck": "echo 'no TS to typecheck in templates' && exit 0",
+    "test": "echo 'no tests in templates' && exit 0",
+    "build": "echo 'no build in templates' && exit 0"
   }
 }

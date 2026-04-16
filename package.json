@@ -1,6 +1,7 @@
 {
   "name": "au-agentic-monorepo",
   "private": true,
+  "packageManager": "bun@1.3.10",
   "workspaces": [
     "packages/*"
   ],
