@@ -1,0 +1,2 @@
+$ echo 'no TS to typecheck in templates' && exit 0
+no TS to typecheck in templates

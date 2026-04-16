@@ -1,0 +1,2 @@
+$ echo 'no build in templates' && exit 0
+no build in templates
