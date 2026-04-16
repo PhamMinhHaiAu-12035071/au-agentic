@@ -1,0 +1,32 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "../../tsconfig.json"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": [".tsbuildinfo"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "../../tsconfig.json"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["$TURBO_DEFAULT$", "../../bunfig.toml"],
+      "env": ["CI"]
+    },
+    "lint": {
+      "outputs": [],
+      "inputs": ["$TURBO_DEFAULT$", "../../biome.json"]
+    },
+    "format": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
