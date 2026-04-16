@@ -142,8 +142,10 @@ CITATION.cff              # Citation metadata for academic use
 **Configuration:**
 ```
 package.json              # Monorepo root, workspaces, scripts, devDependencies
-tsconfig.json             # TypeScript compiler config (ESNext, Bun types)
-eslint.config.ts          # ESLint config (@typescript-eslint plugins)
+tsconfig.json             # TypeScript base config (extended by every package)
+bunfig.toml               # Bun test coverage settings (LCOV, 70% per-file threshold)
+.editorconfig             # Editor consistency (UTF-8, LF, indent 2 space)
+eslint.config.ts          # ESLint config (Phase 1 only — superseded in Phase 2)
 commitlint.config.ts      # Conventional Commits enforcement config
 bun.lock                  # Bun lockfile for dependency resolution
 ```
