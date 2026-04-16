@@ -74,4 +74,11 @@ describe('copyFilesToProject', () => {
     expect(results[0]?.result).toBe('copied');
     await rm(tmpDir4, { recursive: true, force: true });
   });
+
+  it('uses skill path for cursor and claude, prompt path for copilot, skill path for codex', () => {
+    expect(getTargetPath('cursor')).toBe('.cursor/skills/interview/SKILL.md');
+    expect(getTargetPath('claude')).toBe('.claude/skills/interview/SKILL.md');
+    expect(getTargetPath('copilot')).toBe('.github/prompts/interview.prompt.md');
+    expect(getTargetPath('codex')).toBe('.agents/skills/interview/SKILL.md');
+  });
 });
