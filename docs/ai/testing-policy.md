@@ -73,3 +73,24 @@ On `git commit`, lint-staged runs `eslint --fix` and `tsc --noEmit` on staged `.
 ## VSCode Integration
 
 The TypeScript language server reports errors in the **Problems** tab; those are the same class of issues that fail `bun run typecheck`. Do not ignore Problems tab errors before claiming verification passed.
+
+## Coverage policy
+
+Per-file thresholds are enforced at 80% lines, functions, and statements. The baseline is defined in `bunfig.toml` `coverageThreshold`; if the file does not yet reach 80%, the baseline matches its current coverage. New code should reach 80%; if reducing code raises coverage, bump `bunfig.toml` accordingly.
+
+## Test Quality Anti-Patterns
+
+The user prefers high-quality tests over high coverage numbers. Avoid these patterns; reviewers will reject them:
+
+- **Tautological assertions** — `expect(true).toBe(true)` or `expect(x).toBe(x)`. The test asserts nothing.
+- **Pass-through tests** — `it('calls the function', () => { fn() })` with no assertion on behavior.
+- **No-IO no-mock tests** — exercises a function that has no observable effect because the test stubbed nothing and read nothing.
+- **Snapshot for non-snapshot data** — snapshotting a JSON object that should have explicit field-by-field assertions.
+- **Mixed setup and assertion bodies** — a single `it` block with 50+ lines doing arrange, act, and 10 separate asserts. Split into focused tests.
+- **Empty test bodies** — `it('handles X', () => {})`. Biome `noEmptyBlockStatements` blocks this at lint time; reviewers should reject any `// @biome-disable-next-line` exemption without a written reason in the PR.
+
+When LLM-assisted code generates tests, the human reviewer is responsible for verifying each test asserts a real behavior contract. Coverage percentage is not a substitute for this judgment.
+
+## Performance gate
+
+`bun run perf` runs `scripts/benchmark.ts` and writes `docs/development/performance-benchmarks.md`. Spec acceptance requires zero FAIL rows and at most two WARN rows.
