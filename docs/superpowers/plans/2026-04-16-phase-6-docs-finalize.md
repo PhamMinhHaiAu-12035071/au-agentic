@@ -20,8 +20,9 @@
 |---|---|---|
 | `README.md` | Modify | Quick Start commands using Biome, Lefthook, Turbo, perf |
 | `CONTRIBUTING.md` | Modify | Setup section: install gitleaks, run `bunx lefthook install` |
-| `AGENTS.md` | Modify | Confirm Non-Negotiables still align (verify command name unchanged) |
-| `CLAUDE.md` | Modify | Same |
+| `AGENTS.md` | Modify | Add cache-discipline Non-Negotiable + sweep legacy mentions |
+| `CLAUDE.md` | Verify | Sweep legacy mentions (likely no edit) |
+| `docs/ai/performance-policy.md` | Create | Canonical "time is GOLD" rules, W-tier definitions, worktree creation pattern |
 | `docs/ai/core.md` | Modify | Sweep ESLint/Husky mentions |
 | `docs/ai/glossary.md` | Modify | Add LCOV, cache hit, T1–T4 tier definitions |
 | `docs/ai/legacy-context.md` | Modify | Add a "Toolchain refactor 2026-04" entry |
@@ -180,29 +181,41 @@ git commit -m "docs(contrib): rewrite setup and workflow for new toolchain"
 
 ---
 
-### Task 4: Sanity-check `AGENTS.md` and `CLAUDE.md`
+### Task 4: Update `AGENTS.md` Non-Negotiables and sanity-check `CLAUDE.md`
 
 **Files:**
-- Verify (likely no changes): `AGENTS.md`, `CLAUDE.md`
+- Modify: `AGENTS.md`
+- Verify (likely no changes): `CLAUDE.md`
 
-- [ ] **Step 1: Confirm `bun run verify` is still the canonical command**
+- [ ] **Step 1: Read current Non-Negotiables block in `AGENTS.md`**
 
-Run: `grep -n 'bun run verify' AGENTS.md CLAUDE.md`
-Expected: at least one match in `AGENTS.md`. Since `bun run verify` still exists (now Turbo-routed), no edit is required.
+Run: `grep -n -A10 '# Non-Negotiables' AGENTS.md`
+Expected: a bulleted list of rules.
 
-- [ ] **Step 2: Confirm no ESLint/Husky reference**
+- [ ] **Step 2: Append the cache rule to Non-Negotiables**
 
-Run: `grep -ni 'eslint\|husky\|lint-staged' AGENTS.md CLAUDE.md`
+Find the `# Non-Negotiables` section and add this bullet (before any `# ` next-section heading):
+
+```markdown
+- Always invoke commands as `bun run <script>` (which routes through `scripts/cache-env.sh`); never run raw `bun install`, `bunx turbo`, or similar — raw invocations bypass project-scope cache and force cold rebuilds across worktrees. Read `docs/ai/performance-policy.md` for the full "time is GOLD" ruleset.
+```
+
+- [ ] **Step 3: Confirm no ESLint/Husky/Prettier mentions remain**
+
+Run: `grep -ni 'eslint\|husky\|lint-staged\|prettier' AGENTS.md CLAUDE.md`
 Expected: zero matches. If any match, delete or rewrite.
 
-- [ ] **Step 3: If edits were needed, commit**
+- [ ] **Step 4: Confirm `bun run verify` is still referenced (its name did not change)**
+
+Run: `grep -n 'bun run verify' AGENTS.md CLAUDE.md`
+Expected: at least one match in `AGENTS.md`.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add AGENTS.md CLAUDE.md
-git commit -m "docs(agents): remove legacy tool references"
+git commit -m "docs(agents): add cache-discipline non-negotiable; sweep legacy tools"
 ```
-
-If no edits were needed, skip the commit.
 
 ---
 
@@ -215,12 +228,13 @@ If no edits were needed, skip the commit.
 
 For each file, run `grep -ni 'eslint\|husky\|lint-staged' docs/ai/<file>` and replace with the new tool name (Biome, Lefthook). If a sentence describes a workflow that no longer exists, delete the sentence.
 
-- [ ] **Step 2: Update `docs/ai/routing.md` with a tooling row**
+- [ ] **Step 2: Update `docs/ai/routing.md` with tooling and performance rows**
 
-Find the routing table in the file and add a row:
+Find the routing table in the file and add two rows:
 
 ```markdown
-| Tooling / performance task? | coding-rules.md, docs/development/performance-benchmarks.md |
+| Tooling / config change? | coding-rules.md, docs/reference/configuration.md |
+| Performance / cache / worktree task? | performance-policy.md, docs/development/performance-benchmarks.md |
 ```
 
 - [ ] **Step 3: Update `docs/ai/execution-policy.md`**
@@ -524,7 +538,140 @@ git commit -m "ci(pr-template): add test-quality, verify, perf, docs-sync checkb
 
 ---
 
-### Task 12: Final acceptance gate (Spec Section 12)
+### Task 12: Write `docs/ai/performance-policy.md` (the canonical "time is GOLD" rules)
+
+**Files:**
+- Create: `docs/ai/performance-policy.md`
+
+This file is the single source of truth for caching discipline. Every AI subagent session reads it via the routing table updated in Task 5; `AGENTS.md` Non-Negotiables (Task 4) link here for full rules.
+
+- [ ] **Step 1: Create the file**
+
+```markdown
+**Purpose:** Universal performance discipline; "time is GOLD" rules for all AI subagent sessions and human contributors
+**Read this when:** Starting any session, creating a worktree, running install/test/lint/typecheck/build, debugging slow commands
+**Do not use for:** Test correctness (see testing-policy.md), tool selection rationale (see ADR-0003)
+**Related:** AGENTS.md Non-Negotiables, docs/development/performance-benchmarks.md, docs/explanations/design-principles.md
+**Update when:** New cached commands added; cache layout changes; performance tier definitions evolve
+
+---
+
+# Performance Policy
+
+## Preamble
+
+au-agentic is built for fast TDD inner loops and efficient AI subagent throughput. Time is GOLD. Every command must hit cache when possible; cache misses are bugs to investigate, not "the way things are."
+
+## Iron rules
+
+### Rule 1: Always use `bun run <script>`
+
+The root `package.json` defines wrapped scripts (`install`, `verify`, `test`, `typecheck`, `lint`, `build`, `perf`). Each routes through `scripts/cache-env.sh` which exports `BUN_INSTALL_CACHE_DIR` and `TURBO_CACHE_DIR` pointing to the main worktree's project-scope `.cache/` directory.
+
+**Do this:**
+
+```bash
+bun run install
+bun run verify
+bun run test
+```
+
+**Not this:**
+
+```bash
+bun install              # bypasses cache-env.sh; uses Bun's user-global cache
+bunx turbo run test      # bypasses cache-env.sh; Turbo cache may be in wrong place
+bun test                 # ok inside a single package, but skips Turbo cache hit
+```
+
+The exception: `format` and `check` (Biome) do not need cache wrapping because Biome has no persistent cache. They run directly.
+
+### Rule 2: Worktree creation pattern
+
+When creating a subagent worktree, ALWAYS use the project tree (`.worktrees/<name>`) and ALWAYS install via the wrapped script:
+
+```bash
+git worktree add --detach .worktrees/feature-x HEAD
+cd .worktrees/feature-x
+bun run install   # cache hit from main → < 500ms (W1 tier)
+bun run verify    # turbo cache hit from main → < 2s (W2 tier)
+```
+
+Worktrees outside `.worktrees/` (for example `/tmp/foo`) still work because `cache-env.sh` resolves the main worktree via `git rev-parse --git-common-dir`, but the convention exists for tidiness and easy cleanup.
+
+### Rule 3: Verify before claiming done
+
+Before claiming any task complete, run `bun run verify`. If it takes longer than 5 seconds on a no-op rerun (cache hit case), the cache is misconfigured. Investigate:
+
+- Is `.cache/turbo/` populated? (`ls -la .cache/turbo/`)
+- Did `cache-env.sh` set `TURBO_CACHE_DIR` correctly? (`./scripts/cache-env.sh env | grep TURBO`)
+- Did `turbo.json` accidentally gain a `cacheDir` field? (it must NOT — auto-share requires it unset)
+- Are inputs in `turbo.json` listing files that change every run (timestamps, generated artifacts)?
+
+### Rule 4: Same command twice = cache bug
+
+If you find yourself running the same command twice in one session and the second invocation took non-trivial time (more than 500ms for cached tasks), STOP. There is a cache config bug. Diagnose root cause; do not "just rerun until it works."
+
+### Rule 5: Never delete `.cache/` to "clean up"
+
+`.cache/` is gitignored and self-managing. Deleting it forces every subsequent command to cold-rebuild — a large unnecessary cost. Only delete if:
+
+- You confirmed cache corruption (rare; usually presents as Turbo restoring stale outputs)
+- You documented the deletion in your commit message with a reason
+
+For corruption, the targeted fix is `bunx turbo run <task> --force` to skip cache for one run, not nuking the whole directory.
+
+### Rule 6: Run `bun run perf` before merging toolchain changes
+
+If the change touches any tooling config (`biome.json`, `turbo.json`, `lefthook.yml`, `bunfig.toml`, `tsconfig.json`, `package.json` scripts, `scripts/`), run `bun run perf` and confirm zero FAIL rows. The benchmark writes `docs/development/performance-benchmarks.md` — commit if any row drifted by more than 50%.
+
+## Performance tier acceptance
+
+Spec acceptance requires every row in `bun run perf` to be PASS or WARN; zero FAIL.
+
+| Tier | Time band | Why this matters |
+|---|---|---|
+| T1 instant | < 200 ms | Human "instant" perception threshold |
+| T1 sub-second | < 500 ms | Tolerable for staged-file scans |
+| T2 snappy | < 1 s | Inner TDD loop must stay below attention break |
+| T3 workflow | < 2–3 s | Pre-commit total — above this, contributors start `--no-verify` |
+| T4 full pipeline | < 10 s cold, < 1 s cached | Fresh-clone vs daily working baseline |
+| **W1 worktree install** | < 500 ms | Subagent re-install must be near-instant |
+| **W2 worktree verify** | < 2 s | Subagent re-verify must hit cache |
+| **W3 worktree subagent loop** | < 3 s | Realistic per-task AI iteration cost |
+| **W cold** | < 5 s | Truly cold worktree (network-touching install path) |
+
+Full table and current measurements: `docs/development/performance-benchmarks.md`.
+
+## Why this matters
+
+AI subagent-driven development creates many short-lived worktrees. If each pays the full cold-cache cost, AI throughput collapses and human review queues stretch. The cache layout and these rules together ensure subagent N+1 inherits all the cache wins from subagent N.
+
+## When the rules conflict with user instruction
+
+User instructions ALWAYS take precedence. If you are explicitly told to run a raw command for diagnosis, do so and report. The rules here exist as the default discipline, not as a constraint on direct requests.
+```
+
+- [ ] **Step 2: Verify the routing table in `docs/ai/routing.md` already references this file (added in Task 5)**
+
+Run: `grep -n 'performance-policy' docs/ai/routing.md`
+Expected: at least one match.
+
+- [ ] **Step 3: Verify markdownlint passes on the new file**
+
+Run: `bunx markdownlint-cli2 docs/ai/performance-policy.md`
+Expected: exit code 0.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/ai/performance-policy.md
+git commit -m "docs(ai): add performance-policy.md canonical time-is-gold ruleset"
+```
+
+---
+
+### Task 13: Final acceptance gate (Spec Section 12)
 
 - [ ] **Step 1: Confirm all ten new config files exist**
 
@@ -614,9 +761,12 @@ git tag -a toolchain-v1 -m "Toolchain production-readiness spec implemented"
 
 ## Phase 6 Definition of Done
 
-- [ ] All 12 tasks completed and committed
+- [ ] All 13 tasks completed and committed (Tasks 1–11 base plus 12 perf-policy plus 13 acceptance gate)
 - [ ] Zero remaining mentions of `eslint`, `prettier`, `husky`, `lint-staged` outside `docs/superpowers/` and `docs/ai/legacy-context.md`
 - [ ] `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md` align with new toolchain
+- [ ] `AGENTS.md` Non-Negotiables include the cache-discipline rule
+- [ ] `docs/ai/performance-policy.md` exists with the full "time is GOLD" ruleset
+- [ ] `docs/ai/routing.md` includes the performance routing row
 - [ ] `.github/PULL_REQUEST_TEMPLATE.md` includes test-quality, verify, perf, docs-sync checkboxes
 - [ ] Spec acceptance checklist (Section 12) all green
 - [ ] Tag `toolchain-v1` created

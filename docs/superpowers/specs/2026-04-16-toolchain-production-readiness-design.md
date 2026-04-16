@@ -95,9 +95,9 @@ Scripts:
 - `bun run lint`: `biome lint .`
 - `bun run check`: `biome check --write .` (lint plus format plus organize-imports in one pass)
 
-### 3.2 Turborepo (task graph and cache)
+### 3.2 Turborepo (task graph and cache) with project-scope shared cache
 
-`turbo.json` declares inputs, outputs, and dependency edges so Turbo can hash inputs and skip work when nothing changed.
+`turbo.json` declares inputs, outputs, and dependency edges so Turbo can hash inputs and skip work when nothing changed. **Critical: do not set `cacheDir` in `turbo.json`.** Turborepo v2 auto-shares cache with the main worktree when `cacheDir` is unset; setting any explicit value disables that auto-share and breaks subagent worktree caching.
 
 ```json
 {
@@ -113,14 +113,56 @@ Scripts:
 }
 ```
 
-Top-level `package.json` scripts route through Turbo:
-- `bun run test`: `turbo run test`
-- `bun run typecheck`: `turbo run typecheck`
-- `bun run lint`: `turbo run lint`
-- `bun run build`: `turbo run build`
-- `bun run verify`: `turbo run lint typecheck test`
+#### Project-scope cache layout
 
-Cache directory: `.turbo/` (gitignored). Cache mode: local only for now; remote cache deferred until CI auto-trigger is enabled.
+All cache lives under the **main worktree's** `.cache/` directory, gitignored, never user-global:
+
+```
+au-agentic/                        # main worktree
+├── .cache/                        # project-scope cache root (gitignored)
+│   ├── bun-install/               # BUN_INSTALL_CACHE_DIR (override Bun's user-global default)
+│   └── turbo/                     # TURBO_CACHE_DIR (belt-and-suspenders; Turbo v2 auto-share also)
+└── .worktrees/                    # subagent worktrees (managed by superpowers:using-git-worktrees)
+    └── feature-x/                 # uses MAIN's .cache/ via cache-env.sh
+```
+
+#### `scripts/cache-env.sh` — the wrapper
+
+A 12-line bash helper that resolves the main worktree (works from any worktree via `git rev-parse --git-common-dir`), exports the two cache env vars, and exec's the command:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+COMMON_GIT="$(git rev-parse --git-common-dir)"
+MAIN_WORKTREE="$(cd "$(dirname "$COMMON_GIT")" && pwd)"
+export BUN_INSTALL_CACHE_DIR="$MAIN_WORKTREE/.cache/bun-install"
+export TURBO_CACHE_DIR="$MAIN_WORKTREE/.cache/turbo"
+exec "$@"
+```
+
+Top-level `package.json` scripts route through `cache-env.sh`:
+
+- `bun run install`: `./scripts/cache-env.sh bun install`
+- `bun run test`: `./scripts/cache-env.sh bunx turbo run test`
+- `bun run typecheck`: `./scripts/cache-env.sh bunx turbo run typecheck`
+- `bun run lint`: `./scripts/cache-env.sh bunx turbo run lint`
+- `bun run build`: `./scripts/cache-env.sh bunx turbo run build`
+- `bun run verify`: `./scripts/cache-env.sh bunx turbo run lint typecheck test`
+- `bun run perf`: `./scripts/cache-env.sh bun scripts/benchmark.ts`
+
+Subagent worktree workflow (the AI-driven case):
+
+```bash
+cd .worktrees/feature-x
+bun run install   # cache hit from main → < 500ms
+bun run verify    # turbo cache hit from main → < 2s
+```
+
+#### Platform note
+
+`cache-env.sh` requires `bash` (macOS, Linux). For Windows users, fallback path: set `BUN_INSTALL_CACHE_DIR` and `TURBO_CACHE_DIR` env vars in shell rc pointing to absolute path of main worktree's `.cache/`. Documented in `docs/getting-started/local-setup.md`.
+
+Cache mode: local only for now; remote cache deferred until CI auto-trigger is enabled.
 
 ### 3.3 Bun test with coverage
 
@@ -337,9 +379,132 @@ No `push`, `pull_request`, or `schedule` triggers. Workflows are present, versio
 
 `verify.yml` (new) is the canonical full-pipeline workflow; the others are kept as previously written but degraded to manual.
 
-### 3.13 Benchmark script (no external tool)
+### 3.13 Benchmark script and worktree benchmark helper (no external tool)
 
-`scripts/benchmark.ts`, run via `bun run perf`. Uses Bun's built-in `performance.now()` and `Bun.spawn`; no Homebrew dependency, no Node, no hyperfine.
+`scripts/benchmark.ts`, run via `bun run perf`. Uses Bun's built-in `performance.now()` and `Bun.spawn`; no Homebrew dependency, no Node, no hyperfine. The script measures both standard commands AND a real git worktree round-trip (subagent simulation) via `scripts/wt-bench.sh`.
+
+#### `scripts/wt-bench.sh` — worktree benchmark harness
+
+```bash
+#!/usr/bin/env bash
+# Helper for worktree-scoped benchmarking. Maintains a persistent
+# benchmark worktree at .worktrees/.bench so tests measure realistic
+# AI subagent re-invocation cost, not one-time worktree setup cost.
+set -euo pipefail
+
+COMMON_GIT="$(git rev-parse --git-common-dir)"
+MAIN_WORKTREE="$(cd "$(dirname "$COMMON_GIT")" && pwd)"
+BENCH_WT="$MAIN_WORKTREE/.worktrees/.bench"
+
+case "${1:-help}" in
+  setup)
+    [[ -d "$BENCH_WT" ]] || git worktree add --detach "$BENCH_WT" HEAD
+    ;;
+  install)
+    cd "$BENCH_WT" && bun run install >/dev/null 2>&1
+    ;;
+  verify)
+    cd "$BENCH_WT" && bun run verify >/dev/null 2>&1
+    ;;
+  loop)
+    # Full subagent loop: install + verify in one shot
+    cd "$BENCH_WT" && bun run install >/dev/null 2>&1 && bun run verify >/dev/null 2>&1
+    ;;
+  cold-cycle)
+    # Truly cold worktree: create unique → install → verify → cleanup
+    UNIQ="$MAIN_WORKTREE/.worktrees/.cold-$$"
+    git worktree add --detach "$UNIQ" HEAD >/dev/null 2>&1
+    trap 'git worktree remove --force "$UNIQ" 2>/dev/null || true' EXIT
+    cd "$UNIQ"
+    bun run install >/dev/null 2>&1
+    bun run verify >/dev/null 2>&1
+    ;;
+  teardown)
+    git worktree remove --force "$BENCH_WT" 2>/dev/null || true
+    ;;
+  help|*)
+    echo "Usage: $0 {setup|install|verify|loop|cold-cycle|teardown}" >&2
+    exit 1
+    ;;
+esac
+```
+
+#### `scripts/benchmark.ts` (with worktree integration)
+
+```ts
+#!/usr/bin/env bun
+interface Bench {
+  name: string;
+  cmd: string[];
+  targetMs: number;
+  ceilingMs: number;
+  warmupRuns?: number;
+  measureRuns?: number;
+}
+
+const benches: Bench[] = [
+  // Standard (main worktree) benchmarks
+  { name: 'biome format',                cmd: ['bunx','biome','format','--write','.'],                  targetMs: 200,   ceilingMs: 500 },
+  { name: 'biome lint',                  cmd: ['bunx','biome','lint','.'],                              targetMs: 200,   ceilingMs: 500 },
+  { name: 'biome check (full)',          cmd: ['bunx','biome','check','.'],                             targetMs: 300,   ceilingMs: 800 },
+  { name: 'gitleaks staged',             cmd: ['gitleaks','protect','--staged','--redact','--no-banner'], targetMs: 500, ceilingMs: 1500 },
+  { name: 'bun test (single file)',      cmd: ['bun','test','packages/cli/src/__tests__/copy.test.ts'], targetMs: 300,   ceilingMs: 1000 },
+  { name: 'bun test (full)',             cmd: ['bun','test'],                                           targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'bun typecheck (warm)',        cmd: ['bun','run','typecheck'],                                targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'turbo test (cache hit)',      cmd: ['bunx','turbo','run','test'],                            targetMs: 300,   ceilingMs: 1000 },
+  { name: 'turbo verify (cache hit)',    cmd: ['bunx','turbo','run','lint','typecheck','test'],         targetMs: 1000,  ceilingMs: 3000 },
+  { name: 'turbo verify (cold)',         cmd: ['bunx','turbo','run','lint','typecheck','test','--force'], targetMs: 10000, ceilingMs: 30000 },
+  { name: 'knip',                        cmd: ['bunx','knip'],                                          targetMs: 3000,  ceilingMs: 8000 },
+  { name: 'markdownlint',                cmd: ['bunx','markdownlint-cli2'],                             targetMs: 2000,  ceilingMs: 5000 },
+
+  // Worktree (subagent simulation) benchmarks — uses persistent .worktrees/.bench
+  { name: 'worktree W1: bun install (cache hit from main)',  cmd: ['bash','scripts/wt-bench.sh','install'],    targetMs: 500,  ceilingMs: 2000 },
+  { name: 'worktree W2: turbo verify (cache hit from main)', cmd: ['bash','scripts/wt-bench.sh','verify'],     targetMs: 2000, ceilingMs: 5000 },
+  { name: 'worktree W3: full subagent loop (install+verify)',cmd: ['bash','scripts/wt-bench.sh','loop'],       targetMs: 3000, ceilingMs: 8000 },
+  { name: 'worktree cold: create+install+verify+remove',     cmd: ['bash','scripts/wt-bench.sh','cold-cycle'], targetMs: 5000, ceilingMs: 15000, measureRuns: 3 }
+];
+
+async function runOnce(cmd: string[]): Promise<number> {
+  const t0 = performance.now();
+  const proc = Bun.spawn(cmd, { stdout: 'ignore', stderr: 'ignore' });
+  await proc.exited;
+  return performance.now() - t0;
+}
+
+const median = (xs: number[]): number => xs.slice().sort((a, b) => a - b)[Math.floor(xs.length / 2)] ?? 0;
+
+// Setup: create the persistent benchmark worktree once
+console.log('Setting up .worktrees/.bench (one-time)...');
+await Bun.spawn(['bash','scripts/wt-bench.sh','setup'], { stdio: ['ignore','inherit','inherit'] }).exited;
+
+const rows: string[] = [];
+rows.push('| Status | Command | Median (ms) | Target (ms) | Ceiling (ms) |');
+rows.push('|---|---|---:|---:|---:|');
+
+let anyFail = false;
+for (const b of benches) {
+  process.stdout.write(`Running ${b.name} ...`);
+  for (let i = 0; i < (b.warmupRuns ?? 2); i++) await runOnce(b.cmd);
+  const samples: number[] = [];
+  for (let i = 0; i < (b.measureRuns ?? 5); i++) samples.push(await runOnce(b.cmd));
+  const m = median(samples);
+  const status = m <= b.targetMs ? 'PASS' : m <= b.ceilingMs ? 'WARN' : 'FAIL';
+  if (status === 'FAIL') anyFail = true;
+  rows.push(`| ${status} | \`${b.name}\` | ${m.toFixed(0)} | ${b.targetMs} | ${b.ceilingMs} |`);
+  console.log(` ${status} (${m.toFixed(0)}ms median)`);
+}
+
+// Teardown: remove the persistent benchmark worktree
+console.log('Tearing down .worktrees/.bench...');
+await Bun.spawn(['bash','scripts/wt-bench.sh','teardown'], { stdio: ['ignore','inherit','inherit'] }).exited;
+
+const report = `# Performance Benchmarks\n\n> Auto-generated by \`bun run perf\` on ${new Date().toISOString()}.\n\n${rows.join('\n')}\n`;
+await Bun.write('docs/development/performance-benchmarks.md', report);
+console.log('\n' + report);
+if (anyFail) process.exit(1);
+```
+
+`package.json` adds: `"perf": "./scripts/cache-env.sh bun scripts/benchmark.ts"`.
 
 ```ts
 #!/usr/bin/env bun
@@ -426,8 +591,11 @@ edit file
 - `knip.json`
 - `.markdownlint-cli2.jsonc`
 - `.editorconfig`
+- `scripts/cache-env.sh` (new — wraps every `bun run X` with project-scope cache env vars)
+- `scripts/wt-bench.sh` (new — worktree benchmark harness)
 - `scripts/benchmark.ts`
 - `.github/workflows/verify.yml`
+- `docs/ai/performance-policy.md` (new — canonical "time is GOLD" rules for AI subagent sessions)
 - `docs/development/performance-benchmarks.md` (auto-generated)
 - `docs/adr/0002-biome-over-eslint-prettier.md`
 - `docs/adr/0003-turborepo-task-cache.md`
@@ -444,7 +612,8 @@ edit file
 - `packages/cli/tsconfig.json`: extend root base, add `paths` mirror, set `outDir`, `rootDir`, `include`
 - `packages/templates/tsconfig.json` (new): extend root base; thin file so Biome and IDE see consistent settings
 - `commitlint.config.ts`: scope-enum, body-max-line-length, subject-max-length
-- `.gitignore`: add `.turbo/`, `coverage/`, `*.tsbuildinfo`, `lcov.info`
+- `.gitignore`: add `.turbo/`, `coverage/`, `*.tsbuildinfo`, `lcov.info`, `.cache/`, `.worktrees/.bench/`, `.worktrees/.cold-*/`
+- `AGENTS.md`: add Non-Negotiable: "Use `bun run <script>` not raw tool invocations — preserves project-scope cache (see docs/ai/performance-policy.md)"
 - `.github/workflows/ci.yml`, `docs-check.yml`, `release.yml`, `security.yml`: change `on:` to `workflow_dispatch:` only
 - `docs/ai/coding-rules.md`, `testing-policy.md`, `repo-map.md`, `routing.md`, `security-policy.md`, `deployment-policy.md`, `execution-policy.md`, `docs-policy.md`, `core.md`, `glossary.md`, `legacy-context.md`, `gold-rules.md`: see Section 8 for per-file diffs
 - `docs/development/testing.md`, `styleguide.md`, `workflow.md`, `dependency-policy.md`, `branching-and-prs.md`, `docs-contributing.md`, `debugging.md`: align with new tools
@@ -484,6 +653,12 @@ Acceptance gate before declaring this spec implemented: `bun run perf` reports z
 | T2 snappy | under 1 s | bun test full, bun typecheck warm, turbo run cache hit |
 | T3 workflow | under 2 to 3 s | lefthook pre-commit total, knip, markdownlint, typecheck cold |
 | T4 full pipeline | under 10 s cold, under 1 s cached | turbo run lint typecheck test |
+| **W1 worktree install** | under 500 ms target, 2 s ceiling | `bun run install` in subagent worktree (cache hit from main) |
+| **W2 worktree verify** | under 2 s target, 5 s ceiling | `bun run verify` in subagent worktree (turbo cache hit from main) |
+| **W3 worktree subagent loop** | under 3 s target, 8 s ceiling | install + verify in one shot (the realistic AI per-task cost) |
+| **W cold** | under 5 s target, 15 s ceiling | create unique worktree + install + verify + remove (truly cold, network-touching path) |
+
+The **W (worktree) tier** measures the realistic AI subagent cost: each subagent gets a fresh worktree, runs install + verify, makes changes, runs verify again. The cache must turn the second-and-later invocations into cache hits, otherwise subagent throughput collapses. `time is GOLD` philosophy: any W-tier row in `WARN` or `FAIL` status blocks the spec acceptance gate.
 
 Time budgets derive from human perception research and observed industry practice for pre-commit hook acceptance thresholds. The benchmark script writes `docs/development/performance-benchmarks.md` so any drift over time is visible in version control.
 
@@ -504,6 +679,7 @@ This is a code-change-with-docs-update task as defined by `AGENTS.md`. Each impl
 | `execution-policy.md` | Update verify command description; add `bun run perf` benchmark gate |
 | `docs-policy.md` | Add mapping: tool config change -> ai/coding-rules.md plus reference/techstack.md plus reference/configuration.md plus adr/ |
 | `core.md`, `glossary.md`, `legacy-context.md`, `gold-rules.md` | Sweep for ESLint, Husky, lint-staged mentions; replace or remove |
+| **`performance-policy.md` (NEW)** | Canonical "time is GOLD" rules: always use `bun run X`, never raw `bunx turbo` or `bun install`; worktree creation pattern; cache invalidation discipline; W-tier acceptance |
 
 ### docs/development/
 
@@ -607,7 +783,11 @@ None at the time of writing. All major decisions were resolved during the brains
 
 Spec is implemented when:
 
-- [ ] All ten new config files in Section 5 "Added" exist and pass their own validators
+- [ ] All twelve new config/script files in Section 5 "Added" exist and pass their own validators
+- [ ] `scripts/cache-env.sh` is executable (`chmod +x`) and resolves main worktree correctly from any worktree
+- [ ] `scripts/wt-bench.sh` is executable and `bun run perf` includes W-tier benchmarks
+- [ ] `docs/ai/performance-policy.md` exists and is referenced from `AGENTS.md` Non-Negotiables
+- [ ] In a fresh `.worktrees/.bench` worktree, `bun run install` and `bun run verify` both hit cache (W1 < 500ms, W2 < 2s)
 - [ ] All listed devDependencies in Section 5 "Removed" are absent from `bun.lock`
 - [ ] `bun run verify` exits 0
 - [ ] `bun run perf` exits 0 with zero FAIL rows and at most two WARN rows

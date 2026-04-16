@@ -432,6 +432,13 @@ packages/cli/dist/
 coverage/
 lcov.info
 *.tsbuildinfo
+
+# Project-scope cache (Phase 4 introduces .cache/; ignore now to avoid accidental commits)
+.cache/
+
+# Worktree benchmark scratch (Phase 4 introduces .worktrees/.bench)
+.worktrees/.bench/
+.worktrees/.cold-*/
 ```
 
 - [ ] **Step 3: Verify previously-untracked artifacts are now ignored**
