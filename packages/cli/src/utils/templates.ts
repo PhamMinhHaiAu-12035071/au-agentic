@@ -1,5 +1,5 @@
-import cursorTemplate from '@au-agentic/templates/interview/cursor.md' with { type: 'text' };
-import claudeTemplate from '@au-agentic/templates/interview/claude.md' with { type: 'text' };
+import cursorTemplate from '@au-agentic/templates/interview/cursor/SKILL.md' with { type: 'text' };
+import claudeTemplate from '@au-agentic/templates/interview/claude/SKILL.md' with { type: 'text' };
 import copilotTemplate from '@au-agentic/templates/interview/copilot.md' with { type: 'text' };
 import codexTemplate from '@au-agentic/templates/interview/codex/SKILL.md' with { type: 'text' };
 
@@ -21,8 +21,8 @@ const TEMPLATE_MAP: Record<Tool, string> = {
 };
 
 export const TARGET_PATH_MAP: Record<Tool, string> = {
-  cursor: '.cursor/commands/interview.md',
-  claude: '.claude/commands/interview.md',
+  cursor: '.cursor/skills/interview/SKILL.md',
+  claude: '.claude/skills/interview/SKILL.md',
   copilot: '.github/prompts/interview.prompt.md',
   codex: '.agents/skills/interview/SKILL.md',
 };
