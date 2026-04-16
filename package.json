@@ -9,7 +9,9 @@
     "build": "cd packages/cli && bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
     "test": "bun test packages/cli/src/__tests__/",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint packages/",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
     "verify": "bun run typecheck && bun run lint && bun run test",
     "prepublish": "bun run verify && bun run build",
     "prepare": "husky"
@@ -30,8 +32,8 @@
     "typescript": "^5.7.2"
   },
   "lint-staged": {
-    "*.ts": [
-      "eslint --fix"
+    "*.{ts,tsx,js,json,md}": [
+      "biome check --write --no-errors-on-unmatched"
     ]
   }
 }
