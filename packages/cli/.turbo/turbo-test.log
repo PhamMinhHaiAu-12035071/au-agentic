@@ -2,73 +2,73 @@ $ bun test --concurrent src/__tests__/
 bun test v1.3.10 (30e609e0)
 
 src/__tests__/turbo-config.test.ts:
-(pass) turbo.json contract > declares build, typecheck, test, lint, format, dev tasks [1.14ms]
-(pass) turbo.json contract > build outputs to dist/ [0.04ms]
+(pass) turbo.json contract > declares build, typecheck, test, lint, format, dev tasks [1.20ms]
+(pass) turbo.json contract > build outputs to dist/ [0.10ms]
 (pass) turbo.json contract > test outputs coverage
-(pass) turbo.json contract > format and dev are not cached [0.25ms]
-(pass) turbo.json contract > dev is persistent [0.02ms]
+(pass) turbo.json contract > format and dev are not cached [0.18ms]
+(pass) turbo.json contract > dev is persistent
 
 src/__tests__/templates.test.ts:
-(pass) template frontmatter > cursor template declares name and description [1.23ms]
-(pass) template frontmatter > claude template declares name, description, argument-hint, allowed-tools [0.11ms]
+(pass) template frontmatter > cursor template declares name and description [1.51ms]
+(pass) template frontmatter > claude template declares name, description, argument-hint, allowed-tools [2.24ms]
 
 src/__tests__/workflows-disabled.test.ts:
-(pass) GitHub Actions workflows are manual-trigger only > finds at least four workflow files [0.19ms]
-(pass) GitHub Actions workflows are manual-trigger only > release.yml declares only workflow_dispatch [12.77ms]
-(pass) GitHub Actions workflows are manual-trigger only > docs-check.yml declares only workflow_dispatch [1.69ms]
-(pass) GitHub Actions workflows are manual-trigger only > security.yml declares only workflow_dispatch [1.59ms]
-(pass) GitHub Actions workflows are manual-trigger only > verify.yml declares only workflow_dispatch [6.21ms]
-(pass) GitHub Actions workflows are manual-trigger only > ci.yml declares only workflow_dispatch [0.77ms]
+(pass) GitHub Actions workflows are manual-trigger only > finds at least four workflow files [0.27ms]
+(pass) GitHub Actions workflows are manual-trigger only > release.yml declares only workflow_dispatch [12.24ms]
+(pass) GitHub Actions workflows are manual-trigger only > docs-check.yml declares only workflow_dispatch [1.52ms]
+(pass) GitHub Actions workflows are manual-trigger only > security.yml declares only workflow_dispatch [1.00ms]
+(pass) GitHub Actions workflows are manual-trigger only > verify.yml declares only workflow_dispatch [4.61ms]
+(pass) GitHub Actions workflows are manual-trigger only > ci.yml declares only workflow_dispatch [0.56ms]
 
 src/__tests__/biome-config.test.ts:
-(pass) biome.json contract > enables formatter and linter [0.05ms]
+(pass) biome.json contract > enables formatter and linter
 (pass) biome.json contract > enforces kebab-case filenames
 (pass) biome.json contract > blocks focused tests and empty blocks [0.03ms]
 (pass) biome.json contract > blocks unused imports [0.01ms]
 (pass) biome.json contract > enables organizeImports [0.05ms]
 
 src/__tests__/aliases.test.ts:
-(pass) package.json imports field aliases > resolves #utils/* to packages/cli/src/utils/* [1.16ms]
-(pass) package.json imports field aliases > resolves #steps/* to packages/cli/src/steps/* [0.09ms]
+(pass) package.json imports field aliases > resolves #utils/* to packages/cli/src/utils/* [0.01ms]
+(pass) package.json imports field aliases > resolves #steps/* to packages/cli/src/steps/* [0.02ms]
 
 src/__tests__/files.test.ts:
-(pass) ensureDir > does not throw if directory already exists [0.92ms]
-(pass) isDirectory > returns true for a real directory [2.35ms]
-(pass) isDirectory > returns false for non-existent path [1.77ms]
-(pass) fileExists > returns false for non-existent file [1.70ms]
-(pass) hasWritePermission > returns true for writable directory [1.48ms]
-(pass) isDirectory > returns false for a file [2.22ms]
-(pass) fileExists > returns true for existing file [1.74ms]
-(pass) ensureDir > creates nested directories [1.42ms]
-(pass) writeTemplate > writes content to file, creating parent dirs [0.77ms]
-(pass) writeTemplate > overwrites existing file [0.59ms]
+(pass) ensureDir > does not throw if directory already exists [0.87ms]
+(pass) isDirectory > returns true for a real directory [1.83ms]
+(pass) isDirectory > returns false for non-existent path [1.52ms]
+(pass) fileExists > returns false for non-existent file [1.46ms]
+(pass) hasWritePermission > returns true for writable directory [1.37ms]
+(pass) isDirectory > returns false for a file [1.70ms]
+(pass) fileExists > returns true for existing file [1.48ms]
+(pass) ensureDir > creates nested directories [1.20ms]
+(pass) writeTemplate > overwrites existing file [1.11ms]
+(pass) writeTemplate > writes content to file, creating parent dirs [1.25ms]
 
 src/__tests__/paths.test.ts:
-(pass) expandTilde > expands ~ to home directory [0.03ms]
-(pass) expandTilde > expands bare ~ to home directory
+(pass) expandTilde > expands ~ to home directory [0.07ms]
+(pass) expandTilde > expands bare ~ to home directory [0.03ms]
 (pass) expandTilde > leaves absolute paths unchanged [0.02ms]
 (pass) expandTilde > leaves relative paths unchanged
-(pass) trimTrailingSlash > removes single trailing slash [0.05ms]
-(pass) trimTrailingSlash > removes multiple trailing slashes [0.03ms]
-(pass) trimTrailingSlash > leaves paths without trailing slash unchanged [0.01ms]
-(pass) resolvePath > resolves relative path to absolute [0.21ms]
-(pass) resolvePath > expands tilde and resolves [0.02ms]
-(pass) resolvePath > trims trailing slash before resolving
+(pass) trimTrailingSlash > removes single trailing slash [0.02ms]
+(pass) trimTrailingSlash > removes multiple trailing slashes [0.05ms]
+(pass) trimTrailingSlash > leaves paths without trailing slash unchanged
+(pass) resolvePath > resolves relative path to absolute [0.04ms]
+(pass) resolvePath > expands tilde and resolves [0.04ms]
+(pass) resolvePath > trims trailing slash before resolving [0.02ms]
 (pass) resolvePath > trims whitespace [0.01ms]
 
 src/__tests__/lefthook-config.test.ts:
-(pass) lefthook.yml contract > runs pre-commit in parallel [0.03ms]
-(pass) lefthook.yml contract > declares biome, typecheck, gitleaks, knip in pre-commit [0.05ms]
+(pass) lefthook.yml contract > runs pre-commit in parallel
+(pass) lefthook.yml contract > declares biome, typecheck, gitleaks, knip in pre-commit [0.32ms]
 (pass) lefthook.yml contract > declares commitlint in commit-msg
-(pass) lefthook.yml contract > declares knip-strict in pre-push [0.03ms]
+(pass) lefthook.yml contract > declares knip-strict in pre-push [0.05ms]
 
 src/__tests__/copy.test.ts:
 (pass) copyFilesToProject > uses skill path for cursor and claude, prompt path for copilot, skill path for codex
-(pass) copyFilesToProject > records failure when write throws [0.67ms]
-(pass) copyFilesToProject > copies cursor template to correct target path [2.59ms]
-(pass) copyFilesToProject > skips file when confirmOverwrite returns false [2.82ms]
-(pass) copyFilesToProject > does not track copy state after copyFilesToProject returns [4.21ms]
-(pass) copyFilesToProject > copies multiple tools [4.84ms]
+(pass) copyFilesToProject > records failure when write throws [1.16ms]
+(pass) copyFilesToProject > copies cursor template to correct target path [2.50ms]
+(pass) copyFilesToProject > skips file when confirmOverwrite returns false [2.97ms]
+(pass) copyFilesToProject > copies multiple tools [3.95ms]
+(pass) copyFilesToProject > does not track copy state after copyFilesToProject returns [4.03ms]
 
  51 pass
  0 fail
