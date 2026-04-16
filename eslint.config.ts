@@ -21,7 +21,8 @@ export default [
       '@typescript-eslint': tsPlugin,
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
+      // Safe: @typescript-eslint/eslint-plugin always exports configs.recommended
+      ...tsPlugin.configs.recommended!.rules,
     },
   },
   {
