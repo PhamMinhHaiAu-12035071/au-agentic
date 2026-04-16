@@ -3,3 +3,15 @@ packages/cli/dist/
 .DS_Store
 /examples/
 .superpowers/
+
+# Toolchain phase 1
+coverage/
+lcov.info
+*.tsbuildinfo
+
+# Project-scope cache (Phase 4 introduces .cache/; ignore now to avoid accidental commits)
+.cache/
+
+# Worktree benchmark scratch (Phase 4 introduces .worktrees/.bench)
+.worktrees/.bench/
+.worktrees/.cold-*/
