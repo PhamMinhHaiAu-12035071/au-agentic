@@ -58,11 +58,10 @@ au-agentic/
 ```
 templates/
 └── interview/
-    ├── cursor.md     → .cursor/commands/interview.md
-    ├── claude.md     → .claude/commands/interview.md
-    ├── copilot.md    → .github/prompts/interview.prompt.md
-    └── codex/
-        └── SKILL.md  → .agents/skills/interview/SKILL.md
+    ├── cursor/SKILL.md   → .cursor/skills/interview/SKILL.md
+    ├── claude/SKILL.md   → .claude/skills/interview/SKILL.md
+    ├── copilot.md        → .github/prompts/interview.prompt.md
+    └── codex/SKILL.md    → .agents/skills/interview/SKILL.md
 ```
 
 **Import mechanism:** Templates imported at build time as static text via Bun's `with { type: 'text' }` import attribute. No runtime file I/O.
