@@ -24,7 +24,16 @@ import templateContent from '../path/to/template.md' with { type: 'text' };
 
 Templates are static text at build time; no runtime file I/O for templates.
 
-**Standard imports:** External packages (`@clack/prompts`, `picocolors`, etc.). Internal modules use relative paths; prefer `.js` suffix in import specifiers for ESM resolution (for example `./steps/copy.js`, `./utils/paths.js`).
+**Standard imports:**
+
+- **External packages** (`@clack/prompts`, `picocolors`): use the bare specifier.
+- **Cross-package** (between `cli` and `templates`): use the workspace alias `@au-agentic/templates/...`.
+- **Intra-package** (inside `packages/cli/src/`): use the `imports` field aliases declared in `packages/cli/package.json`:
+    - `#utils/*` resolves to `./src/utils/*.ts`
+    - `#steps/*` resolves to `./src/steps/*.ts`
+- **Relative imports** are still allowed for siblings within the same directory (e.g., `./helpers`), but prefer `#alias/*` for anything reaching across more than one directory.
+
+The `tsconfig.json` `paths` block mirrors the `imports` field for editor support; the runtime source of truth is always the `imports` field. See `docs/adr/0005-imports-field-alias-pattern.md` for rationale.
 
 ## Naming Conventions
 
