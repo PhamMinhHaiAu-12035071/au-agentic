@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Templates contain placeholder tokens, not real secrets"
+paths = ['''packages/templates/.*''']
+
+[[allowlists]]
+description = "Documentation may contain example tokens"
+paths = ['''docs/.*\.md''']
+regexes = ['''xoxb-[0-9]{11}-[0-9]{11}-[a-zA-Z0-9]{24}''', '''AKIA[0-9A-Z]{16}''']
