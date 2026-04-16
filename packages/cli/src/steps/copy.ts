@@ -89,10 +89,10 @@ export function showResults(results: FileResult[]): void {
 
 function showNextSteps(tools: Tool[]): void {
   const steps: Record<Tool, string> = {
-    cursor: 'Open Cursor → Chat panel → Type /interview',
-    claude: 'Run `claude` in terminal → Type /interview',
-    copilot: 'Open VS Code → GitHub Copilot Chat → Attach prompt → interview',
-    codex: 'Run `codex` in terminal → Type $interview or trigger skill',
+    cursor: 'Mở Cursor → Chat panel → Gõ /interview',
+    claude: 'Chạy `claude` → Gõ /interview',
+    copilot: 'VS Code → Copilot Chat → Gõ /interview',
+    codex: 'Chạy `codex` → Gõ $interview hoặc /interview',
   };
 
   p.log.message('\n' + pc.dim('Next steps:'));
