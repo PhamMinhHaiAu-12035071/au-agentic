@@ -7,14 +7,16 @@
   ],
   "scripts": {
     "dev": "bun run packages/cli/src/index.ts",
-    "build": "cd packages/cli && bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
-    "test": "bun test packages/cli/src/__tests__/",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome lint .",
+    "install": "./scripts/cache-env.sh bun install",
+    "build": "./scripts/cache-env.sh bunx turbo run build",
+    "test": "./scripts/cache-env.sh bunx turbo run test",
+    "typecheck": "./scripts/cache-env.sh bunx turbo run typecheck",
+    "lint": "./scripts/cache-env.sh bunx turbo run lint",
     "format": "biome format --write .",
     "check": "biome check --write .",
-    "verify": "bun run typecheck && bun run lint && bun run test",
-    "prepublish": "bun run verify && bun run build"
+    "verify": "./scripts/cache-env.sh bunx turbo run lint typecheck test",
+    "perf": "./scripts/cache-env.sh bun scripts/benchmark.ts",
+    "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
