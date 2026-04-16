@@ -49,7 +49,7 @@ Raw markdown file in packages/templates/ imported at build time as static text. 
 Process of copying templates to user's project at correct target paths. CLI wizard orchestrates scaffolding with 3 steps: path → tools → copy.
 
 **Target path**  
-Destination where template gets copied. Example: `templates/interview/cursor.md` → `.cursor/commands/interview.md` in user's project.
+Destination where template gets copied. Example: `templates/interview/cursor/SKILL.md` → `.cursor/skills/interview/SKILL.md` in user's project.
 
 ---
 
