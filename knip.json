@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    "packages/cli": {
+      "entry": ["src/index.ts", "src/__tests__/**/*.test.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "ignoreWorkspaces": ["packages/templates"],
+  "ignoreBinaries": ["bun", "lefthook", "gitleaks", "biome", "turbo", "markdownlint-cli2"]
+}

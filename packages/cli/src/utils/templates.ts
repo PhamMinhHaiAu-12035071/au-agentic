@@ -20,7 +20,7 @@ const TEMPLATE_MAP: Record<Tool, string> = {
   codex: codexTemplate,
 };
 
-export const TARGET_PATH_MAP: Record<Tool, string> = {
+const TARGET_PATH_MAP: Record<Tool, string> = {
   cursor: ".cursor/skills/interview/SKILL.md",
   claude: ".claude/skills/interview/SKILL.md",
   copilot: ".github/prompts/interview.prompt.md",

@@ -4,9 +4,9 @@ import pc from "picocolors";
 import { fileExists, writeTemplate } from "../utils/files.js";
 import { getTargetPath, getTemplateContent, TOOL_LABELS, type Tool } from "../utils/templates.js";
 
-export type CopyResult = "copied" | "skipped" | "failed";
+type CopyResult = "copied" | "skipped" | "failed";
 
-export interface FileResult {
+interface FileResult {
   tool: Tool;
   targetPath: string;
   status: "new" | "overwrite";
@@ -59,7 +59,7 @@ export async function copyFilesToProject(
   return results;
 }
 
-export function showResults(results: FileResult[]): void {
+function showResults(results: FileResult[]): void {
   const hasFailure = results.some((r) => r.result === "failed");
 
   if (hasFailure) {

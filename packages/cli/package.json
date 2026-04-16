@@ -14,7 +14,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=@clack/core --external=picocolors",
+    "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=picocolors",
     "test": "bun test --concurrent src/__tests__/",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint .",
@@ -23,7 +23,6 @@
   "dependencies": {
     "@au-agentic/templates": "workspace:*",
     "@clack/prompts": "^0.9.1",
-    "@clack/core": "^0.4.1",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
