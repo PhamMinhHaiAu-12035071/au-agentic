@@ -62,6 +62,13 @@ The `tsconfig.json` `paths` block mirrors the `imports` field for editor support
 
 Use `import type { ... }` for type-only imports. Avoid `any`; prefer `unknown`, generics, or narrow assertions with a short comment. Strict mode is on (`strict`, `noImplicitAny`, `strictNullChecks`).
 
+## Linting and Formatting
+
+- Run Biome to detect issues: `bun run lint`
+- Fix auto-fixable issues: `bun run check` (or `biome check --write .`)
+- Format code: `bun run format` (or `biome format --write .`)
+- Commit with clean lint (enforced via pre-commit hook)
+
 ## Generated Code and Build
 
 **Output:** Single bundle `dist/index.js`. Externalize `@clack/prompts`, `@clack/core`, `picocolors`. Preserve shebang `#!/usr/bin/env bun`. Do not commit `dist/` (gitignored).
