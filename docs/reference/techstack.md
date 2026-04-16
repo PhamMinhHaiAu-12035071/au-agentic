@@ -53,3 +53,17 @@
 | Interactive Prompts | @clack/prompts | 0.9.1 | select, multiselect, text, confirm |
 | Prompt Core | @clack/core | 0.4.1 | Low-level prompt primitives |
 | Terminal Colors | picocolors | 1.1.1 | Lightweight ANSI colors |
+
+## Test coverage
+
+- **Tool:** Bun built-in test runner with `--coverage` flag
+- **Config:** `bunfig.toml` `[test]` block
+- **Reporters:** text (console) and LCOV (`coverage/lcov.info`)
+- **Threshold:** 40% per-file for lines/statements, 25% for functions (current baseline)
+- **CI artifact:** `coverage/lcov.info` (uploaded by `verify.yml` once CI is activated)
+
+## EditorConfig
+
+- **Tool:** EditorConfig (https://editorconfig.org)
+- **Config:** `.editorconfig` at repo root
+- **Editors supported:** VSCode (via extension), JetBrains, Vim/Neovim, Sublime Text
