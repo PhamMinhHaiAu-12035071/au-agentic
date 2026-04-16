@@ -8,6 +8,29 @@
 
 # Development workflow
 
+## Git hooks (Lefthook)
+
+Hooks are declared in `lefthook.yml` and installed by `bunx lefthook install` (run once after cloning).
+
+**Pre-commit (parallel):**
+
+- `biome check --write` on staged TS/JSON/MD
+- `bun run typecheck`
+- `gitleaks protect --staged`
+- `bunx knip --no-exit-code` (warning only)
+
+**Commit-msg:**
+
+- `bunx --bun commitlint --edit "$1"` — enforces Conventional Commits with the scope-enum from `commitlint.config.ts`
+
+**Pre-push:**
+
+- `bunx knip` — strict; fails on unused exports or dependencies
+
+To temporarily skip a hook (use sparingly): `git commit --no-verify`. CI will still catch issues if it has been activated.
+
+## Standard Flow
+
 **Status:** Currently not applicable — workflow is standard Bun monorepo + conventional commits; details live in CLAUDE/AGENTS until expanded.
 
 **Trigger:** This file should be filled when:

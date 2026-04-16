@@ -8,6 +8,13 @@
 
 # Environment
 
+## System Dependencies
+
+- **gitleaks** v8 — pre-commit secret scanner, install via Homebrew/scoop/apt
+- **Lefthook** — git hook runner, installed automatically as a Bun devDep; activated by `bunx lefthook install`
+
+## Configuration
+
 **Status:** Currently not applicable — only Bun and local `bun` scripts matter today; no managed env matrix.
 
 **Trigger:** This file should be filled when:
