@@ -24,14 +24,14 @@ bunx au-agentic
 1. Enter `/tmp/test-project` as path
 2. Select only "Cursor"
 3. Choose "Copy now"
-4. Verify: `/tmp/test-project/.cursor/commands/interview.md` exists
+4. Verify: `/tmp/test-project/.cursor/skills/interview/SKILL.md` exists
 5. Open Cursor, Chat, type `/interview`
 6. Verify: Interview wizard starts, asks questions about requirements
 
 ### Claude Code
 
 1. Select only "Claude Code"
-2. Verify: `/tmp/test-project/.claude/commands/interview.md` exists
+2. Verify: `/tmp/test-project/.claude/skills/interview/SKILL.md` exists
 3. Run `claude` in terminal, type `/interview`
 4. Verify: AskUserQuestion UI appears, interview starts
 
@@ -39,14 +39,14 @@ bunx au-agentic
 
 1. Select only "GitHub Copilot"
 2. Verify: `/tmp/test-project/.github/prompts/interview.prompt.md` exists
-3. Open VS Code, Copilot Chat, attach prompt file, send
+3. Open VS Code, Copilot Chat, type `/interview`
 4. Verify: Interview questions appear in agent mode
 
 ### Codex CLI
 
 1. Select only "Codex CLI"
 2. Verify: `/tmp/test-project/.agents/skills/interview/SKILL.md` exists
-3. Run `codex`, type `$interview`
+3. Run `codex`, type `$interview` or `/interview`
 4. Verify: Interview skill activates
 
 ### Re-entry test
