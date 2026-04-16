@@ -34,3 +34,14 @@ npm publish
 ```
 
 **For future automation:** This file should document CI-based publish triggers, version tagging, and deployment rollback procedures.
+
+## CI policy: manual trigger only
+
+All five workflow files (`ci.yml`, `docs-check.yml`, `release.yml`, `security.yml`, `verify.yml`) declare `on: workflow_dispatch` only. No push, pull-request, merge, or schedule event will start an Actions run.
+
+To run a workflow:
+
+- Web UI: GitHub → Actions tab → select workflow → "Run workflow" button → choose branch and reason
+- CLI: `gh workflow run verify.yml --ref <branch> -f reason="<why>"`
+
+Never re-enable auto-triggers without updating ADR-0006 and the runbook.
