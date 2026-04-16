@@ -297,7 +297,7 @@ src/utils/paths.ts:2:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━�
         2 │ + import·{·resolve·}·from·"node:path";
      3  3 │   
      4  4 │   export function expandTilde(input: string): string {
-Checked 19 files in 42ms. No fixes applied.
-Found 14 infos.
   
 
+Checked 19 files in 10ms. No fixes applied.
+Found 14 infos.
