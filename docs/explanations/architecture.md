@@ -13,3 +13,14 @@
 **Trigger:** This file should be filled when:
 - You want a human-oriented architecture doc separate from AI policies
 - Subsystems multiply beyond templates + CLI wizard
+
+## Toolchain architecture (2026-04)
+
+The repository uses a layered verification model:
+
+1. **Pre-commit (parallel):** Biome (format + lint), tsc (typecheck), gitleaks (secrets), Knip (exports)
+2. **Orchestration:** Turborepo caches task outputs by input hash; Lefthook triggers hooks
+3. **Performance gate:** `scripts/benchmark.ts` measures T1-T4 tiers and fails if any task regresses
+4. **Manual CI:** GitHub Actions workflows require `workflow_dispatch` (ADR-0006)
+
+Key design decisions documented in `docs/adr/` (0002 Biome, 0003 Turborepo, 0004 Lefthook, 0006 disabled workflows).
