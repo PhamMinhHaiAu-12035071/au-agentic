@@ -35,7 +35,7 @@
 | Task Cache | Turborepo | 2.x | Per-task graph cache; shared across worktrees |
 | Testing | Bun Test | 1.3.10 | Unit + integration tests with coverage |
 | Git Hooks | Lefthook | latest | Parallel pre-commit orchestration |
-| Secret Scan | gitleaks | 8.x | Pre-commit + pre-push secret detection |
+| Secret Scan | secretlint | 11.x | Pre-commit secret detection (project-scope; replaced gitleaks per ADR-0007) |
 | Dead Code | Knip | 5.x | Unused exports / dependencies detection |
 | Markdown | markdownlint-cli2 | 0.13+ | Docs style + structure enforcement |
 | Commit Messages | commitlint | 19.6.1 | Conventional Commits enforcement |

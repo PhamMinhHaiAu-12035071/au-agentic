@@ -84,7 +84,7 @@ On `git commit`, Lefthook runs (in parallel):
 
 - Biome check + organize imports on staged files
 - `tsc --noEmit` (typecheck) via Turbo
-- gitleaks secret scan on staged files
+- secretlint secret scan on staged files (bunx, project-scope)
 - Knip unused-export check (warning-only)
 
 ## VSCode integration

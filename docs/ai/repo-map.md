@@ -150,7 +150,8 @@ turbo.json                # Turborepo task graph and cache config
 knip.json                 # Knip dead-code / unused-export config
 .markdownlint-cli2.jsonc  # markdownlint-cli2 rule overrides
 lefthook.yml              # Git hook orchestration (parallel pre-commit)
-.gitleaks.toml            # gitleaks secret-scan rules and allowlist
+.secretlintrc.json        # secretlint rules (preset-recommend)
+.secretlintignore         # secretlint path allowlist (gitignore-style)
 commitlint.config.ts      # Conventional Commits enforcement config
 bun.lock                  # Bun lockfile for dependency resolution
 ```

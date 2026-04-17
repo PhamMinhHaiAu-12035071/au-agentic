@@ -8,17 +8,16 @@
 
 # Local setup
 
-## System dependencies (install once)
+## System prerequisites
 
-Two binaries must be present on `PATH` because they are not Bun packages:
+The repo is deliberately **project-scope only** — every dev tool installs into `node_modules` via `bun add`. The only binaries you need on the system:
 
-- **gitleaks** — secret scanning at commit time
-    - macOS: `brew install gitleaks`
-    - Debian/Ubuntu: download from https://github.com/gitleaks/gitleaks/releases and place in `/usr/local/bin`
-    - Windows: `scoop install gitleaks`
-    - Verify: `gitleaks version` returns `8.x`
+- **Bun 1.3.10+** (the runtime) — `curl -fsSL https://bun.sh/install | bash`
+- **git 2.40+** — already installed on most dev boxes
 
-After installing, run `bunx lefthook install` to wire Lefthook hooks into `.git/hooks/`.
+That is the full list. Secret scanning (secretlint), linting (Biome), task cache (Turborepo), hooks (Lefthook), dead-code detection (Knip), and markdown linting all install through `bun install`. No `brew install gitleaks` or equivalent — see [../ai/dependency-scope-policy.md](../ai/dependency-scope-policy.md) for the canonical rule.
+
+After dependencies are installed (step below), run `bunx lefthook install` once to wire Lefthook hooks into `.git/hooks/`.
 
 ## Setup flow
 

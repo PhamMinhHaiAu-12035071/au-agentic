@@ -68,7 +68,7 @@ Unit tests for pure functions (`copyFilesToProject`, path utilities). No Clack/T
 
 ## Pre-commit Hook
 
-On `git commit`, Lefthook runs (in parallel): Biome check + organize imports on staged files, `tsc --noEmit` (typecheck) via Turbo, gitleaks secret scan, and Knip unused-export warning. If the hook fails, fix before committing — never bypass with `--no-verify`.
+On `git commit`, Lefthook runs (in parallel): Biome check + organize imports on staged files, `tsc --noEmit` (typecheck) via Turbo, secretlint secret scan (bunx, project-scope), and Knip unused-export warning. If the hook fails, fix before committing — never bypass with `--no-verify`.
 
 ## VSCode Integration
 

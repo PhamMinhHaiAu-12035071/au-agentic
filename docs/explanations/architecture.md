@@ -18,9 +18,9 @@
 
 The repository uses a layered verification model:
 
-1. **Pre-commit (parallel):** Biome (format + lint), tsc (typecheck), gitleaks (secrets), Knip (exports)
+1. **Pre-commit (parallel):** Biome (format + lint), tsc (typecheck), secretlint (secrets — project-scope npm, replaces gitleaks per ADR-0007), Knip (exports)
 2. **Orchestration:** Turborepo caches task outputs by input hash; Lefthook triggers hooks
 3. **Performance gate:** `scripts/benchmark.ts` measures T1-T4 tiers and fails if any task regresses
 4. **Manual CI:** GitHub Actions workflows require `workflow_dispatch` (ADR-0006)
 
-Key design decisions documented in `docs/adr/` (0002 Biome, 0003 Turborepo, 0004 Lefthook, 0006 disabled workflows).
+Key design decisions documented in `docs/adr/` (0002 Biome, 0003 Turborepo, 0004 Lefthook, 0006 disabled workflows, 0007 secretlint).

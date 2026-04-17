@@ -53,4 +53,4 @@ bun run verify    # lint + typecheck + test (Turbo-cached)
 bun run perf      # benchmark suite; refreshes docs/development/performance-benchmarks.md
 ```
 
-System dependency: install **gitleaks** v8 (`brew install gitleaks` on macOS). See `docs/getting-started/local-setup.md` for non-macOS instructions.
+System prerequisites: only **Bun 1.3.10+** and **git** — every other tool (Biome, Turbo, Lefthook, secretlint, Knip, markdownlint-cli2) installs into `node_modules` via `bun install`. See [docs/getting-started/local-setup.md](docs/getting-started/local-setup.md) and [docs/ai/dependency-scope-policy.md](docs/ai/dependency-scope-policy.md) for the project-scope rule.

@@ -35,10 +35,12 @@ Likely cause: `biome.json` ignore globs do not yet exclude generated files (e.g.
 
 Fix: confirm `files.ignore` in `biome.json` lists the generated directories.
 
-### gitleaks blocking a legitimate change
+### secretlint blocking a legitimate change
 
-If you are confident a flagged token is not a real secret, extend `.gitleaks.toml` allowlist with the most specific path/regex possible. Never add `--no-verify` to bypass.
+If you are confident a flagged token is not a real secret, prefer fixing the source (rotate the token or replace with a placeholder). For docs showing example tokens, add an inline disable comment: `<!-- textlint-disable --> ... <!-- textlint-enable -->`, or add the specific file path to `.secretlintignore`.
 
-### `bun run perf` shows FAIL on `gitleaks staged`
+Never add `--no-verify` to bypass. If the allowlist needs a new entry, commit it with the PR so reviewers see the rationale.
 
-gitleaks must be on `PATH`. If `gitleaks version` does not print `8.x`, re-install per `docs/getting-started/local-setup.md`.
+### `bun run perf` shows FAIL on secretlint
+
+Secretlint runs through `bunx`, so it is installed in `node_modules`. If it is missing, run `bun run setup` to reinstall devDeps. Do NOT `brew install gitleaks` — the project has moved off gitleaks entirely (ADR-0007).

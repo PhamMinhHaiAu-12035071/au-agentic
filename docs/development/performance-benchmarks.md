@@ -13,7 +13,7 @@ Re-run after any toolchain change. Status meanings:
 | PASS | `biome format` | 54 | 200 | 500 |
 | PASS | `biome lint` | 57 | 200 | 500 |
 | PASS | `biome check (full)` | 55 | 300 | 800 |
-| PASS | `gitleaks staged` | 36 | 500 | 1500 |
+| PASS | `secretlint staged-equivalent` | pending next perf run | 2000 | 5000 |
 | PASS | `bun test (single file)` | 38 | 300 | 1000 |
 | PASS | `bun test (full sequential)` | 74 | 1000 | 3000 |
 | PASS | `bun test (full concurrent)` | 72 | 500 | 1500 |
@@ -31,7 +31,7 @@ Re-run after any toolchain change. Status meanings:
 ## Tier definitions
 
 - **T1 instant** (< 200 ms): biome format, biome lint, biome check on staged subset
-- **T1 sub-second** (< 500 ms): gitleaks staged scan
+- **T3 workflow** (< 2 s): secretlint staged scan (project-scope npm tool; slower than the old gitleaks Go binary but keeps every dep in node_modules)
 - **T2 snappy** (< 1 s): bun test full, bun typecheck warm, turbo run cache hit
 - **T3 workflow** (< 2–3 s): lefthook pre-commit total, knip, markdownlint, typecheck cold
 - **T4 full pipeline** (< 10 s cold, < 1 s cached): turbo run lint typecheck test

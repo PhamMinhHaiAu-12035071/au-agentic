@@ -4,19 +4,15 @@ Thank you for contributing!
 
 ## Setup
 
-1. Install [Bun 1.3.10+](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
-2. Install gitleaks v8 (system binary):
-    - macOS: `brew install gitleaks`
-    - Debian/Ubuntu: download from https://github.com/gitleaks/gitleaks/releases
-    - Windows: `scoop install gitleaks`
-3. Clone and install:
+1. Install [Bun 1.3.10+](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`. Bun and git are the **only** system prerequisites — every other dev tool ships inside `node_modules`. See [docs/ai/dependency-scope-policy.md](docs/ai/dependency-scope-policy.md) for why.
+2. Clone and install:
     ```bash
     git clone https://github.com/phamau/au-agentic
     cd au-agentic
-    bun install
-    bunx lefthook install
+    bun install            # first-time deps (biome, turbo, lefthook, secretlint, …)
+    bunx lefthook install  # wire git hooks into .git/hooks/
     ```
-4. Verify everything works:
+3. Verify everything works:
     ```bash
     bun run verify    # lint + typecheck + test
     bun run perf      # benchmark gate
@@ -25,7 +21,7 @@ Thank you for contributing!
 ## Development workflow
 
 - Make changes (Biome auto-formats on save if VSCode extension is installed)
-- Stage and commit (Lefthook runs Biome, typecheck, gitleaks, knip in parallel)
+- Stage and commit (Lefthook runs Biome, typecheck, secretlint, knip in parallel)
 - Push (pre-push runs strict knip)
 - CI is currently manual-trigger only; trigger via Actions tab if needed (see `docs/development/branching-and-prs.md`)
 

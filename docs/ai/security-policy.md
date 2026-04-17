@@ -69,13 +69,13 @@ This repo currently has no secrets handling, auth, or external integrations. The
 
 ## Secret scanning
 
-au-agentic uses **gitleaks** to block secrets at commit time and to scan the full repo in CI.
+au-agentic uses **secretlint** (project-scope npm package) to block secrets at commit time and to scan the full repo in CI. The previous gitleaks system binary was removed in ADR-0007 because it required `brew install` and violated the project-scope dependency rule.
 
-- **Pre-commit:** Lefthook runs `gitleaks protect --staged --redact --no-banner` on every `git commit`. Failures abort the commit.
-- **CI:** `verify.yml` runs `gitleaks detect --redact --no-banner` over the full working tree. (CI is currently `workflow_dispatch` only; see `docs/deployment/runbooks.md`.)
-- **Config:** `.gitleaks.toml` extends the default ruleset and allowlists `packages/templates/**` (placeholder tokens) and known-fake regexes inside `docs/`.
+- **Pre-commit:** Lefthook runs `bunx secretlint --maskSecrets --secretlintignore .secretlintignore {staged_files}` on every `git commit`. Failures abort the commit.
+- **CI:** `verify.yml` runs secretlint over the full working tree. (CI is currently `workflow_dispatch` only; see `docs/deployment/runbooks.md`.)
+- **Config:** `.secretlintrc.json` enables `@secretlint/secretlint-rule-preset-recommend` (AWS, GCP, Slack, GitHub, npm, private keys, SendGrid, basic auth). `.secretlintignore` allowlists `packages/templates/**` (placeholder tokens) and cache/build directories.
 
-If a real secret has been committed, rotate the credential first, then remove from history with `git filter-repo` or BFG. Gitleaks itself does not remove history.
+If a real secret has been committed, rotate the credential first, then remove from history with `git filter-repo` or BFG. Secretlint detects but does not remove history.
 
 ## Source Of Truth
 
