@@ -59,7 +59,12 @@ function writeRef(
 
 function syncLicense(): void {
   const upstreamLicense = join(TMP_DIR, "LICENSE");
-  if (!existsSync(upstreamLicense)) throw new Error("Upstream LICENSE missing");
+  if (!existsSync(upstreamLicense)) {
+    console.warn(
+      "  ⚠ upstream has no LICENSE — keeping local packages/templates/javascript-patterns/LICENSE as source of truth",
+    );
+    return;
+  }
   writeFileSync(join(TARGET_ROOT, "LICENSE"), readFileSync(upstreamLicense, "utf8"));
 }
 
