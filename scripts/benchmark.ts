@@ -72,7 +72,7 @@ const benches: Bench[] = [
 
   // Worktree (subagent simulation) benchmarks — see scripts/wt-bench.sh
   {
-    name: "worktree W1: bun install (cache hit from main)",
+    name: "worktree W1: bun run setup (cache hit from main)",
     cmd: ["bash", "scripts/wt-bench.sh", "install"],
     targetMs: 500,
     ceilingMs: 2000,
@@ -156,7 +156,7 @@ ${rows.join("\n")}
 - **T2 snappy** (< 1 s): bun test full, bun typecheck warm, turbo run cache hit
 - **T3 workflow** (< 2–3 s): lefthook pre-commit total, knip, markdownlint, typecheck cold
 - **T4 full pipeline** (< 10 s cold, < 1 s cached): turbo run lint typecheck test
-- **W1 worktree install** (< 500 ms target, 2 s ceiling): \`bun run install\` in subagent worktree, cache hit from main
+- **W1 worktree install** (< 500 ms target, 2 s ceiling): \`bun run setup\` in subagent worktree, cache hit from main
 - **W2 worktree verify** (< 2 s target, 5 s ceiling): \`bun run verify\` in subagent worktree, turbo cache hit
 - **W3 worktree subagent loop** (< 3 s target, 8 s ceiling): install + verify combined (one full AI iteration)
 - **W cold** (< 5 s target, 15 s ceiling): create+install+verify+remove of a fresh worktree (truly cold path)
@@ -170,5 +170,5 @@ bun run perf
 The script writes this file in place. Commit changes if benchmarks shift meaningfully (more than 50% drift on any row).
 `;
 await Bun.write("docs/development/performance-benchmarks.md", report);
-console.log("\n" + report);
+console.log(`\n${report}`);
 if (anyFail) process.exit(1);

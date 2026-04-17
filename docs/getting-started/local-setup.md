@@ -33,7 +33,26 @@ Typical flow today:
 ```bash
 git clone <repo-url>
 cd au-agentic
-bun install
-bunx lefthook install
-bun run verify
+bun install            # first-time dependency install only
+bunx lefthook install  # wire git hooks into .git/hooks/
+bun run verify         # lint + typecheck + test through Turbo + cache-env
 ```
+
+For every subsequent re-install (lockfile changed, pulled new deps, etc.),
+use `bun run setup` instead of raw `bun install` — it routes through
+`scripts/cache-env.sh` so bun/turbo caches stay shared across worktrees.
+
+## Editor integration
+
+`.vscode/settings.json` and `.vscode/extensions.json` are checked in. On
+first open in VSCode or Cursor, the editor will prompt to install the
+recommended extensions (Biome, EditorConfig, markdownlint, TOML, YAML).
+After install:
+
+- Saving a `.ts` / `.tsx` / `.json` / `.jsonc` file auto-runs Biome's
+  formatter and `organizeImports` — matches the pre-commit hook's output
+  so hooks never fight local edits.
+- Markdown files skip format-on-save to avoid clashing with
+  `markdownlint-cli2` rules; run `bun run check` for bulk reformats.
+
+Cursor reads the same `.vscode/` config. No separate setup needed.

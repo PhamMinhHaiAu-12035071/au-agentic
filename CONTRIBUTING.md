@@ -35,7 +35,7 @@ Conventional Commits enforced by `commitlint`. Subject ≤ 72 chars (no upper-ca
 
 ## Tests
 
-- Use `bun test` (or run via Turbo: `bun run test`)
+- Use `bun run test` — routes through Turbo + `scripts/run-bun-test.sh` so the root `bunfig.toml` is honored (coverage reporters, thresholds) and worker `.tmp` fragments are cleaned. Raw `bun test` at the repo root works too; raw `bun test` from inside a package dir silently disables coverage config.
 - Coverage threshold: 70% per file (lines, functions, statements)
 - Quality > quantity: see `docs/ai/testing-policy.md` "Test Quality Anti-Patterns"
 
