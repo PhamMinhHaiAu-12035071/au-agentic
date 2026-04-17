@@ -25,3 +25,9 @@ Paste output from:
 
 - [ ] No breaking changes
 - [ ] Yes - described below with migration guide
+
+## Skill bench (required if skill files changed)
+
+- [ ] N/A — PR does not touch `packages/templates/**/SKILL.md` or skill logic
+- [ ] Ran `bun run skill:bench` locally; tracker diff attached in `docs/superpowers/bench/<skill>.md`
+- [ ] Ran `bun run skill:bench --matrix` (release-gate scope); pass_rate documented

@@ -29,3 +29,6 @@ lcov.info
 
 # Codegen output — regenerated on prebuild
 packages/cli/src/generated/
+
+# cursor-agent-bench raw artifacts (JSONL per run)
+coverage/cursor-bench/

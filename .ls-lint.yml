@@ -23,6 +23,14 @@ ls:
   packages/cli/src:
     .dir: regex:^(__tests__|[a-z0-9-]+)$
 
+  # Bench package tests: kebab .test.ts files (with optional dot-qualifier like .compile.test.ts).
+  packages/cursor-agent-bench/src/__tests__:
+    .ts: regex:^[a-z0-9-]+(\.[a-z0-9-]+)?\.test\.ts$
+
+  # Allow __tests__ subdir under bench/src alongside kebab-case siblings.
+  packages/cursor-agent-bench/src:
+    .dir: regex:^(__tests__|[a-z0-9-]+)$
+
   # Repo-root scripts/ may contain a __tests__ dir following the same convention.
   scripts:
     .dir: regex:^(__tests__|[a-z0-9-]+)$
@@ -83,3 +91,11 @@ ignore:
   # Nested package artifacts (workspace hoisting does not cover these paths)
   - packages/cli/node_modules
   - packages/cli/.turbo
+  - packages/cursor-agent-bench/node_modules
+  - packages/cursor-agent-bench/.turbo
+
+  # Package-level README.md follows community UPPERCASE convention
+  - packages/cursor-agent-bench/README.md
+
+  # Bench tracker directory README follows community UPPERCASE convention
+  - docs/superpowers/bench/README.md

@@ -20,7 +20,9 @@
     "verify": "./scripts/cache-env.sh bunx turbo run lint typecheck test && bun run typecheck:scripts",
     "perf": "./scripts/cache-env.sh bun scripts/benchmark.ts",
     "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build",
-    "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync/patterns-dev/index.ts"
+    "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync/patterns-dev/index.ts",
+    "skill:bench": "bun --filter @au-agentic/cursor-agent-bench bench",
+    "skill:bench:smoke-real": "bun --filter @au-agentic/cursor-agent-bench bench:smoke-real"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
