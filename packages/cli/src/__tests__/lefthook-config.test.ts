@@ -11,12 +11,18 @@ describe("lefthook.yml contract", () => {
     expect(config["pre-commit"]?.parallel).toBe(true);
   });
 
-  it("declares biome, typecheck, gitleaks, knip in pre-commit", () => {
+  it("declares biome, typecheck, secretlint, knip in pre-commit", () => {
     const cmds = Object.keys(config["pre-commit"]?.commands ?? {});
     expect(cmds).toContain("biome");
     expect(cmds).toContain("typecheck");
-    expect(cmds).toContain("gitleaks");
+    expect(cmds).toContain("secretlint");
     expect(cmds).toContain("knip");
+  });
+
+  it("secret scanner is project-scope (bunx), not a system binary", () => {
+    const secretlintCmd = config["pre-commit"]?.commands?.secretlint?.run ?? "";
+    expect(secretlintCmd).toContain("bunx");
+    expect(secretlintCmd).not.toContain("gitleaks");
   });
 
   it("declares commitlint in commit-msg", () => {

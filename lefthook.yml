@@ -8,8 +8,9 @@ pre-commit:
     typecheck:
       glob: "*.ts"
       run: bun run typecheck
-    gitleaks:
-      run: gitleaks protect --staged --redact --no-banner
+    secretlint:
+      glob: "*"
+      run: bunx secretlint --maskSecrets --secretlintignore .secretlintignore {staged_files}
     knip:
       run: bunx knip --no-progress --no-exit-code
 

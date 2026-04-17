@@ -25,10 +25,10 @@ const benches: Bench[] = [
     ceilingMs: 800,
   },
   {
-    name: "gitleaks staged",
-    cmd: ["gitleaks", "protect", "--staged", "--redact", "--no-banner"],
-    targetMs: 500,
-    ceilingMs: 1500,
+    name: "secretlint staged-equivalent",
+    cmd: ["bunx", "secretlint", "--maskSecrets", "--secretlintignore", ".secretlintignore", "**/*"],
+    targetMs: 2000,
+    ceilingMs: 5000,
   },
   {
     name: "bun test (single file)",
@@ -152,7 +152,7 @@ ${rows.join("\n")}
 ## Tier definitions
 
 - **T1 instant** (< 200 ms): biome format, biome lint, biome check on staged subset
-- **T1 sub-second** (< 500 ms): gitleaks staged scan
+- **T3 workflow** (< 2 s): secretlint pre-commit scan (project-scope npm tool; slower than the old gitleaks Go binary but keeps every dep in node_modules)
 - **T2 snappy** (< 1 s): bun test full, bun typecheck warm, turbo run cache hit
 - **T3 workflow** (< 2–3 s): lefthook pre-commit total, knip, markdownlint, typecheck cold
 - **T4 full pipeline** (< 10 s cold, < 1 s cached): turbo run lint typecheck test
