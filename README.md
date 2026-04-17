@@ -36,3 +36,21 @@ Tested with: Claude Sonnet 4.6 (Claude Code), GPT-4o (Copilot), Cursor Agent mod
 
 - Node.js 18+ (for `npx`) or Bun 1.3.10 (for `bunx`)
 - An interactive terminal (TTY required)
+
+## Quick start (for contributors/developers)
+
+```bash
+# Clone and install
+git clone https://github.com/<owner>/au-agentic.git
+cd au-agentic
+bun install
+
+# One-time hook setup
+bunx lefthook install
+
+# Verify everything works
+bun run verify    # lint + typecheck + test (Turbo-cached)
+bun run perf      # benchmark suite; refreshes docs/development/performance-benchmarks.md
+```
+
+System dependency: install **gitleaks** v8 (`brew install gitleaks` on macOS). See `docs/getting-started/local-setup.md` for non-macOS instructions.
