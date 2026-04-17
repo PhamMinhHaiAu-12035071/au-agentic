@@ -18,8 +18,9 @@ function sleep(ms: number): Promise<void> {
 
 function formatMs(ms: number): string {
   if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
-  const m = Math.floor(ms / 60_000);
-  const s = Math.round((ms % 60_000) / 1000);
+  const totalSecs = Math.round(ms / 1000);
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
   return `${m}m ${s}s`;
 }
 
