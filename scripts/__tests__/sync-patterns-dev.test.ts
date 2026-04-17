@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { slugifyPattern, transformUpstreamRef } from "../sync-upstream-patterns";
+import { slugifyPattern, transformUpstreamRef } from "../sync/patterns-dev";
 
 const FIXTURE = readFileSync(join(import.meta.dir, "fixtures/sample-upstream-SKILL.md"), "utf8");
 
