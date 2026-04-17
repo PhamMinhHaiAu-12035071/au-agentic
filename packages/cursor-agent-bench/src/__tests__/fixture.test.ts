@@ -67,7 +67,7 @@ test("validateFixture rejects maxTurns < turns.length", () => {
   ).toThrow(/maxTurns/);
 });
 
-test("loadAllFixtures wraps validation error with filename context (I-1)", async () => {
+test("loadAllFixtures wraps validation error with filename context", async () => {
   const dir = await mkdtemp(join(tmpdir(), "bench-fx-"));
   try {
     await writeFile(
@@ -80,7 +80,7 @@ test("loadAllFixtures wraps validation error with filename context (I-1)", async
   }
 });
 
-test("loadAllFixtures wraps missing default export with filename context (I-1)", async () => {
+test("loadAllFixtures wraps missing default export with filename context", async () => {
   const dir = await mkdtemp(join(tmpdir(), "bench-fx-"));
   try {
     await writeFile(join(dir, "no-default.ts"), "export const x = 1;");

@@ -24,7 +24,7 @@ const fixture: Fixture = {
       assertions: [
         {
           kind: "regex",
-          pattern: /recommend|option|approach|\boption[s]?\b/i,
+          pattern: /recommend|option|approach/i,
           description: "presents options or a recommendation",
         },
         {

@@ -55,7 +55,7 @@ test("unknown kind returns ok=false with reason", () => {
   expect(r.reason).toMatch(/unknown/i);
 });
 
-test("exitCode matcher rejects non-numeric pattern with clear reason (I-2)", () => {
+test("exitCode matcher rejects non-numeric pattern with clear reason", () => {
   const r = evalAssertion(
     { kind: "exitCode", pattern: "abc" },
     { output: "", exitCode: 0 },
