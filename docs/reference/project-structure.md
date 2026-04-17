@@ -13,3 +13,10 @@
 **Trigger:** This file should be filled when:
 - Human-oriented structure docs should diverge from AI repo map
 - You add apps, services, or infra folders
+
+## Toolchain directories (new in 2026-04)
+
+- `.turbo/` — Turborepo local task cache (gitignored). Stores task outputs keyed by input hash.
+- `coverage/` — Bun test coverage reports in LCOV format (gitignored).
+- `scripts/` — Bash wrappers for cache discipline, benchmark automation.
+- `.worktrees/` — Git worktrees for isolated feature branches; see `docs/superpowers/specs/2026-04-16-toolchain-production-readiness-design.md` "Worktree-shared cache" section.
