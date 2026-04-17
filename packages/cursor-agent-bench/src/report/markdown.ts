@@ -95,8 +95,7 @@ function replaceOrAppendSection(existing: string, heading: string, body: string)
   if (pattern.test(existing)) {
     return existing.replace(pattern, normalized);
   }
-  const sep = existing.endsWith("\n") ? "" : "\n";
-  return `${existing}${sep}${normalized}`;
+  return `${existing.trimEnd()}\n\n${normalized}`;
 }
 
 export async function renderTracker(

@@ -149,6 +149,34 @@ test("renderTracker does not over-match when heading has suffix", async () => {
   });
 });
 
+test("renderTracker appends section with blank-line separator when no prior section of that mode exists", async () => {
+  await withTmp(async (dir) => {
+    const file = join(dir, "tracker.md");
+    // Pre-existing file has only a Latest Matrix section and does NOT end in a
+    // trailing blank line. Appending the new Latest Smoke section must produce
+    // exactly one blank line between the prior content and the new heading.
+    const existing = [
+      "# Interview Skill — Bench Tracker",
+      "",
+      "## Latest Matrix",
+      "",
+      "MATRIX_BEFORE_SMOKE_TOKEN",
+    ].join("\n"); // no trailing newline
+    await writeFile(file, existing);
+
+    const turns = [mk("m1", "f1", true, 50, 0)];
+    await renderTracker(file, "interview", mkResult(turns));
+
+    const content = await readFile(file, "utf8");
+    // Exactly one blank line between existing content and the new heading —
+    // no `…TOKEN\n## Latest Smoke` (missing blank line) and no
+    // `…TOKEN\n\n\n## Latest Smoke` (double blank line).
+    expect(content).toContain("MATRIX_BEFORE_SMOKE_TOKEN\n\n## Latest Smoke");
+    expect(content).not.toContain("MATRIX_BEFORE_SMOKE_TOKEN\n## Latest Smoke");
+    expect(content).not.toContain("MATRIX_BEFORE_SMOKE_TOKEN\n\n\n## Latest Smoke");
+  });
+});
+
 test("renderTracker matrix mode writes 'Runs per cell: 3'", async () => {
   await withTmp(async (dir) => {
     const file = join(dir, "tracker.md");
