@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { copyFilesToProject } from "#steps/copy";
 import { fileExists } from "#utils/files";
-import { getTargetPath } from "#utils/templates";
+import { filesForSkillTool, type Skill } from "#utils/templates";
 
 let tmpDir: string;
 
@@ -16,67 +16,98 @@ afterAll(async () => {
   await rm(tmpDir, { recursive: true, force: true });
 });
 
+const INTERVIEW_ONLY: Skill[] = ["interview"];
+
 describe("copyFilesToProject", () => {
-  it("copies cursor template to correct target path", async () => {
-    const results = await copyFilesToProject(tmpDir, ["cursor"], {
+  it("copies cursor interview template to correct target path", async () => {
+    const results = await copyFilesToProject(tmpDir, ["cursor"], INTERVIEW_ONLY, {
       confirmOverwrite: async () => true,
     });
 
-    const targetPath = join(tmpDir, getTargetPath("cursor"));
-    expect(await fileExists(targetPath)).toBe(true);
-    expect(results).toEqual([expect.objectContaining({ tool: "cursor", result: "copied" })]);
+    const expected = filesForSkillTool("interview", "cursor").map((f) =>
+      join(tmpDir, f.targetPath),
+    );
+    for (const p of expected) {
+      expect(await fileExists(p)).toBe(true);
+    }
+    expect(results.every((r) => r.result === "copied")).toBe(true);
+    expect(results.map((r) => r.tool)).toContain("cursor");
   });
 
-  it("copies multiple tools", async () => {
+  it("copies multiple tools for interview", async () => {
     const tmpDir2 = await mkdtemp(join(tmpdir(), "au-agentic-multi-"));
-    const results = await copyFilesToProject(tmpDir2, ["cursor", "claude"], {
+    const tools = ["cursor", "claude", "copilot", "codex"] as const;
+    const results = await copyFilesToProject(tmpDir2, [...tools], INTERVIEW_ONLY, {
       confirmOverwrite: async () => true,
     });
 
-    expect(results).toHaveLength(2);
+    for (const tool of tools) {
+      const expected = filesForSkillTool("interview", tool).map((f) => join(tmpDir2, f.targetPath));
+      for (const p of expected) {
+        expect(await fileExists(p)).toBe(true);
+      }
+    }
     expect(results.every((r) => r.result === "copied")).toBe(true);
     await rm(tmpDir2, { recursive: true, force: true });
   });
 
   it("skips file when confirmOverwrite returns false", async () => {
     const tmpDir3 = await mkdtemp(join(tmpdir(), "au-agentic-skip-"));
-    // First copy to create the file
-    await copyFilesToProject(tmpDir3, ["cursor"], { confirmOverwrite: async () => true });
-    // Second copy with skip
-    const results = await copyFilesToProject(tmpDir3, ["cursor"], {
+    await copyFilesToProject(tmpDir3, ["cursor"], INTERVIEW_ONLY, {
+      confirmOverwrite: async () => true,
+    });
+    const results = await copyFilesToProject(tmpDir3, ["cursor"], INTERVIEW_ONLY, {
       confirmOverwrite: async () => false,
     });
 
-    expect(results[0]?.result).toBe("skipped");
+    expect(results.some((r) => r.result === "skipped")).toBe(true);
     await rm(tmpDir3, { recursive: true, force: true });
   });
 
   it("records failure when write throws", async () => {
-    const results = await copyFilesToProject("/nonexistent/readonly/path", ["cursor"], {
-      confirmOverwrite: async () => true,
-    });
+    const results = await copyFilesToProject(
+      "/nonexistent/readonly/path",
+      ["cursor"],
+      INTERVIEW_ONLY,
+      { confirmOverwrite: async () => true },
+    );
 
-    expect(results[0]?.result).toBe("failed");
-    expect(results[0]?.error).toBeDefined();
+    expect(results.some((r) => r.result === "failed")).toBe(true);
+    expect(results.find((r) => r.result === "failed")?.error).toBeDefined();
   });
 
   it("does not track copy state after copyFilesToProject returns", async () => {
     const tmpDir4 = await mkdtemp(join(tmpdir(), "au-agentic-state-"));
-    await copyFilesToProject(tmpDir4, ["cursor"], { confirmOverwrite: async () => true });
-
-    const results = await copyFilesToProject(tmpDir4, ["cursor"], {
+    await copyFilesToProject(tmpDir4, ["cursor"], INTERVIEW_ONLY, {
       confirmOverwrite: async () => true,
     });
 
-    expect(results[0]?.status).toBe("overwrite");
-    expect(results[0]?.result).toBe("copied");
+    const results = await copyFilesToProject(tmpDir4, ["cursor"], INTERVIEW_ONLY, {
+      confirmOverwrite: async () => true,
+    });
+
+    expect(results.every((r) => r.status === "overwrite")).toBe(true);
+    expect(results.every((r) => r.result === "copied")).toBe(true);
     await rm(tmpDir4, { recursive: true, force: true });
   });
 
-  it("uses skill path for cursor and claude, prompt path for copilot, skill path for codex", () => {
-    expect(getTargetPath("cursor")).toBe(".cursor/skills/interview/SKILL.md");
-    expect(getTargetPath("claude")).toBe(".claude/skills/interview/SKILL.md");
-    expect(getTargetPath("copilot")).toBe(".github/prompts/interview.prompt.md");
-    expect(getTargetPath("codex")).toBe(".agents/skills/interview/SKILL.md");
+  it("multi-skill scaffold writes javascript-patterns refs under each tool", async () => {
+    const freshDir = await mkdtemp(join(tmpdir(), "au-agentic-multiskill-"));
+    try {
+      const results = await copyFilesToProject(freshDir, ["claude"], ["javascript-patterns"], {
+        confirmOverwrite: async () => true,
+      });
+
+      const copied = results.filter((r) => r.result === "copied").map((r) => r.targetPath);
+      expect(copied.some((p) => p.endsWith(".claude/skills/javascript-patterns/SKILL.md"))).toBe(
+        true,
+      );
+      expect(copied.some((p) => p.endsWith(".claude/skills/javascript-patterns/LICENSE"))).toBe(
+        true,
+      );
+      expect(copied.filter((p) => p.includes("/references/")).length).toBe(29);
+    } finally {
+      await rm(freshDir, { recursive: true, force: true });
+    }
   });
 });

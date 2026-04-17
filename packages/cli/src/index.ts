@@ -2,6 +2,7 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { stepCopy } from "#steps/copy";
 import { stepInputPath } from "#steps/path";
+import { stepSelectSkills } from "#steps/skills";
 import { stepSelectTools } from "#steps/tools";
 import pkg from "../package.json" with { type: "json" };
 
@@ -27,7 +28,8 @@ async function main(): Promise<void> {
 
   const projectPath = await stepInputPath();
   const tools = await stepSelectTools();
-  await stepCopy(projectPath, tools);
+  const skills = await stepSelectSkills();
+  await stepCopy(projectPath, tools, skills);
 }
 
 main().catch((err: unknown) => {

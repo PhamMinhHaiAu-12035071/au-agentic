@@ -3,10 +3,10 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { fileExists, writeTemplate } from "#utils/files";
 import {
+  filesForSkillTool,
   getNextStep,
-  getTargetPath,
-  getTemplateContent,
-  TOOL_LABELS,
+  getToolLabel,
+  type Skill,
   type Tool,
 } from "#utils/templates";
 
@@ -14,6 +14,7 @@ type CopyResult = "copied" | "skipped" | "failed";
 type FileStatus = "new" | "overwrite";
 
 interface FileResult {
+  skill: Skill;
   tool: Tool;
   targetPath: string;
   status: FileStatus;
@@ -26,46 +27,49 @@ interface CopyOptions {
   onResult?: (result: FileResult) => void;
 }
 
-/**
- * Core copy logic, extracted for testability. No Clack calls.
- */
 export async function copyFilesToProject(
   projectPath: string,
   tools: Tool[],
+  skills: Skill[],
   options: CopyOptions,
 ): Promise<FileResult[]> {
   const results: FileResult[] = [];
 
-  for (const tool of tools) {
-    const targetPath = join(projectPath, getTargetPath(tool));
-    const exists = await fileExists(targetPath);
-    const status: FileStatus = exists ? "overwrite" : "new";
+  for (const skill of skills) {
+    for (const tool of tools) {
+      for (const { targetPath, content } of filesForSkillTool(skill, tool)) {
+        const abs = join(projectPath, targetPath);
+        const exists = await fileExists(abs);
+        const status: FileStatus = exists ? "overwrite" : "new";
 
-    if (exists) {
-      const confirmed = await options.confirmOverwrite(targetPath);
-      if (!confirmed) {
-        const result: FileResult = { tool, targetPath, status, result: "skipped" };
-        results.push(result);
-        options.onResult?.(result);
-        continue;
+        if (exists) {
+          const confirmed = await options.confirmOverwrite(abs);
+          if (!confirmed) {
+            const r: FileResult = { skill, tool, targetPath: abs, status, result: "skipped" };
+            results.push(r);
+            options.onResult?.(r);
+            continue;
+          }
+        }
+
+        try {
+          await writeTemplate(content, abs);
+          const r: FileResult = { skill, tool, targetPath: abs, status, result: "copied" };
+          results.push(r);
+          options.onResult?.(r);
+        } catch (err) {
+          const r: FileResult = {
+            skill,
+            tool,
+            targetPath: abs,
+            status,
+            result: "failed",
+            error: (err as Error).message,
+          };
+          results.push(r);
+          options.onResult?.(r);
+        }
       }
-    }
-
-    try {
-      await writeTemplate(getTemplateContent(tool), targetPath);
-      const result: FileResult = { tool, targetPath, status, result: "copied" };
-      results.push(result);
-      options.onResult?.(result);
-    } catch (err) {
-      const result: FileResult = {
-        tool,
-        targetPath,
-        status,
-        result: "failed",
-        error: (err as Error).message,
-      };
-      results.push(result);
-      options.onResult?.(result);
     }
   }
 
@@ -74,15 +78,11 @@ export async function copyFilesToProject(
 
 function showResults(results: FileResult[]): void {
   const hasFailure = results.some((r) => r.result === "failed");
-
-  if (hasFailure) {
-    p.log.warn("Scaffold completed with errors");
-  }
+  if (hasFailure) p.log.warn("Scaffold completed with errors");
 
   for (const r of results) {
     const icon =
       r.result === "copied" ? pc.green("✓") : r.result === "skipped" ? pc.dim("–") : pc.red("✗");
-
     const label =
       r.result === "copied" && r.status === "new"
         ? pc.dim("(new)")
@@ -91,27 +91,34 @@ function showResults(results: FileResult[]): void {
           : r.result === "skipped"
             ? pc.dim("(skipped)")
             : pc.red(`(failed: ${r.error})`);
-
     p.log.message(`  ${icon} ${r.targetPath} ${label}`);
   }
 }
 
-function showNextSteps(tools: Tool[]): void {
+function showNextSteps(tools: Tool[], skills: Skill[]): void {
   p.log.message(`\n${pc.dim("Next steps:")}`);
-  for (const tool of tools) {
-    p.log.message(`  ${pc.bold(TOOL_LABELS[tool])}: ${getNextStep(tool)}`);
+  for (const skill of skills) {
+    p.log.message(`  ${pc.bold(skill)}:`);
+    for (const tool of tools) {
+      p.log.message(`    ${getToolLabel(tool)}: ${getNextStep(tool, skill)}`);
+    }
   }
 }
 
-export async function stepCopy(projectPath: string, tools: Tool[]): Promise<void> {
-  const fileInfos = await Promise.all(
-    tools.map(async (tool) => {
-      const targetPath = join(projectPath, getTargetPath(tool));
-      return { tool, targetPath, exists: await fileExists(targetPath) };
-    }),
-  );
+export async function stepCopy(projectPath: string, tools: Tool[], skills: Skill[]): Promise<void> {
+  const previews: Array<{ skill: Skill; tool: Tool; targetPath: string; exists: boolean }> = [];
+  for (const skill of skills) {
+    for (const tool of tools) {
+      for (const { targetPath } of filesForSkillTool(skill, tool)) {
+        const abs = join(projectPath, targetPath);
+        previews.push({ skill, tool, targetPath: abs, exists: await fileExists(abs) });
+      }
+    }
+  }
 
-  p.log.info(`/interview will be scaffolded for: ${tools.map((t) => TOOL_LABELS[t]).join(", ")}`);
+  p.log.info(
+    `Will scaffold ${skills.length} skill(s) × ${tools.length} tool(s) = ${previews.length} file(s)`,
+  );
 
   const action = await p.select({
     message: "What would you like to do?",
@@ -128,11 +135,10 @@ export async function stepCopy(projectPath: string, tools: Tool[]): Promise<void
 
   if (action === "preview") {
     p.log.message(pc.dim("\nFile preview:"));
-    for (const f of fileInfos) {
+    for (const f of previews) {
       const label = f.exists ? pc.yellow("(overwrite)") : pc.green("(new)");
       p.log.message(`  ${f.targetPath} ${label}`);
     }
-
     const proceed = await p.confirm({ message: "Proceed to copy?" });
     if (p.isCancel(proceed) || !proceed) {
       p.outro("No files were copied.");
@@ -142,21 +148,17 @@ export async function stepCopy(projectPath: string, tools: Tool[]): Promise<void
 
   const copiedPaths: string[] = [];
 
-  const results = await copyFilesToProject(projectPath, tools, {
+  const results = await copyFilesToProject(projectPath, tools, skills, {
     confirmOverwrite: async (targetPath) => {
-      const answer = await p.confirm({
-        message: `${targetPath} already exists. Overwrite?`,
-      });
-
+      const answer = await p.confirm({ message: `${targetPath} already exists. Overwrite?` });
       if (p.isCancel(answer)) {
         const copiedList =
           copiedPaths.length > 0
-            ? `\nFiles already copied:\n${copiedPaths.map((p) => `  ${p}`).join("\n")}`
+            ? `\nFiles already copied:\n${copiedPaths.map((x) => `  ${x}`).join("\n")}`
             : "";
         p.cancel(`Cancelled.${copiedList}\nRemaining files were not copied.`);
         process.exit(1);
       }
-
       return answer as boolean;
     },
     onResult: (r) => {
@@ -165,7 +167,7 @@ export async function stepCopy(projectPath: string, tools: Tool[]): Promise<void
   });
 
   showResults(results);
-  showNextSteps(tools);
+  showNextSteps(tools, skills);
 
   const hasFailure = results.some((r) => r.result === "failed");
   if (hasFailure) {
