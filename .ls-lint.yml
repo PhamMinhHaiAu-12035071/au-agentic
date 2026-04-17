@@ -69,6 +69,9 @@ ignore:
   # Upstream-shaped fixture preserves original SKILL.md casing for realism
   - scripts/__tests__/fixtures/sample-upstream-SKILL.md
 
+  # Tier 2 golden-file anchors: double-underscore convention mirrors __tests__
+  - packages/cli/src/__tests__/__golden__
+
   # AI-agent tool directories — follow external tool conventions (e.g. SKILL.md)
   - .agents
   - .cursor
