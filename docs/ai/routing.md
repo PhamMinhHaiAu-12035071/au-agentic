@@ -30,6 +30,7 @@
 | **Security** | security-policy.md | docs/reference/configuration.md | `bun run lint`<br>`bun run test` | SECURITY.md if needed |
 | **Dependency** | dependency-scope-policy.md<br>coding-rules.md | docs/development/dependency-policy.md | `bun run verify` | docs/reference/techstack.md |
 | **Unclear / Mixed change** | repo-map.md<br>docs-policy.md | docs/reference/project-structure.md<br>docs/explanations/architecture.md | Expand 1 layer minimal context;<br>if still unclear stop and ask user | Identify nearest source-of-truth then sync docs |
+| **Adding a new skill template** | repo-map.md<br>docs/reference/project-structure.md | docs/development/testing.md | `bun run gen:manifest`<br>`bun run verify` | repo-map.md + project-structure.md; drop folder under `packages/templates/<skill>/`, run codegen, add 4-tier tests, update wizard skill-select step |
 
 ## Modifier Overlays
 

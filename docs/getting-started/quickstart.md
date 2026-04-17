@@ -22,3 +22,14 @@ bunx lefthook install   # one-time hook setup
 bun run verify          # lint + typecheck + test
 bun run perf            # benchmark gate
 ```
+
+## Scaffold wizard walkthrough
+
+Run `bunx au-agentic` in an interactive terminal. The wizard is 4 steps:
+
+1. **Path** — enter your project directory (must be writable).
+2. **Tools** — multi-select AI tools: Cursor, Claude Code, GitHub Copilot, Codex CLI.
+3. **Skills** — multi-select which skills to scaffold: `interview` (default-on) and `javascript-patterns` (29 patterns from patterns.dev).
+4. **Preview + copy** — preview target file tree, confirm overwrites, then copy.
+
+Both skills are manual-trigger only — after scaffolding, invoke via `/interview` or `/javascript-patterns` in the AI tool's slash popup.
