@@ -11,6 +11,8 @@ pre-commit:
     secretlint:
       glob: "*"
       run: bunx secretlint --maskSecrets --secretlintignore .secretlintignore {staged_files}
+    ls-lint:
+      run: bunx ls-lint
     knip:
       run: bunx knip --no-progress --no-exit-code
 

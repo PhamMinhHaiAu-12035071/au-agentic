@@ -11,11 +11,12 @@ describe("lefthook.yml contract", () => {
     expect(config["pre-commit"]?.parallel).toBe(true);
   });
 
-  it("declares biome, typecheck, secretlint, knip in pre-commit", () => {
+  it("declares biome, typecheck, secretlint, ls-lint, knip in pre-commit", () => {
     const cmds = Object.keys(config["pre-commit"]?.commands ?? {});
     expect(cmds).toContain("biome");
     expect(cmds).toContain("typecheck");
     expect(cmds).toContain("secretlint");
+    expect(cmds).toContain("ls-lint");
     expect(cmds).toContain("knip");
   });
 
@@ -23,6 +24,12 @@ describe("lefthook.yml contract", () => {
     const secretlintCmd = config["pre-commit"]?.commands?.secretlint?.run ?? "";
     expect(secretlintCmd).toContain("bunx");
     expect(secretlintCmd).not.toContain("gitleaks");
+  });
+
+  it("filesystem name linter is project-scope (bunx)", () => {
+    const cmd = config["pre-commit"]?.commands?.["ls-lint"]?.run ?? "";
+    expect(cmd).toMatch(/\bbunx\s+ls-lint\b/);
+    expect(cmd).not.toMatch(/^ls-lint(\s|$)/);
   });
 
   it("declares commitlint in commit-msg", () => {
