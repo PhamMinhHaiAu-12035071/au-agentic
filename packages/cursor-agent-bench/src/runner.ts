@@ -16,6 +16,8 @@ export interface SpawnArgs {
   prompt: string;
   resumeId?: string;
   timeoutMs: number;
+  /** Optional per-line callback. Undefined → runCmd uses legacy buffered path. */
+  onStdoutLine?: (line: string) => void;
 }
 
 export type SpawnFn = (args: SpawnArgs) => Promise<SpawnResult>;
