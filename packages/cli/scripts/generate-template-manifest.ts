@@ -112,9 +112,17 @@ function render(entries: ManifestEntry[]): string {
 
   const byShape: Record<string, Record<string, Record<string, string>>> = {};
   for (const e of entries) {
-    byShape[e.skill] ??= {};
-    byShape[e.skill][e.tool] ??= {};
-    byShape[e.skill][e.tool][e.key] = e.importName;
+    let tools = byShape[e.skill];
+    if (tools === undefined) {
+      tools = {};
+      byShape[e.skill] = tools;
+    }
+    let files = tools[e.tool];
+    if (files === undefined) {
+      files = {};
+      tools[e.tool] = files;
+    }
+    files[e.key] = e.importName;
   }
 
   const manifestLines = Object.entries(byShape)
