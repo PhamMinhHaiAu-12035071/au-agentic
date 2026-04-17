@@ -1,5 +1,5 @@
-import { homedir } from "os";
-import { resolve } from "path";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
 
 export function expandTilde(input: string): string {
   if (input === "~") return homedir();

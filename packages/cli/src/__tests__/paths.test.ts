@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { homedir } from "os";
-import { resolve } from "path";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
 import { expandTilde, resolvePath, trimTrailingSlash } from "../utils/paths";
 
 describe("expandTilde", () => {

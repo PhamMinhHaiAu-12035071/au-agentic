@@ -1,5 +1,5 @@
+import { join } from "node:path";
 import * as p from "@clack/prompts";
-import { join } from "path";
 import pc from "picocolors";
 import { fileExists, writeTemplate } from "../utils/files.js";
 import { getTargetPath, getTemplateContent, TOOL_LABELS, type Tool } from "../utils/templates.js";
@@ -91,7 +91,7 @@ function showNextSteps(tools: Tool[]): void {
     codex: "Chạy `codex` → Gõ $interview hoặc /interview",
   };
 
-  p.log.message("\n" + pc.dim("Next steps:"));
+  p.log.message(`\n${pc.dim("Next steps:")}`);
   for (const tool of tools) {
     p.log.message(`  ${pc.bold(TOOL_LABELS[tool])}: ${steps[tool]}`);
   }

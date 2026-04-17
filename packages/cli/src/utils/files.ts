@@ -1,5 +1,5 @@
-import { access, constants, mkdir, stat, writeFile } from "fs/promises";
-import { dirname } from "path";
+import { access, constants, mkdir, stat, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 export async function isDirectory(path: string): Promise<boolean> {
   try {
