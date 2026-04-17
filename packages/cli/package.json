@@ -5,7 +5,8 @@
   "type": "module",
   "imports": {
     "#utils/*": "./src/utils/*.ts",
-    "#steps/*": "./src/steps/*.ts"
+    "#steps/*": "./src/steps/*.ts",
+    "#generated/*": "./src/generated/*.ts"
   },
   "bin": {
     "au-agentic": "dist/index.js"
@@ -14,9 +15,11 @@
     "dist"
   ],
   "scripts": {
+    "gen:manifest": "bun scripts/generate-template-manifest.ts",
+    "prebuild": "bun run gen:manifest",
     "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=picocolors",
-    "test": "../../scripts/run-bun-test.sh --concurrent src/__tests__/",
-    "typecheck": "tsc --noEmit",
+    "test": "bun run gen:manifest && ../../scripts/run-bun-test.sh --concurrent src/__tests__/",
+    "typecheck": "bun run gen:manifest && tsc --noEmit",
     "lint": "biome lint .",
     "format": "biome format --write ."
   },

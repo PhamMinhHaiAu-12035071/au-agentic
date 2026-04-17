@@ -26,3 +26,6 @@ lcov.info
 .cursor/
 .claude/
 .agents/
+
+# Codegen output — regenerated on prebuild
+packages/cli/src/generated/
