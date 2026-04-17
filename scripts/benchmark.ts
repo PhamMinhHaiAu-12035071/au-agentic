@@ -31,6 +31,12 @@ const benches: Bench[] = [
     ceilingMs: 5000,
   },
   {
+    name: "ls-lint (full repo)",
+    cmd: ["bunx", "ls-lint"],
+    targetMs: 500,
+    ceilingMs: 2000,
+  },
+  {
     name: "bun test (single file)",
     cmd: ["bun", "test", "packages/cli/src/__tests__/copy.test.ts"],
     targetMs: 300,
