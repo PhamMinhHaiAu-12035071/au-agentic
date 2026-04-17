@@ -39,7 +39,8 @@ function sh(argv: string[]): string {
 }
 
 function cloneUpstream(): void {
-  if (existsSync(TMP_DIR)) rmSync(TMP_DIR, { recursive: true, force: true });
+  // rmSync with force:true is idempotent for missing paths — no existsSync guard needed.
+  rmSync(TMP_DIR, { recursive: true, force: true });
   mkdirSync(TMP_DIR, { recursive: true });
   sh(["git", "clone", "--depth=1", `--branch=${UPSTREAM_BRANCH}`, UPSTREAM_REPO, TMP_DIR]);
 }

@@ -11,6 +11,12 @@ function copilotCatalog(): string {
   return content;
 }
 
+// Shared across DEC-012 scope + DEC-013 ambiguity describes — same 4 catalogs.
+const CATALOGS: Array<{ tool: string; content: string }> = [
+  ...AGENT_TOOLS.map((t) => ({ tool: t, content: JS[t]["SKILL.md"] })),
+  { tool: "copilot", content: copilotCatalog() },
+];
+
 describe("javascript-patterns skill contract", () => {
   describe("DEC-011: manual-trigger-only", () => {
     for (const tool of AGENT_TOOLS) {
@@ -45,12 +51,7 @@ describe("javascript-patterns skill contract", () => {
   });
 
   describe("DEC-012: scope = JS/TS source + test/spec files only", () => {
-    const catalogs: Array<{ tool: string; content: string }> = [
-      ...AGENT_TOOLS.map((t) => ({ tool: t, content: JS[t]["SKILL.md"] })),
-      { tool: "copilot", content: copilotCatalog() },
-    ];
-
-    for (const { tool, content } of catalogs) {
+    for (const { tool, content } of CATALOGS) {
       test(`${tool} catalog declares Scope block listing JS + TS + test + spec`, () => {
         expect(content).toContain("## Scope");
         expect(content).toContain(".js");
@@ -70,12 +71,7 @@ describe("javascript-patterns skill contract", () => {
   });
 
   describe("DEC-013: ambiguity → delegate /interview", () => {
-    const catalogs: Array<{ tool: string; content: string }> = [
-      ...AGENT_TOOLS.map((t) => ({ tool: t, content: JS[t]["SKILL.md"] })),
-      { tool: "copilot", content: copilotCatalog() },
-    ];
-
-    for (const { tool, content } of catalogs) {
+    for (const { tool, content } of CATALOGS) {
       test(`${tool} catalog contains Ambiguity Protocol referencing /interview`, () => {
         expect(content).toContain("## Ambiguity Protocol");
         expect(content).toContain("/interview");

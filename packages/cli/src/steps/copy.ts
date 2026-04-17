@@ -27,49 +27,73 @@ interface CopyOptions {
   onResult?: (result: FileResult) => void;
 }
 
+interface ScaffoldItem {
+  skill: Skill;
+  tool: Tool;
+  abs: string;
+  content: string;
+  exists: boolean;
+}
+
+async function enumerateScaffoldItems(
+  projectPath: string,
+  tools: Tool[],
+  skills: Skill[],
+): Promise<ScaffoldItem[]> {
+  const items: Omit<ScaffoldItem, "exists">[] = [];
+  for (const skill of skills) {
+    for (const tool of tools) {
+      for (const { targetPath, content } of filesForSkillTool(skill, tool)) {
+        items.push({ skill, tool, abs: join(projectPath, targetPath), content });
+      }
+    }
+  }
+  // Parallelize stat calls — independent and hot-path for a 120+ file scaffold
+  return Promise.all(items.map(async (i) => ({ ...i, exists: await fileExists(i.abs) })));
+}
+
 export async function copyFilesToProject(
   projectPath: string,
   tools: Tool[],
   skills: Skill[],
   options: CopyOptions,
 ): Promise<FileResult[]> {
+  const items = await enumerateScaffoldItems(projectPath, tools, skills);
+  return runCopy(items, options);
+}
+
+async function runCopy(items: ScaffoldItem[], options: CopyOptions): Promise<FileResult[]> {
   const results: FileResult[] = [];
 
-  for (const skill of skills) {
-    for (const tool of tools) {
-      for (const { targetPath, content } of filesForSkillTool(skill, tool)) {
-        const abs = join(projectPath, targetPath);
-        const exists = await fileExists(abs);
-        const status: FileStatus = exists ? "overwrite" : "new";
+  for (const { skill, tool, abs, content, exists } of items) {
+    const status: FileStatus = exists ? "overwrite" : "new";
 
-        if (exists) {
-          const confirmed = await options.confirmOverwrite(abs);
-          if (!confirmed) {
-            const r: FileResult = { skill, tool, targetPath: abs, status, result: "skipped" };
-            results.push(r);
-            options.onResult?.(r);
-            continue;
-          }
-        }
-
-        try {
-          await writeTemplate(content, abs);
-          const r: FileResult = { skill, tool, targetPath: abs, status, result: "copied" };
-          results.push(r);
-          options.onResult?.(r);
-        } catch (err) {
-          const r: FileResult = {
-            skill,
-            tool,
-            targetPath: abs,
-            status,
-            result: "failed",
-            error: (err as Error).message,
-          };
-          results.push(r);
-          options.onResult?.(r);
-        }
+    if (exists) {
+      const confirmed = await options.confirmOverwrite(abs);
+      if (!confirmed) {
+        const r: FileResult = { skill, tool, targetPath: abs, status, result: "skipped" };
+        results.push(r);
+        options.onResult?.(r);
+        continue;
       }
+    }
+
+    try {
+      await writeTemplate(content, abs);
+      const r: FileResult = { skill, tool, targetPath: abs, status, result: "copied" };
+      results.push(r);
+      options.onResult?.(r);
+    } catch (err) {
+      const r: FileResult = {
+        skill,
+        tool,
+        targetPath: abs,
+        status,
+        result: "failed",
+        error: (err as Error).message,
+      };
+      results.push(r);
+      options.onResult?.(r);
     }
   }
 
@@ -106,15 +130,7 @@ function showNextSteps(tools: Tool[], skills: Skill[]): void {
 }
 
 export async function stepCopy(projectPath: string, tools: Tool[], skills: Skill[]): Promise<void> {
-  const previews: Array<{ skill: Skill; tool: Tool; targetPath: string; exists: boolean }> = [];
-  for (const skill of skills) {
-    for (const tool of tools) {
-      for (const { targetPath } of filesForSkillTool(skill, tool)) {
-        const abs = join(projectPath, targetPath);
-        previews.push({ skill, tool, targetPath: abs, exists: await fileExists(abs) });
-      }
-    }
-  }
+  const previews = await enumerateScaffoldItems(projectPath, tools, skills);
 
   p.log.info(
     `Will scaffold ${skills.length} skill(s) × ${tools.length} tool(s) = ${previews.length} file(s)`,
@@ -137,7 +153,7 @@ export async function stepCopy(projectPath: string, tools: Tool[], skills: Skill
     p.log.message(pc.dim("\nFile preview:"));
     for (const f of previews) {
       const label = f.exists ? pc.yellow("(overwrite)") : pc.green("(new)");
-      p.log.message(`  ${f.targetPath} ${label}`);
+      p.log.message(`  ${f.abs} ${label}`);
     }
     const proceed = await p.confirm({ message: "Proceed to copy?" });
     if (p.isCancel(proceed) || !proceed) {
