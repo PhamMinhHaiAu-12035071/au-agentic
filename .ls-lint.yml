@@ -23,6 +23,14 @@ ls:
   packages/cli/src:
     .dir: regex:^(__tests__|[a-z0-9-]+)$
 
+  # Repo-root scripts/ may contain a __tests__ dir following the same convention.
+  scripts:
+    .dir: regex:^(__tests__|[a-z0-9-]+)$
+
+  # Script tests: kebab .test.ts files live here.
+  scripts/__tests__:
+    .ts: regex:^[a-z0-9-]+\.test\.ts$
+
 ignore:
   # Community-convention root UPPERCASE files
   - README.md
@@ -54,6 +62,12 @@ ignore:
 
   # Git internals — not subject to naming conventions
   - .git
+
+  # Lefthook-generated hook directory (naming dictated by upstream tool)
+  - .husky
+
+  # Upstream-shaped fixture preserves original SKILL.md casing for realism
+  - scripts/__tests__/fixtures/sample-upstream-SKILL.md
 
   # AI-agent tool directories — follow external tool conventions (e.g. SKILL.md)
   - .agents
