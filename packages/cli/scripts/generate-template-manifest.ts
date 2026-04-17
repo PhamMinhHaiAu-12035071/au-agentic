@@ -14,6 +14,12 @@ const TEMPLATES_DIR = join(REPO_ROOT, "packages/templates");
 const OUT_PATH = join(CLI_ROOT, "src/generated/template-manifest.ts");
 const SHARED_FILES = new Set(["LICENSE"]);
 
+// Top-level dirs under packages/templates/ that act as author namespaces — codegen
+// descends one level so that templates/<author>/<skill>/ is treated as a skill at
+// the manifest tree's <skill> key (with the author folded into the import path only).
+// Add new authors here as upstream sources land.
+const AUTHOR_NAMESPACES = new Set<string>(["patterns-dev"]);
+
 interface ManifestEntry {
   importName: string;
   importPath: string;
@@ -43,43 +49,60 @@ function sanitizeIdent(s: string): string {
 
 function collect(): ManifestEntry[] {
   const entries: ManifestEntry[] = [];
-  for (const skill of sortedReaddir(TEMPLATES_DIR)) {
-    if (!skill.isDirectory()) continue;
-    const skillDir = join(TEMPLATES_DIR, skill.name);
+  for (const top of sortedReaddir(TEMPLATES_DIR)) {
+    if (!top.isDirectory()) continue;
+    const topDir = join(TEMPLATES_DIR, top.name);
 
-    for (const item of sortedReaddir(skillDir)) {
-      if (item.isFile() && SHARED_FILES.has(item.name)) {
-        entries.push({
-          importName: `${sanitizeIdent(skill.name)}__shared__${sanitizeIdent(item.name)}`,
-          importPath: `@au-agentic/templates/${skill.name}/${item.name}`,
-          skill: skill.name,
-          tool: "_shared",
-          key: item.name,
-        });
-      } else if (item.isFile() && !SHARED_FILES.has(item.name) && /\.md$/.test(item.name)) {
-        // Top-level loose files (e.g. interview/copilot.md)
-        entries.push({
-          importName: `${sanitizeIdent(skill.name)}__copilot__${sanitizeIdent(item.name)}`,
-          importPath: `@au-agentic/templates/${skill.name}/${item.name}`,
-          skill: skill.name,
-          tool: "copilot",
-          key: item.name,
-        });
-      } else if (item.isDirectory()) {
-        const toolDir = join(skillDir, item.name);
-        for (const rel of walkMd(toolDir, toolDir)) {
-          entries.push({
-            importName: `${sanitizeIdent(skill.name)}__${sanitizeIdent(item.name)}__${sanitizeIdent(rel)}`,
-            importPath: `@au-agentic/templates/${skill.name}/${item.name}/${rel}`,
-            skill: skill.name,
-            tool: item.name,
-            key: rel,
-          });
-        }
+    if (AUTHOR_NAMESPACES.has(top.name)) {
+      // Author tier: walk children as skills, prefix import path with author/
+      for (const skill of sortedReaddir(topDir)) {
+        if (!skill.isDirectory()) continue;
+        collectSkill(entries, join(topDir, skill.name), skill.name, `${top.name}/${skill.name}`);
       }
+    } else {
+      // Direct skill tier: existing 2-level layout
+      collectSkill(entries, topDir, top.name, top.name);
     }
   }
   return entries;
+}
+
+function collectSkill(
+  entries: ManifestEntry[],
+  skillDir: string,
+  skillKey: string,
+  importPrefix: string,
+): void {
+  for (const item of sortedReaddir(skillDir)) {
+    if (item.isFile() && SHARED_FILES.has(item.name)) {
+      entries.push({
+        importName: `${sanitizeIdent(skillKey)}__shared__${sanitizeIdent(item.name)}`,
+        importPath: `@au-agentic/templates/${importPrefix}/${item.name}`,
+        skill: skillKey,
+        tool: "_shared",
+        key: item.name,
+      });
+    } else if (item.isFile() && !SHARED_FILES.has(item.name) && /\.md$/.test(item.name)) {
+      entries.push({
+        importName: `${sanitizeIdent(skillKey)}__copilot__${sanitizeIdent(item.name)}`,
+        importPath: `@au-agentic/templates/${importPrefix}/${item.name}`,
+        skill: skillKey,
+        tool: "copilot",
+        key: item.name,
+      });
+    } else if (item.isDirectory()) {
+      const toolDir = join(skillDir, item.name);
+      for (const rel of walkMd(toolDir, toolDir)) {
+        entries.push({
+          importName: `${sanitizeIdent(skillKey)}__${sanitizeIdent(item.name)}__${sanitizeIdent(rel)}`,
+          importPath: `@au-agentic/templates/${importPrefix}/${item.name}/${rel}`,
+          skill: skillKey,
+          tool: item.name,
+          key: rel,
+        });
+      }
+    }
+  }
 }
 
 function render(entries: ManifestEntry[]): string {
