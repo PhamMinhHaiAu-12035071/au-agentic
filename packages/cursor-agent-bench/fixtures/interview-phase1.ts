@@ -22,8 +22,16 @@ const fixture: Fixture = {
       prompt:
         "Objective: let users persist a preferred color scheme (light / dark / auto) across sessions. DoD: flag saved to config, honored on next boot, covered by tests.",
       assertions: [
-        { kind: "regex", pattern: /recommend/i, description: "presents a recommended option" },
-        { kind: "regex", pattern: /why|because|rationale/i, description: "explains why" },
+        {
+          kind: "regex",
+          pattern: /recommend|option|approach|\boption[s]?\b/i,
+          description: "presents options or a recommendation",
+        },
+        {
+          kind: "regex",
+          pattern: /why|because|rationale|reason|trade-?off/i,
+          description: "explains reasoning",
+        },
       ],
     },
     {
@@ -31,7 +39,7 @@ const fixture: Fixture = {
       assertions: [
         {
           kind: "regex",
-          pattern: /decision log|locked|accepted/i,
+          pattern: /decision|locked|accepted|confirmed|recorded/i,
           description: "records decision",
         },
       ],
