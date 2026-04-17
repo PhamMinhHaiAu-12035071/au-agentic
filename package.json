@@ -19,7 +19,7 @@
     "verify": "./scripts/cache-env.sh bunx turbo run lint typecheck test",
     "perf": "./scripts/cache-env.sh bun scripts/benchmark.ts",
     "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build",
-    "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync-upstream-patterns.ts"
+    "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync/patterns-dev/index.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
