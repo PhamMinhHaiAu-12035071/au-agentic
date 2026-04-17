@@ -31,3 +31,14 @@ bun run skill:bench --fixture interview-phase1 --model claude-4.5-sonnet --runs 
 ## Adding a fixture
 
 Create `fixtures/<id>.ts` following `Fixture` type from `src/types.ts`.
+
+## ⚠️ Isolation warning
+
+The runner spawns `cursor-agent` in the current working directory. If a
+fixture prompt asks the skill to perform a coding task (e.g. "add feature X"),
+Cursor CLI may write files into the real workspace. V1 does not sandbox
+this — always inspect `git status` after a real bench run and discard any
+unintended changes with `git checkout -- <files>` / `rm` before committing.
+
+Follow-up: run the bench from an isolated git worktree or a copy of the
+repo to prevent LLM-induced code pollution.
