@@ -93,6 +93,28 @@ inner[k2] = v;
 
 **Why this rule exists:** Biome covers all `.ts` files by default, but `tsc --noEmit` only sees files in its `include` glob. A directory missing from any tsconfig is silently uncovered — strict-mode bugs (e.g. `noUncheckedIndexedAccess` violations) live there until an IDE catches them. The contract is intentionally explicit so coverage gaps cannot drift in unnoticed.
 
+## Internationalization (i18n)
+
+**Shipped artifacts MUST be in English** — international standard. au-agentic is published to a global audience; non-English in user-facing output makes the tool feel localized to a single market and blocks adoption.
+
+**Scope of the rule:**
+
+| Where | Must be English |
+|---|---|
+| `packages/templates/**` (SKILL.md hubs, `.prompt.md`, references) | YES — content scaffolds verbatim into end-user projects |
+| `packages/cli/src/utils/templates.ts` (`TOOL_META.<tool>.nextStep`, `SKILL_LABELS`) | YES — strings shown by the wizard |
+| Any `console.log` / error message in `packages/cli/src/**` and `scripts/**` that ships with the bundled CLI | YES |
+
+**Internal code is exempt:** code comments, test descriptions, internal variable names, commit messages, and developer-facing docs under `docs/` may use whatever language fits the team. They never reach end-users.
+
+**Verifying compliance:** before merging a change that touches templates or CLI prompt strings, run:
+
+```bash
+grep -rEln "(không|được|của|hoặc|với|chạy|gõ|nhé|này|thế|Bảng|Mở|Nếu|KHÔNG)" packages/cli/src/utils/templates.ts packages/templates/
+```
+
+Expected: empty output. If anything matches, translate it before committing. (Pattern is not exhaustive — it's a tripwire for the most common Vietnamese tokens. Add new tokens if a non-English variant slips through.)
+
 ## Linting and Formatting
 
 - Run Biome to detect issues: `bun run lint`
