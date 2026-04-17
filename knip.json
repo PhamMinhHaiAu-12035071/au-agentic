@@ -1,5 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["scripts/*.ts"],
+  "project": ["scripts/*.ts"],
   "workspaces": {
     "packages/cli": {
       "entry": ["src/index.ts", "src/__tests__/**/*.test.ts"],
@@ -7,5 +9,6 @@
     }
   },
   "ignoreWorkspaces": ["packages/templates"],
+  "ignoreDependencies": ["turbo", "markdownlint-cli2"],
   "ignoreBinaries": ["bun", "lefthook", "gitleaks", "biome", "turbo", "markdownlint-cli2"]
 }
