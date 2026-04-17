@@ -4,24 +4,40 @@ Thank you for contributing!
 
 ## Setup
 
-```bash
-git clone https://github.com/phamau/au-agentic
-cd au-agentic
-bun install
-bun run verify  # typecheck + lint + test
-```
+1. Install [Bun 1.3.10+](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
+2. Install gitleaks v8 (system binary):
+    - macOS: `brew install gitleaks`
+    - Debian/Ubuntu: download from https://github.com/gitleaks/gitleaks/releases
+    - Windows: `scoop install gitleaks`
+3. Clone and install:
+    ```bash
+    git clone https://github.com/phamau/au-agentic
+    cd au-agentic
+    bun install
+    bunx lefthook install
+    ```
+4. Verify everything works:
+    ```bash
+    bun run verify    # lint + typecheck + test
+    bun run perf      # benchmark gate
+    ```
 
-## Commit Conventions
+## Development workflow
 
-We use [Conventional Commits](https://www.conventionalcommits.org/):
-- `feat:` — New features
-- `fix:` — Bug fixes
-- `docs:` — Documentation changes
-- `chore:` — Maintenance tasks
-- `refactor:` — Code restructuring
-- `test:` — Test changes
+- Make changes (Biome auto-formats on save if VSCode extension is installed)
+- Stage and commit (Lefthook runs Biome, typecheck, gitleaks, knip in parallel)
+- Push (pre-push runs strict knip)
+- CI is currently manual-trigger only; trigger via Actions tab if needed (see `docs/development/branching-and-prs.md`)
 
-Enforced by commitlint pre-commit hook.
+## Commit messages
+
+Conventional Commits enforced by `commitlint`. Subject ≤ 72 chars (no upper-case or PascalCase first word); body lines ≤ 100 chars. Scope is free-form — pick the most specific subtree (`cli`, `templates`, `docs`, `ai`, `adr`, `reference`, `dev`, `setup`, `deployment`, `explanations`, `tooling`, `deps`, `tests`, `ci`, `security`, etc.).
+
+## Tests
+
+- Use `bun test` (or run via Turbo: `bun run test`)
+- Coverage threshold: 70% per file (lines, functions, statements)
+- Quality > quantity: see `docs/ai/testing-policy.md` "Test Quality Anti-Patterns"
 
 ## Pull Requests
 
