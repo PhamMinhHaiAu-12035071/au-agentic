@@ -1,6 +1,7 @@
 import { evalAssertion } from "#src/eval/l1";
 import { truncateOutput, writeDump } from "#src/truncate";
 import type { AssertionResult, BenchConfig, Fixture, ReproMetadata, TurnResult } from "#src/types";
+import type { BenchUI } from "#src/ui/types";
 
 export interface SpawnResult {
   stdout: string;
@@ -31,6 +32,7 @@ export interface RunFixtureOpts {
   startedAt: Date;
   spawn: SpawnFn;
   sleep: (ms: number) => Promise<void>;
+  ui: BenchUI;
 }
 
 export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promise<TurnResult[]> {
@@ -75,7 +77,7 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
 
     if (Date.now() >= deadline) {
       results.push(budgetExceededResult(i, prompt));
-      break;
+      break; // no turnStart emitted → no turnEnd needed
     }
 
     const remaining = Math.max(0, deadline - Date.now());
@@ -85,12 +87,23 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
       break;
     }
 
+    await opts.ui.turnStart({
+      turn: i,
+      prompt: prompt.length > 60 ? `${prompt.slice(0, 59)}…` : prompt,
+    });
+
     let spawnRes: SpawnResult | undefined;
     let retried = false;
     const maxAttempts = config.retry.max;
     for (let attempt = 0; attempt <= maxAttempts; attempt++) {
       try {
-        spawnRes = await spawn({ model, prompt, resumeId, timeoutMs });
+        spawnRes = await spawn({
+          model,
+          prompt,
+          resumeId,
+          timeoutMs,
+          onStdoutLine: (line) => opts.ui.turnLine(line),
+        });
         if (spawnRes.timedOut && attempt < maxAttempts) {
           retried = true;
           await sleep(config.retry.delayMs);
@@ -128,12 +141,11 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
         reason: "spawn-error",
         ...baseMetadata,
       });
+      await opts.ui.turnEnd({ pass: false, durationMs: 0, reason: "spawn-error" });
       break;
     }
 
-    if (spawnRes.sessionId) {
-      resumeId = spawnRes.sessionId;
-    }
+    if (spawnRes.sessionId) resumeId = spawnRes.sessionId;
 
     const finalSpawn: SpawnResult = spawnRes;
     const assertions: AssertionResult[] = turn.assertions.map((a) =>
@@ -161,7 +173,6 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
           output: finalSpawn.stdout,
         });
       } catch {
-        // best-effort dump; disk full / permission errors must not crash the runner
         outputDumpPath = undefined;
       }
     }
@@ -185,6 +196,12 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
       timedOut: finalSpawn.timedOut,
       reason,
       ...baseMetadata,
+    });
+
+    await opts.ui.turnEnd({
+      pass,
+      durationMs: finalSpawn.durationMs,
+      reason,
     });
 
     if (!pass) break;

@@ -8,6 +8,7 @@ import { renderTracker } from "#src/report/markdown";
 import { runFixture } from "#src/runner";
 import { spawnCursorAgent } from "#src/spawn-cursor-agent";
 import type { BenchResult, Fixture, ReproMetadata, TurnResult } from "#src/types";
+import { createBenchUI } from "#src/ui/index";
 import config from "../cursor-bench.config";
 
 function sleep(ms: number): Promise<void> {
@@ -49,6 +50,8 @@ async function main(): Promise<number> {
   const models = args.mode === "matrix" ? config.models : [args.model ?? config.defaultModel];
   const runs = args.runs ?? (args.mode === "matrix" ? config.matrixRuns : config.defaultRuns);
 
+  const ui = createBenchUI({ isTty: process.stdout.isTTY ?? false });
+
   const startedAt = new Date();
   const startTs = Date.now();
   const bySkill = new Map<string, TurnResult[]>();
@@ -84,6 +87,7 @@ async function main(): Promise<number> {
           startedAt,
           spawn: spawnCursorAgent,
           sleep,
+          ui,
         });
         totalCount += turns.length;
         passCount += turns.filter((t) => t.pass).length;
