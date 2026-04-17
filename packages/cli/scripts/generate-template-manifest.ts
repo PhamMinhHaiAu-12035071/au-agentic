@@ -22,11 +22,17 @@ interface ManifestEntry {
   key: string;
 }
 
+function sortedReaddir(dir: string): import("node:fs").Dirent[] {
+  // Sort deterministically so codegen output is stable across filesystems
+  // (APFS, ext4, tmpfs all differ in native readdirSync order).
+  return readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function walkMd(dir: string, base: string, entries: string[] = []): string[] {
-  for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+  for (const dirent of sortedReaddir(dir)) {
     const full = join(dir, dirent.name);
     if (dirent.isDirectory()) walkMd(full, base, entries);
-    else if (/\.(md|mdx)$/.test(dirent.name)) entries.push(relative(base, full));
+    else if (/\.md$/.test(dirent.name)) entries.push(relative(base, full));
   }
   return entries;
 }
@@ -37,11 +43,11 @@ function sanitizeIdent(s: string): string {
 
 function collect(): ManifestEntry[] {
   const entries: ManifestEntry[] = [];
-  for (const skill of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+  for (const skill of sortedReaddir(TEMPLATES_DIR)) {
     if (!skill.isDirectory()) continue;
     const skillDir = join(TEMPLATES_DIR, skill.name);
 
-    for (const item of readdirSync(skillDir, { withFileTypes: true })) {
+    for (const item of sortedReaddir(skillDir)) {
       if (item.isFile() && SHARED_FILES.has(item.name)) {
         entries.push({
           importName: `${sanitizeIdent(skill.name)}__shared__${sanitizeIdent(item.name)}`,
@@ -50,7 +56,7 @@ function collect(): ManifestEntry[] {
           tool: "_shared",
           key: item.name,
         });
-      } else if (item.isFile() && !SHARED_FILES.has(item.name) && /\.(md|mdx)$/.test(item.name)) {
+      } else if (item.isFile() && !SHARED_FILES.has(item.name) && /\.md$/.test(item.name)) {
         // Top-level loose files (e.g. interview/copilot.md)
         entries.push({
           importName: `${sanitizeIdent(skill.name)}__copilot__${sanitizeIdent(item.name)}`,
