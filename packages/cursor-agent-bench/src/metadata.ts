@@ -1,3 +1,8 @@
+// Assumption: collectMetadata is called once per skill at bench startup. git
+// SHA is read at that moment and embedded in every TurnResult for that skill.
+// If a skill is ever re-run across commits in a single invocation (not a V1
+// flow), the captured SHA may not reflect the true HEAD when later turns run.
+// V1 is single-skill single-invocation so this is safe.
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { platform, release } from "node:os";
