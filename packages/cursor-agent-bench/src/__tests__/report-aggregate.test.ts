@@ -103,6 +103,20 @@ test("aggregate builds per-model ranking sorted by pass_rate desc then mean asc"
   expect(report.ranking[2]!.rank).toBe(3);
 });
 
+test("aggregate handles fixture/model names containing `|` without collision", () => {
+  // Old key `${fixture}|${model}` would collide:
+  //   fixture="a|b", model="c"  -> "a|b|c"
+  //   fixture="a",   model="b|c" -> "a|b|c"
+  const turns: TurnResult[] = [mk("c", "a|b", true, 100, 0), mk("b|c", "a", false, 200, 0)];
+  const report = aggregate(mkResult(turns));
+  expect(report.cells).toHaveLength(2);
+  const byFixture = new Map(report.cells.map((c) => [c.fixture, c]));
+  expect(byFixture.get("a|b")?.model).toBe("c");
+  expect(byFixture.get("a|b")?.passCount).toBe(1);
+  expect(byFixture.get("a")?.model).toBe("b|c");
+  expect(byFixture.get("a")?.passCount).toBe(0);
+});
+
 test("aggregate sums retries, timeouts, budgetExceeded into summary", () => {
   const turns: TurnResult[] = [
     { ...mk("m1", "f1", true, 100, 0), retried: true },

@@ -24,7 +24,7 @@ function mean(xs: number[]): number {
 function computeCells(turns: TurnResult[]): CellStats[] {
   const groups = new Map<string, TurnResult[]>();
   for (const t of turns) {
-    const key = `${t.fixture}|${t.model}`;
+    const key = `${t.fixture}\u0000${t.model}`;
     const arr = groups.get(key);
     if (arr) arr.push(t);
     else groups.set(key, [t]);
@@ -32,7 +32,7 @@ function computeCells(turns: TurnResult[]): CellStats[] {
 
   const cells: CellStats[] = [];
   for (const [key, group] of groups) {
-    const [fixture, model] = key.split("|") as [string, string];
+    const [fixture, model] = key.split("\u0000") as [string, string];
     const durations = group.map((t) => t.durationMs);
     const passCount = group.filter((t) => t.pass).length;
     const totalCount = group.length;
