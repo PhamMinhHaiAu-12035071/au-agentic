@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test } from "bun:test";
+import { expect, test } from "bun:test";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -38,25 +38,22 @@ test("dumpPathFor produces deterministic path format", () => {
   );
 });
 
-let dir = "";
-beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), "bench-dump-"));
-});
-afterEach(async () => {
-  await rm(dir, { recursive: true, force: true });
-});
-
 test("writeDump writes full output to file and returns path", async () => {
-  const path = await writeDump({
-    dir,
-    startedAt: new Date("2026-04-17T10:42:00Z"),
-    skill: "s",
-    fixture: "f",
-    model: "m",
-    runIndex: 0,
-    turn: 0,
-    output: "FULL LLM OUTPUT",
-  });
-  const content = await readFile(path, "utf8");
-  expect(content).toBe("FULL LLM OUTPUT");
+  const dir = await mkdtemp(join(tmpdir(), "bench-dump-"));
+  try {
+    const path = await writeDump({
+      dir,
+      startedAt: new Date("2026-04-17T10:42:00Z"),
+      skill: "s",
+      fixture: "f",
+      model: "m",
+      runIndex: 0,
+      turn: 0,
+      output: "FULL LLM OUTPUT",
+    });
+    const content = await readFile(path, "utf8");
+    expect(content).toBe("FULL LLM OUTPUT");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
