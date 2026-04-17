@@ -152,9 +152,8 @@ ${rows.join("\n")}
 ## Tier definitions
 
 - **T1 instant** (< 200 ms): biome format, biome lint, biome check on staged subset
-- **T3 workflow** (< 2 s): secretlint pre-commit scan (project-scope npm tool; slower than the old gitleaks Go binary but keeps every dep in node_modules)
 - **T2 snappy** (< 1 s): bun test full, bun typecheck warm, turbo run cache hit
-- **T3 workflow** (< 2–3 s): lefthook pre-commit total, knip, markdownlint, typecheck cold
+- **T3 workflow** (< 2–3 s): lefthook pre-commit total, secretlint staged scan (project-scope npm; slower than the old gitleaks Go binary but keeps every dep in node_modules), knip, markdownlint, typecheck cold
 - **T4 full pipeline** (< 10 s cold, < 1 s cached): turbo run lint typecheck test
 - **W1 worktree install** (< 500 ms target, 2 s ceiling): \`bun run setup\` in subagent worktree, cache hit from main
 - **W2 worktree verify** (< 2 s target, 5 s ceiling): \`bun run verify\` in subagent worktree, turbo cache hit
