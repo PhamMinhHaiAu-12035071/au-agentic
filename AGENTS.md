@@ -15,6 +15,7 @@ All agents must internalize these principles before starting any task. Project-s
 - Small diffs — one logical change per commit
 - Update docs in same task — code without docs = incomplete
 - No blind edits in sensitive zones (templates.ts, package.json build config)
+- Always invoke commands as `bun run <script>` (which routes through `scripts/cache-env.sh`); never run raw `bun install`, `bunx turbo`, or similar — raw invocations bypass project-scope cache and force cold rebuilds across worktrees. Read `docs/ai/performance-policy.md` for the full "time is GOLD" ruleset.
 
 # Source of Truth
 
