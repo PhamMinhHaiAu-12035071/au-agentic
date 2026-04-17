@@ -28,3 +28,12 @@ Future content should document:
 - Safe vs unsafe changes in those areas
 - Migration strategy out of legacy patterns
 - Who to ask for context on historical decisions
+
+## Toolchain refactor (2026-04)
+
+The 2026-04-16 toolchain hardening replaced ESLint v9 + Husky + lint-staged with Biome v2 + Lefthook, added Turborepo for task caching, gitleaks for secret scanning, and Knip for dead-code detection. All GitHub Actions workflows were downgraded to manual-trigger only. See:
+
+- Spec: `docs/superpowers/specs/2026-04-16-toolchain-production-readiness-design.md`
+- ADRs: 0002 (Biome), 0003 (Turborepo), 0004 (Lefthook), 0005 (imports field aliases), 0006 (workflows disabled)
+
+If you are reading this and wondering why the repo no longer uses ESLint or Husky — those are the answers.

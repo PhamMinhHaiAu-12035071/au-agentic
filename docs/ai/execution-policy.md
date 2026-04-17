@@ -84,3 +84,7 @@ Every change should be easily reversible:
 - Avoid mixing refactor with feature work in same commit
 
 If a change breaks something, `git revert <commit>` should cleanly undo it.
+
+## Performance gate
+
+Before claiming a toolchain-related task complete, run `bun run perf`. If any benchmark row reports `FAIL`, the work is not done — fix the root cause (config drift, accidentally-broad glob, slow plugin) and re-run.
