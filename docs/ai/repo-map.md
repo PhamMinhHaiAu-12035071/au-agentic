@@ -154,7 +154,9 @@ CITATION.cff              # Citation metadata for academic use
 **Configuration:**
 ```
 package.json              # Monorepo root, workspaces, scripts, devDependencies
-tsconfig.json             # TypeScript base config (extended by every package)
+tsconfig.json             # TypeScript base config (extended by every package + scripts/)
+scripts/tsconfig.json     # Typecheck for repo-root scripts/ — wired into root `verify` via `typecheck:scripts`
+packages/cli/scripts/tsconfig.json  # Typecheck for cli codegen scripts — chained inside cli's `typecheck`
 bunfig.toml               # Bun test coverage settings (LCOV, 70% per-file threshold)
 .editorconfig             # Editor consistency (UTF-8, LF, indent 2 space)
 biome.json                # Biome lint + format config (supersedes ESLint/Prettier)

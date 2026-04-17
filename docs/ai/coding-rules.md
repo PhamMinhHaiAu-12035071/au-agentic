@@ -64,7 +64,34 @@ The `tsconfig.json` `paths` block mirrors the `imports` field for editor support
 
 ## TypeScript Conventions
 
-Use `import type { ... }` for type-only imports. Avoid `any`; prefer `unknown`, generics, or narrow assertions with a short comment. Strict mode is on (`strict`, `noImplicitAny`, `strictNullChecks`).
+Use `import type { ... }` for type-only imports. Avoid `any`; prefer `unknown`, generics, or narrow assertions with a short comment. Strict mode is on (`strict`, `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess`).
+
+**Indexed access pattern:** Under `noUncheckedIndexedAccess`, every `Record<>`/array indexed read returns `T | undefined`. Chained writes like `obj[k1][k2] = v` won't compile even after `obj[k1] ??= {}` because TS doesn't narrow through indexed lvalues. Use locally narrowed variables instead:
+
+```typescript
+let inner = obj[key];
+if (inner === undefined) {
+  inner = {};
+  obj[key] = inner;
+}
+inner[k2] = v;
+```
+
+(Avoid `(obj[k] ??= {})` one-liners — Biome's `noAssignInExpressions` rule rejects assignment-in-expression.)
+
+## TypeScript Coverage
+
+**Every `.ts` file in the repo MUST be reachable by some `tsconfig.json` whose typecheck is wired into `bun run verify`.** Current coverage map:
+
+| Directory | Covered by | Pipeline entry |
+|---|---|---|
+| `packages/cli/src/**` | `packages/cli/tsconfig.json` (`include: ["src"]`) | `bun run typecheck` (turbo) |
+| `packages/cli/scripts/**` | `packages/cli/scripts/tsconfig.json` (extends root) | `bun run typecheck` (chained `tsc -p scripts/`) |
+| `scripts/**` (repo root) | `scripts/tsconfig.json` (extends root) | `bun run typecheck:scripts` (chained after turbo in `verify`) |
+
+**When adding a new `.ts` directory outside the table above** (e.g. `tools/`, a new package, a new script root): add a tsconfig that extends `tsconfig.json` (root) and wire its `tsc --noEmit -p <dir>/` into either the package's `typecheck` script OR the root `verify` chain. Then update this table.
+
+**Why this rule exists:** Biome covers all `.ts` files by default, but `tsc --noEmit` only sees files in its `include` glob. A directory missing from any tsconfig is silently uncovered — strict-mode bugs (e.g. `noUncheckedIndexedAccess` violations) live there until an IDE catches them. The contract is intentionally explicit so coverage gaps cannot drift in unnoticed.
 
 ## Linting and Formatting
 
