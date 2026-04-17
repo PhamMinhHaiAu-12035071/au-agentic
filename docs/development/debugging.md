@@ -44,3 +44,13 @@ Never add `--no-verify` to bypass. If the allowlist needs a new entry, commit it
 ### `bun run perf` shows FAIL on secretlint
 
 Secretlint runs through `bunx`, so it is installed in `node_modules`. If it is missing, run `bun run setup` to reinstall devDeps. Do NOT `brew install gitleaks` — the project has moved off gitleaks entirely (ADR-0007).
+
+### ls-lint blocking a legitimate filename
+
+If ls-lint flags a filename you believe is correct, the fix depends on the cause:
+
+- **Typo / wrong case**: rename the file to match kebab-case (e.g. `MyDoc.md` → `my-doc.md`). Most cases.
+- **External convention**: add the file or directory to `.ls-lint.yml`'s `ignore:` list with a one-line comment explaining why.
+- **Per-directory rule is too strict**: update the regex in `.ls-lint.yml` (e.g. if a new ADR sub-format is introduced) rather than disabling the rule.
+
+Never bypass with `--no-verify`. If ls-lint is genuinely wrong, fix the config and commit the fix with the PR.

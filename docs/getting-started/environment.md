@@ -10,7 +10,7 @@
 
 ## System Dependencies
 
-Only two system binaries are required: **Bun 1.3.10+** (the runtime) and **git 2.40+**. Everything else — Biome, Turbo, Lefthook, Knip, markdownlint-cli2, secretlint (secret scanner) — installs into `node_modules` via `bun install`. See [../ai/dependency-scope-policy.md](../ai/dependency-scope-policy.md) for why.
+Only two system binaries are required: **Bun 1.3.10+** (the runtime) and **git 2.40+**. Everything else — Biome, Turbo, Lefthook, Knip, markdownlint-cli2, secretlint, ls-lint — installs into `node_modules` via `bun install`. See [../ai/dependency-scope-policy.md](../ai/dependency-scope-policy.md) for why.
 
 After `bun install`, run `bunx lefthook install` once to wire Lefthook hooks into `.git/hooks/`.
 

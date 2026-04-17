@@ -36,6 +36,7 @@
 | Testing | Bun Test | 1.3.10 | Unit + integration tests with coverage |
 | Git Hooks | Lefthook | latest | Parallel pre-commit orchestration |
 | Secret Scan | secretlint | 11.x | Pre-commit secret detection (project-scope; replaced gitleaks per ADR-0007) |
+| File/Folder Linter | ls-lint | 2.x | Directory + filename naming conventions (project-scope; ADR-0008) |
 | Dead Code | Knip | 5.x | Unused exports / dependencies detection |
 | Markdown | markdownlint-cli2 | 0.13+ | Docs style + structure enforcement |
 | Commit Messages | commitlint | 19.6.1 | Conventional Commits enforcement |

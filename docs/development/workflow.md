@@ -17,6 +17,7 @@ Hooks are declared in `lefthook.yml` and installed by `bunx lefthook install` (r
 - `biome check --write` on staged TS/JSON/MD
 - `bun run typecheck`
 - `bunx secretlint` on staged files (project-scope; replaced gitleaks per ADR-0007)
+- `bunx ls-lint` filesystem naming check (project-scope; full repo, Go binary)
 - `bunx knip --no-exit-code` (warning only)
 
 **Commit-msg:**

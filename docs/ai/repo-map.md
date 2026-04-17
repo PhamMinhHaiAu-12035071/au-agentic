@@ -152,6 +152,7 @@ knip.json                 # Knip dead-code / unused-export config
 lefthook.yml              # Git hook orchestration (parallel pre-commit)
 .secretlintrc.json        # secretlint rules (preset-recommend)
 .secretlintignore         # secretlint path allowlist (gitignore-style)
+.ls-lint.yml              # ls-lint filesystem naming rules
 commitlint.config.ts      # Conventional Commits enforcement config
 bun.lock                  # Bun lockfile for dependency resolution
 ```

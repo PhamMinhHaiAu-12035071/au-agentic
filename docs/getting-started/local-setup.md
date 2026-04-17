@@ -15,7 +15,7 @@ The repo is deliberately **project-scope only** — every dev tool installs into
 - **Bun 1.3.10+** (the runtime) — `curl -fsSL https://bun.sh/install | bash`
 - **git 2.40+** — already installed on most dev boxes
 
-That is the full list. Secret scanning (secretlint), linting (Biome), task cache (Turborepo), hooks (Lefthook), dead-code detection (Knip), and markdown linting all install through `bun install`. No `brew install gitleaks` or equivalent — see [../ai/dependency-scope-policy.md](../ai/dependency-scope-policy.md) for the canonical rule.
+That is the full list. Secret scanning (secretlint), filesystem naming (ls-lint), linting (Biome), task cache (Turborepo), hooks (Lefthook), dead-code detection (Knip), and markdown linting all install through `bun install`. No `brew install` or equivalent — see [../ai/dependency-scope-policy.md](../ai/dependency-scope-policy.md) for the canonical rule.
 
 After dependencies are installed (step below), run `bunx lefthook install` once to wire Lefthook hooks into `.git/hooks/`.
 

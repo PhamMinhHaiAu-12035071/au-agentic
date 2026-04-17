@@ -51,6 +51,7 @@ Full rationale and enforcement: [../ai/dependency-scope-policy.md](../ai/depende
 | Knip | 6.x | Dead-code detection |
 | markdownlint-cli2 | 0.13.x | Docs style |
 | secretlint + preset-recommend | 11.x | Secret scanning (replaces Phase-3 gitleaks per ADR-0007) |
+| @ls-lint/ls-lint | 2.x | Filesystem naming lint (adopted in ADR-0008) |
 | commitlint | 19.x | Conventional Commits gate |
 
 ## Postinstall scripts
