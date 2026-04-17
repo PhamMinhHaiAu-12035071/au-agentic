@@ -24,9 +24,9 @@ export function transformUpstreamRef(upstreamContent: string, upstreamFolder: st
   return header + body.replace(/^\s+/, "");
 }
 
-const REPO_ROOT = join(import.meta.dir, "..");
+const REPO_ROOT = join(import.meta.dir, "../../..");
 const TMP_DIR = join(REPO_ROOT, ".tmp/upstream-patterns");
-const TARGET_ROOT = join(REPO_ROOT, "packages/templates/javascript-patterns");
+const TARGET_ROOT = join(REPO_ROOT, "packages/templates/patterns-dev/javascript-patterns");
 
 /**
  * Run a command with explicit argv (no shell interpretation).
