@@ -205,6 +205,25 @@ test("runner respects fixture.maxTurns override", async () => {
   });
 });
 
+test("runner survives writeDump failure, still emits result with outputDumpPath=undefined (I-4)", async () => {
+  // `/dev/null` is a file, so `mkdir /dev/null/nope` fails with ENOTDIR.
+  const dumpDir = "/dev/null/nope";
+  const spawn: SpawnFn = async () => ok("goodbye world");
+  const results = await runFixture(fixture1, {
+    config: { ...baseConfig, retry: { max: 0, delayMs: 0 } },
+    model: "m1",
+    runIndex: 0,
+    metadata: fakeMeta,
+    dumpDir,
+    startedAt: new Date(),
+    spawn,
+    sleep: noSleep,
+  });
+  expect(results).toHaveLength(1);
+  expect(results[0]?.pass).toBe(false);
+  expect(results[0]?.outputDumpPath).toBeUndefined();
+});
+
 test("runner embeds metadata + truncates long output + dumps on fail", async () => {
   await withTmp(async (dumpDir) => {
     const longOutput = "x".repeat(20_000);

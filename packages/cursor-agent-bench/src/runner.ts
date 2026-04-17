@@ -147,16 +147,21 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
     const trunc = truncateOutput(finalSpawn.stdout);
     let outputDumpPath: string | undefined;
     if (!pass) {
-      outputDumpPath = await writeDump({
-        dir: dumpDir,
-        startedAt,
-        skill: fixture.skill,
-        fixture: fixture.id,
-        model,
-        runIndex,
-        turn: i,
-        output: finalSpawn.stdout,
-      });
+      try {
+        outputDumpPath = await writeDump({
+          dir: dumpDir,
+          startedAt,
+          skill: fixture.skill,
+          fixture: fixture.id,
+          model,
+          runIndex,
+          turn: i,
+          output: finalSpawn.stdout,
+        });
+      } catch {
+        // best-effort dump; disk full / permission errors must not crash the runner
+        outputDumpPath = undefined;
+      }
     }
 
     results.push({
