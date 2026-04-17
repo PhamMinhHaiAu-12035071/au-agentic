@@ -13,16 +13,21 @@ npx au-agentic
 Run in your terminal (requires interactive mode). The wizard will:
 1. Ask for your project path
 2. Ask which AI tools you use (Cursor, Claude Code, GitHub Copilot, Codex CLI)
-3. Copy `/interview` slash command files to the right locations
+3. Ask which skills to scaffold (interview, javascript-patterns)
+4. Copy slash command files to the right locations
 
 ## What gets scaffolded
 
-| Tool | File created |
-|---|---|
-| Cursor | `.cursor/skills/interview/SKILL.md` |
-| Claude Code | `.claude/skills/interview/SKILL.md` |
-| GitHub Copilot | `.github/prompts/interview.prompt.md` |
-| Codex CLI | `.agents/skills/interview/SKILL.md` |
+| Tool | Skill | File(s) created |
+|---|---|---|
+| Cursor | interview | `.cursor/skills/interview/SKILL.md` |
+| Cursor | javascript-patterns | `.cursor/skills/javascript-patterns/SKILL.md` + `references/*.md` (29) |
+| Claude Code | interview | `.claude/skills/interview/SKILL.md` |
+| Claude Code | javascript-patterns | `.claude/skills/javascript-patterns/SKILL.md` + `references/*.md` (29) |
+| GitHub Copilot | interview | `.github/prompts/interview.prompt.md` |
+| GitHub Copilot | javascript-patterns | `.github/prompts/javascript-patterns.prompt.md` + `.github/prompts/javascript-patterns/*.md` (29) |
+| Codex CLI | interview | `.agents/skills/interview/SKILL.md` |
+| Codex CLI | javascript-patterns | `.agents/skills/javascript-patterns/SKILL.md` + `references/*.md` (29) |
 
 ## Using `/interview`
 
@@ -31,6 +36,19 @@ The command will conduct a structured requirement interview to help you turn vag
 into clear specs.
 
 Tested with: Claude Sonnet 4.6 (Claude Code), GPT-4o (Copilot), Cursor Agent mode, Codex Skills.
+
+## Attribution
+
+The `javascript-patterns` skill bundles 29 JavaScript pattern skills derived from [patterns.dev](https://patterns.dev). Upstream: [PatternsDev/skills](https://github.com/PatternsDev/skills). Upstream repo does not ship a root `LICENSE` file; au-agentic ships a self-authored MIT `LICENSE` with attribution, copied into each scaffolded skill folder. Each upstream `SKILL.md` declared `license: MIT` in its frontmatter.
+
+## Activation model
+
+Both shipped skills (`interview` and `javascript-patterns`) are **manual-trigger-only** — they never self-activate. Invoke them via:
+
+- Slash popup: `/interview`, `/javascript-patterns`
+- Explicit prompt: "active skill interview", "dùng javascript-patterns"
+
+`javascript-patterns` additionally constrains itself to `.js`, `.ts` (+ `.test.*`, `.spec.*`) files; it delegates to `/interview` if the task doesn't map cleanly to a catalog pattern.
 
 ## Requirements
 

@@ -98,3 +98,16 @@ The TypeScript language server runs continuously. Errors in the **Problems** tab
 - Ignoring Problems tab TypeScript errors
 - Merging when `verify` fails
 - Assuming build success implies type safety (build does not replace `typecheck`)
+
+## 4-tier test example: javascript-patterns
+
+The `javascript-patterns` skill (29 patterns × 4 tools ≈ 121 files) is covered by 4 focused tests rather than hundreds of per-file assertions:
+
+| Tier | File | What it asserts |
+|---|---|---|
+| 1. Manifest snapshot | `packages/cli/src/__tests__/template-manifest.test.ts` | Static manifest shape: counts, tool keys, pattern IDs present |
+| 2. Golden file | `packages/cli/src/__tests__/scaffold-golden.test.ts` | Representative samples survive transforms verbatim |
+| 3. Integration | `packages/cli/src/__tests__/copy.test.ts` | End-to-end scaffold into a tmp dir, path tree matches expected layout |
+| 4. Contract | `packages/cli/src/__tests__/skill-contract.test.ts` | DEC-011 manual-trigger, DEC-012 JS/TS scope, DEC-013 `/interview` ambiguity delegation |
+
+See [testing-policy.md](../ai/testing-policy.md#focused-test-tiers) for when to adopt this pattern.

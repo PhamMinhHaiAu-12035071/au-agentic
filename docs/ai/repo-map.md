@@ -41,6 +41,9 @@ au-agentic/
 - `src/steps/copy.ts` — Step 3: Preview, confirm overwrites, write files
 - `src/utils/paths.ts` — Path resolution utilities
 - `src/utils/files.ts` — File writing utilities
+- `scripts/generate-template-manifest.ts` — codegen: scan templates/, emit src/generated/template-manifest.ts (run by prebuild)
+- `src/generated/template-manifest.ts` — AUTO-GENERATED static import manifest (gitignored)
+- `src/steps/skills.ts` — Step 3: Multi-select skills (interview default-on)
 
 **Test locations:**
 - `src/__tests__/copy.test.ts` — Tests for copyFilesToProject() function
@@ -57,11 +60,19 @@ au-agentic/
 **Structure:**
 ```
 templates/
-└── interview/
-    ├── cursor/SKILL.md   → .cursor/skills/interview/SKILL.md
-    ├── claude/SKILL.md   → .claude/skills/interview/SKILL.md
-    ├── copilot.md        → .github/prompts/interview.prompt.md
-    └── codex/SKILL.md    → .agents/skills/interview/SKILL.md
+├── interview/
+│   ├── cursor/SKILL.md   → .cursor/skills/interview/SKILL.md
+│   ├── claude/SKILL.md   → .claude/skills/interview/SKILL.md
+│   ├── copilot.md        → .github/prompts/interview.prompt.md
+│   └── codex/SKILL.md    → .agents/skills/interview/SKILL.md (+ references/)
+└── javascript-patterns/
+    ├── LICENSE                                   → fans out per tool (DEC-009)
+    ├── {claude,cursor,codex}/
+    │   ├── SKILL.md                              → .<tool>/skills/javascript-patterns/SKILL.md
+    │   └── references/*.md (29)                  → .<tool>/skills/javascript-patterns/references/
+    └── copilot/
+        ├── javascript-patterns.prompt.md         → .github/prompts/ (slash-triggered, DEC-011)
+        └── javascript-patterns/*.md (29)         → .github/prompts/javascript-patterns/
 ```
 
 **Import mechanism:** Templates imported at build time as static text via Bun's `with { type: 'text' }` import attribute. No runtime file I/O.
@@ -178,6 +189,16 @@ bun.lock                  # Bun lockfile for dependency resolution
 - `--external` flags for @clack/prompts, @clack/core, picocolors
 - Bun runtime target
 - Entry point must remain src/index.ts
+
+**packages/cli/scripts/generate-template-manifest.ts:**
+- Touches auto-generated output consumed by templates.ts
+- Changes require running `bun run gen:manifest` and committing manifest contract tests
+- Manifest shape is part of CLI test contract
+
+**scripts/sync-upstream-patterns.ts:**
+- Manual-run only (no auto/network at build time)
+- Overwrites `packages/templates/javascript-patterns/` refs
+- LICENSE is self-authored (upstream has no root LICENSE) and NOT overwritten by sync
 
 ## Test Coverage
 

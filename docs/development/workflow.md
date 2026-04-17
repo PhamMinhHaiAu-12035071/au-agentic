@@ -37,3 +37,10 @@ To temporarily skip a hook (use sparingly): `git commit --no-verify`. CI will st
 **Trigger:** This file should be filled when:
 - You add required PR templates, CODEOWNERS, or merge rules worth documenting
 - Feature development spans multiple packages with a documented sequence
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `bun run sync:upstream-patterns` | Manually re-sync patterns.dev content into `packages/templates/javascript-patterns/`. Review diff before committing. |
+| `bun run --cwd packages/cli gen:manifest` | Regenerate `src/generated/template-manifest.ts`. Auto-runs on prebuild. |

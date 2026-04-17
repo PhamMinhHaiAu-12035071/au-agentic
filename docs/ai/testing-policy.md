@@ -91,6 +91,19 @@ The user prefers high-quality tests over high coverage numbers. Avoid these patt
 
 When LLM-assisted code generates tests, the human reviewer is responsible for verifying each test asserts a real behavior contract. Coverage percentage is not a substitute for this judgment.
 
+## Focused-Test Tiers
+
+When a feature involves N-way multiplication (e.g. N skills × M tools = K files), do NOT write K separate assertion tests. Use 4 focused tiers:
+
+1. **Manifest snapshot** — catches "new file added but not registered". One test asserts shape (counts, keys, minimum content markers).
+2. **Golden file** — catches content drift through transforms. 1–2 representative samples per tool, not all K.
+3. **Integration** — catches path-mapping / wiring bugs. End-to-end scaffold into a tmp dir, assert path tree.
+4. **Contract** — catches regressions on user-facing contracts (e.g., manual-trigger-only, scope restriction, ambiguity delegation). Grep-level assertions over template content.
+
+Rationale: each test targets one specific bug class. No "coverage for coverage's sake".
+
+Example implementation: `javascript-patterns` skill uses all 4 tiers — see `packages/cli/src/__tests__/{template-manifest,scaffold-golden,copy,skill-contract}.test.ts`.
+
 ## Performance gate
 
 `bun run perf` runs `scripts/benchmark.ts` and writes `docs/development/performance-benchmarks.md`. Spec acceptance requires zero FAIL rows and at most two WARN rows.

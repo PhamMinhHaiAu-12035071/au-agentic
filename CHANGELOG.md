@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `javascript-patterns` skill (hub-and-spoke, 29 patterns from patterns.dev). Scaffold-able to Claude Code, Cursor, Codex CLI, GitHub Copilot. Self-authored MIT LICENSE with attribution (upstream repo has no root LICENSE).
+- Wizard now includes a skill-select step (multi-select; `interview` default-on).
+- `scripts/sync-upstream-patterns.ts` for manual upstream re-sync.
+- `packages/cli/scripts/generate-template-manifest.ts` codegen (auto-runs on prebuild).
+
 ### Changed
 
 ### Fixed
