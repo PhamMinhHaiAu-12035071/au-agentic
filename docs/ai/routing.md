@@ -31,6 +31,7 @@
 | **Dependency** | dependency-scope-policy.md<br>coding-rules.md | docs/development/dependency-policy.md | `bun run verify` | docs/reference/techstack.md |
 | **Unclear / Mixed change** | repo-map.md<br>docs-policy.md | docs/reference/project-structure.md<br>docs/explanations/architecture.md | Expand 1 layer minimal context;<br>if still unclear stop and ask user | Identify nearest source-of-truth then sync docs |
 | **Adding a new skill template** | repo-map.md<br>docs/reference/project-structure.md | docs/development/testing.md | `bun run gen:manifest`<br>`bun run verify` | repo-map.md + project-structure.md; drop folder under `packages/templates/<skill>/`, run codegen, add 4-tier tests, update wizard skill-select step |
+| **Skill quality validation** (benchmark run, adding fixtures, reviewing tracker diff) | packages/cursor-agent-bench/README.md<br>docs/superpowers/bench/README.md | docs/superpowers/specs/2026-04-17-cursor-agent-bench-design.md<br>docs/adr/0010-cursor-cli-system-prereq.md | `bun run skill:bench` (smoke)<br>`bun run skill:bench --matrix` (release gate) | docs/superpowers/bench/&lt;skill&gt;.md tracker entry |
 
 ## Modifier Overlays
 

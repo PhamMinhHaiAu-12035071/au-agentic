@@ -107,3 +107,14 @@ Example implementation: `javascript-patterns` skill uses all 4 tiers — see `pa
 ## Performance gate
 
 `bun run perf` runs `scripts/benchmark.ts` and writes `docs/development/performance-benchmarks.md`. Spec acceptance requires zero FAIL rows and at most two WARN rows.
+
+## Skill benchmarking
+
+Superpowers skills are validated by `packages/cursor-agent-bench/` — not by `bun run verify`. Two modes:
+
+- **Smoke** (`bun run skill:bench`): single default model × 1 run, fast iter feedback
+- **Matrix** (`bun run skill:bench --matrix`): 7 models × 3 runs, release gate
+
+Bench runs locally only (no CI). Tracker at `docs/superpowers/bench/<skill>.md` is committed; raw JSONL at `coverage/cursor-bench/*.jsonl` is gitignored.
+
+Required runs when PR touches `packages/templates/**/SKILL.md`: see PR template checkboxes.
