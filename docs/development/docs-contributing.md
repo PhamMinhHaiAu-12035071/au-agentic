@@ -13,3 +13,15 @@
 **Trigger:** This file should be filled when:
 - You require doc PRs for certain change types
 - You add doc linting or link checking in CI
+
+## Markdown linting
+
+Markdown files are linted by `markdownlint-cli2` (`.markdownlint-cli2.jsonc` config). Run locally:
+
+```bash
+bunx markdownlint-cli2
+```
+
+Common rules enforced: heading hierarchy (MD001), no duplicate headings within a section (MD024 siblings_only), fenced code with language (MD040). Long lines and inline HTML are allowed.
+
+`packages/templates/**` is excluded — those are content payloads, not documentation.

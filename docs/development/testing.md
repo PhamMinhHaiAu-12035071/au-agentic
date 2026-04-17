@@ -78,18 +78,14 @@ Run before claiming work complete, opening PRs, or merging:
 
 **Iron rule:** Do not claim completion without a successful `bun run verify` in the current change set.
 
-Single test file example:
-
-```bash
-bun test packages/cli/src/__tests__/copy.test.ts
-```
-
 ## Pre-commit hook
 
-On `git commit`, lint-staged runs:
+On `git commit`, Lefthook runs (in parallel):
 
-- `eslint --fix` on staged files
-- `tsc --noEmit` (typecheck) on staged `.ts` files
+- Biome check + organize imports on staged files
+- `tsc --noEmit` (typecheck) via Turbo
+- gitleaks secret scan on staged files
+- Knip unused-export check (warning-only)
 
 ## VSCode integration
 
