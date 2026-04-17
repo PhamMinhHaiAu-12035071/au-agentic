@@ -33,6 +33,6 @@ describe("TEMPLATE_MANIFEST", () => {
 
   test("includes shared LICENSE for javascript-patterns (fan-out rule)", () => {
     const js = TEMPLATE_MANIFEST["javascript-patterns"];
-    expect(js._shared["LICENSE"]).toContain("MIT License");
+    expect(js._shared.LICENSE).toContain("MIT License");
   });
 });
