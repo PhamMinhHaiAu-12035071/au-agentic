@@ -22,7 +22,8 @@ describe(".ls-lint.yml contract", () => {
   it("enforces NNNN-<kebab>.md for ADR files", () => {
     const adrRule = config.ls["docs/adr"];
     expect(adrRule).toBeDefined();
-    expect(adrRule[".md"]).toBe("regex:^[0-9]{4}-[a-z0-9-]+\\.md$");
+    // ls-lint applies regex to the filename stem (extension stripped by the .md key filter)
+    expect(adrRule[".md"]).toBe("regex:^[0-9]{4}-[a-z0-9-]+$");
   });
 
   it("enforces *.test.ts for unit test files", () => {

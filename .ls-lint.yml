@@ -10,12 +10,9 @@ ls:
   .toml: kebab-case
   .sh: kebab-case
 
-  # ADR files must be NNNN-<kebab>.md
-  # NOTE: ls-lint applies regex rules to the filename stem (without extension).
-  # The pattern below is preserved for config contract purposes; docs/adr is
-  # added to ignore so ls-lint does not attempt to validate it with this regex.
+  # ADR files must be NNNN-<kebab>.md (ls-lint checks stem, extension filtered by .md key)
   docs/adr:
-    .md: regex:^[0-9]{4}-[a-z0-9-]+\.md$
+    .md: regex:^[0-9]{4}-[a-z0-9-]+$
 
   # Unit test files must end .test.ts
   packages/cli/src/__tests__:
@@ -61,9 +58,6 @@ ignore:
   - .agents
   - .cursor
   - .superpowers
-
-  # ADR regex uses full-filename pattern; ls-lint applies to stem only — exempt
-  - docs/adr
 
   # Uppercase execution guide — external-convention naming, not kebab-case
   - docs/superpowers/EXECUTION-GUIDE-toolchain.md
