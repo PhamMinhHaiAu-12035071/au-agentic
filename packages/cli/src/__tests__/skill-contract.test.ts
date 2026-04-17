@@ -75,7 +75,7 @@ describe("javascript-patterns skill contract", () => {
       test(`${tool} catalog contains Ambiguity Protocol referencing /interview`, () => {
         expect(content).toContain("## Ambiguity Protocol");
         expect(content).toContain("/interview");
-        expect(content).toMatch(/KHÔNG đoán|do not guess|don't guess/i);
+        expect(content).toMatch(/do not guess|don't guess/i);
       });
 
       test(`${tool} catalog delegation block appears before Catalog table`, () => {

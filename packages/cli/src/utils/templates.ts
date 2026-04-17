@@ -16,29 +16,29 @@ const TOOL_META: Record<Tool, ToolMeta> = {
     label: "Cursor",
     nextStep: (s) =>
       s === "interview"
-        ? "Mở Cursor → Chat panel → Gõ /interview"
-        : "Cursor Chat → Gõ /javascript-patterns (manual-only, chỉ trên file .js/.ts + test/spec)",
+        ? "Open Cursor → Chat panel → Type /interview"
+        : "Cursor Chat → Type /javascript-patterns (manual-only, JS/TS + test/spec files only)",
   },
   claude: {
     label: "Claude Code",
     nextStep: (s) =>
       s === "interview"
-        ? "Chạy `claude` → Gõ /interview"
-        : "Chạy `claude` → Gõ /javascript-patterns (manual-only, chỉ trên file .js/.ts + test/spec)",
+        ? "Run `claude` → Type /interview"
+        : "Run `claude` → Type /javascript-patterns (manual-only, JS/TS + test/spec files only)",
   },
   copilot: {
     label: "GitHub Copilot",
     nextStep: (s) =>
       s === "interview"
-        ? "VS Code → Copilot Chat → Gõ /interview"
-        : "VS Code → Copilot Chat → Gõ /javascript-patterns (slash popup, manual-only)",
+        ? "VS Code → Copilot Chat → Type /interview"
+        : "VS Code → Copilot Chat → Type /javascript-patterns (slash popup, manual-only)",
   },
   codex: {
     label: "Codex CLI",
     nextStep: (s) =>
       s === "interview"
-        ? "Chạy `codex` → Gõ $interview hoặc /interview"
-        : "Chạy `codex` → Gõ $javascript-patterns hoặc /javascript-patterns (manual-only)",
+        ? "Run `codex` → Type $interview or /interview"
+        : "Run `codex` → Type $javascript-patterns or /javascript-patterns (manual-only)",
   },
 };
 

@@ -7,38 +7,38 @@ mode: "agent"
 
 ## Trigger Model
 
-**Manual-only.** Skill này KHÔNG tự active. Chỉ kích hoạt khi:
+**Manual-only.** This prompt does NOT auto-activate. It only fires when:
 
-- User gõ slash `/javascript-patterns` (Cursor/Claude/Copilot/Codex popup)
-- User explicit prompt: "active skill javascript-patterns", "dùng javascript-patterns", v.v.
-- User yêu cầu áp dụng 1 pattern có trong catalog bằng tên
+- User types the slash command `/javascript-patterns` (Cursor/Claude/Copilot/Codex popup)
+- User explicit prompt: "active skill javascript-patterns", "use javascript-patterns", etc.
+- User asks to apply a named pattern from the catalog
 
-Nếu không có trigger ở trên, **KHÔNG** apply pattern — tiếp tục theo convention repo hiện tại.
+If none of the above triggers fire, **DO NOT** apply any pattern — continue following the repo's existing conventions.
 
 ## Scope
 
-Chỉ áp dụng trên file:
+Applies only to:
 
 - `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs`
-- File test & spec tương ứng: `*.test.{js,ts,jsx,tsx}`, `*.spec.{js,ts,jsx,tsx}`
+- Their test & spec files: `*.test.{js,ts,jsx,tsx}`, `*.spec.{js,ts,jsx,tsx}`
 
-File ngoài scope (`.py`, `.rb`, `.go`, `.md`, config, …) → skill KHÔNG áp dụng kể cả khi được trigger.
+Files outside this scope (`.py`, `.rb`, `.go`, `.md`, config, …) → the prompt does NOT apply even if triggered.
 
 ## How to Use
 
-1. Bảng bên dưới liệt kê 29 pattern + 1 dòng "when to use"
-2. Khi task khớp cột "when to use" rõ ràng, dùng `#file:.github/prompts/javascript-patterns/<slug>.md` **TRƯỚC** khi viết code
-3. Copy code ví dụ từ reference, không phải tự nhớ
-4. KHÔNG load tất cả references cùng lúc (tốn context)
+1. The table below lists 29 patterns + a one-line "when to use" hint
+2. When the task clearly matches a "when to use" row, use `#file:.github/prompts/javascript-patterns/<slug>.md` **BEFORE** writing code
+3. Copy example code from the reference; do not rely on memory
+4. Do NOT load all references at once (wastes context)
 
 ## Ambiguity Protocol
 
-Nếu task **không khớp rõ ràng** 1 pattern trong bảng (mơ hồ, multi-pattern, pattern không có trong catalog):
+If the task **does not clearly match** a single pattern in the table (vague, multi-pattern, or pattern not in catalog):
 
-- **KHÔNG đoán** — đoán sai dẫn đến refactor sai hướng.
-- **Delegate sang `/interview` skill** để phỏng vấn user về ý định, constraints, file scope.
-- Sau khi interview ra spec rõ ràng, quay lại catalog này và chọn pattern khớp (nếu có).
-- Nếu interview cho thấy task nằm ngoài scope của catalog, thông báo user và không áp dụng skill.
+- **DO NOT guess** — wrong guesses lead to wrong refactors.
+- **Delegate to the `/interview` skill** to interview the user about intent, constraints, and file scope.
+- After the interview produces a clear spec, return to this catalog and pick the matching pattern (if any).
+- If the interview shows the task is outside the catalog's scope, inform the user and do not apply the skill.
 
 ## Catalog
 
@@ -88,9 +88,9 @@ Nếu task **không khớp rõ ràng** 1 pattern trong bảng (mơ hồ, multi-p
 
 ## Notes
 
-- Catalog là lớp routing duy nhất load khi skill được trigger; reference chi tiết chỉ nạp khi pattern khớp rõ.
-- Nếu task không khớp rõ pattern nào, đừng đoán — hỏi user hoặc delegate `/interview`.
+- The catalog is the only routing layer loaded when the prompt triggers; detailed references load only when a pattern clearly matches.
+- If the task does not clearly match any pattern, do not guess — ask the user or delegate to `/interview`.
 
 ## Attribution
 
-Refs phái sinh từ [patterns.dev](https://patterns.dev) (self-declared MIT per SKILL.md frontmatter). Upstream repo [PatternsDev/skills](https://github.com/PatternsDev/skills) không ship root LICENSE — au-agentic tự viết MIT grant tại `./LICENSE` với attribution.
+References derived from [patterns.dev](https://patterns.dev) (self-declared MIT per SKILL.md frontmatter). The upstream repo [PatternsDev/skills](https://github.com/PatternsDev/skills) does not ship a root LICENSE — au-agentic authors its own MIT grant at `./LICENSE` with attribution.
