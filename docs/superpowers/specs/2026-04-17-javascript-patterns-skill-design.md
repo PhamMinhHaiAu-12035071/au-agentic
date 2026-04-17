@@ -8,13 +8,13 @@ status: design-approved
 
 ## Goal
 
-Port toàn bộ 30 JavaScript design / performance / loading patterns từ [PatternsDev/skills](https://github.com/PatternsDev/skills) (MIT) vào `au-agentic` như **một** skill duy nhất tên `javascript-patterns` (hub-and-spoke), scaffold được cho cả 4 tool (Cursor, Claude Code, GitHub Copilot, Codex CLI).
+Port toàn bộ 29 JavaScript design / performance / loading patterns từ [PatternsDev/skills](https://github.com/PatternsDev/skills) (MIT) vào `au-agentic` như **một** skill duy nhất tên `javascript-patterns` (hub-and-spoke), scaffold được cho cả 4 tool (Cursor, Claude Code, GitHub Copilot, Codex CLI).
 
 Khi user mở file JS/TS trong agent session, skill tự match (progressive disclosure): agent đọc catalog trong `SKILL.md` rồi `Read` reference chi tiết chỉ khi task khớp pattern.
 
 ## Rationale
 
-- Upstream có 30 pattern — nếu mỗi pattern là 1 skill sẽ flood CLI wizard và Copilot auto-attach
+- Upstream có 29 pattern — nếu mỗi pattern là 1 skill sẽ flood CLI wizard và Copilot auto-attach
 - Hub-and-spoke cho phép catalog ~4KB load-on-trigger, refs lazy-load khi pattern khớp rõ
 - Scaffold để "user-project-scope" (không user-scope install), đồng bộ với `interview/` skill hiện hữu
 
@@ -22,7 +22,7 @@ Khi user mở file JS/TS trong agent session, skill tự match (progressive disc
 
 **In scope:**
 
-- Port 30 file từ `PatternsDev/skills/javascript/*/SKILL.md` thành 30 reference file per tool
+- Port 29 file từ `PatternsDev/skills/javascript/*/SKILL.md` thành 29 reference file per tool
 - Viết 1 catalog `SKILL.md` (hoặc equivalent per tool) điều hướng refs
 - Extend CLI wizard: thêm step "Select skills" multi-select
 - Codegen script sinh template manifest
@@ -71,7 +71,7 @@ Tương tự cho `.cursor/skills/` và `.agents/skills/`.
 ```yaml
 ---
 name: javascript-patterns
-description: 30 JavaScript design, performance, and loading patterns from patterns.dev. Use when user invokes `/javascript-patterns`, says "active skill javascript-patterns", or explicitly asks to apply a named pattern (singleton, observer, factory, proxy, etc.). Only applies to JS/TS source + test/spec files.
+description: 29 JavaScript design, performance, and loading patterns from patterns.dev. Use when user invokes `/javascript-patterns`, says "active skill javascript-patterns", or explicitly asks to apply a named pattern (singleton, observer, factory, proxy, etc.). Only applies to JS/TS source + test/spec files.
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -103,7 +103,7 @@ File ngoài scope (`.py`, `.rb`, `.go`, `.md`, config, …) → skill KHÔNG áp
 
 ## How to Use
 
-1. Bảng bên dưới liệt kê 30 pattern + 1 dòng "when to use"
+1. Bảng bên dưới liệt kê 29 pattern + 1 dòng "when to use"
 2. Khi task khớp cột "when to use" rõ ràng, `Read` file tương ứng trong `references/` **TRƯỚC** khi viết code
 3. Copy code ví dụ từ reference, không phải tự nhớ
 4. KHÔNG load tất cả references cùng lúc (tốn context)
@@ -154,7 +154,7 @@ Copilot catalog (`.github/prompts/javascript-patterns.prompt.md`) dùng **y hệ
 
 ```yaml
 ---
-description: "Use 30 JavaScript design/performance/loading patterns from patterns.dev. Slash-triggered — manual only."
+description: "Use 29 JavaScript design/performance/loading patterns from patterns.dev. Slash-triggered — manual only."
 mode: "agent"
 ---
 ```
@@ -209,19 +209,21 @@ packages/templates/
     ├── LICENSE                               # MIT full text
     ├── claude/
     │   ├── SKILL.md
-    │   └── references/*.md (30)
+    │   └── references/*.md (29)
     ├── cursor/
     │   ├── SKILL.md
-    │   └── references/*.md (30)
+    │   └── references/*.md (29)
     ├── codex/
     │   ├── SKILL.md
-    │   └── references/*.md (30)
+    │   └── references/*.md (29)
     └── copilot/
         ├── javascript-patterns.prompt.md         # catalog, slash /javascript-patterns
-        └── javascript-patterns/*.md (30)         # plain refs, reachable via #file:
+        └── javascript-patterns/*.md (29)         # plain refs, reachable via #file:
 ```
 
-**Total source files:** 1 LICENSE + 3 SKILL.md + 90 refs (Claude/Cursor/Codex) + 1 catalog + 30 refs (Copilot) = **125 file** trong folder skill mới.
+**Total source files:** 1 LICENSE + 3 SKILL.md + 87 refs (Claude/Cursor/Codex) + 1 catalog + 29 refs (Copilot) = **121 file** trong folder skill mới.
+
+**LICENSE source:** Upstream `PatternsDev/skills` repo **không có** LICENSE file tại root (xác nhận tại Task 4 khi chạy sync). Từng `SKILL.md` upstream có frontmatter `license: MIT` (self-declared per-file) nhưng repo-level không explicit. Để không rely on ambiguous grant, **au-agentic tự viết `packages/templates/javascript-patterns/LICENSE`** chứa MIT License template + attribution section tới patterns.dev authors. Sync script tolerate-missing upstream LICENSE (warn, không throw).
 
 **LICENSE fan-out rule:** 1 LICENSE source tại `packages/templates/javascript-patterns/LICENSE` được scaffold ra 4 target paths (một bản per tool đã chọn) để user-project-scope MIT compliance đầy đủ:
 
@@ -236,7 +238,7 @@ Codegen manifest encode rule này qua key `_shared` (hoặc equivalent) — logi
 
 ### Problem
 
-Static import 125 file trong `packages/cli/src/utils/templates.ts` sẽ phình file quá lớn + mỗi thêm skill mới = edit tay.
+Static import 121 file trong `packages/cli/src/utils/templates.ts` sẽ phình file quá lớn + mỗi thêm skill mới = edit tay.
 
 ### Solution
 
@@ -281,7 +283,7 @@ Script `scripts/sync-upstream-patterns.ts` (runs locally khi muốn refresh):
   - Strip upstream frontmatter
   - Prepend attribution header
   - Write vào cả 4 tool folder (Claude/Cursor/Codex refs + Copilot refs)
-3. Copy upstream LICENSE vào `packages/templates/javascript-patterns/LICENSE`
+3. ~~Copy upstream LICENSE~~ → **Skip**: upstream has no LICENSE. LICENSE file ở `packages/templates/javascript-patterns/LICENSE` được viết riêng bởi au-agentic (MIT template + attribution) — không phụ thuộc sync.
 4. Report divergence nếu local ref đã có modifications lệch upstream (warn, không auto-overwrite)
 5. Không tự commit — dev review diff rồi commit
 
@@ -383,7 +385,7 @@ Theo bảng mapping trong [docs/ai/docs-policy.md](docs/ai/docs-policy.md):
 | Agent vẫn cố auto-apply pattern dù `disable-model-invocation: true`      | Tier 4 contract test assert trigger fields; catalog body có "Trigger Model" block làm guardrail kép                |
 | User trigger `/javascript-patterns` trong project không có file JS/TS    | "Scope" block trong catalog hướng dẫn skill self-abort khi file ngoài scope                                        |
 | Pattern ambiguous dẫn đến chọn sai                                       | DEC-012 bắt buộc delegate `/interview` trước khi áp dụng; Tier 4 test assert delegation text hiện diện             |
-| 125 file commit 1 PR sẽ to                                               | Split commit: (a) template content + LICENSE, (b) CLI wizard step, (c) codegen + tests, (d) docs — trong cùng 1 PR |
+| 121 file commit 1 PR sẽ to                                               | Split commit: (a) template content + LICENSE, (b) CLI wizard step, (c) codegen + tests, (d) docs — trong cùng 1 PR |
 | Upstream update rename/delete file                                       | Sync script warn nếu local không còn tìm thấy upstream; dev xử lý thủ công                                         |
 | MIT attribution thiếu sót                                                | Tier 2 golden test bao gồm header check; review checklist trong CONTRIBUTING                                       |
 
@@ -393,7 +395,7 @@ Theo bảng mapping trong [docs/ai/docs-policy.md](docs/ai/docs-policy.md):
 
 | ID        | Decision                                                                                                                                                                         | Provenance     |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| DEC-001   | Hub-and-spoke shape (1 SKILL.md + 30 refs)                                                                                                                                       | user-stated    |
+| DEC-001   | Hub-and-spoke shape (1 SKILL.md + 29 refs)                                                                                                                                       | user-stated    |
 | DEC-002'' | Copilot catalog tại `.github/prompts/javascript-patterns.prompt.md` (slash-triggered), refs tại `.github/prompts/javascript-patterns/*.md` — DEC-002' superseded bởi manual-only | user-confirmed |
 | DEC-003   | Wizard thêm step "Select skills" multi-select; interview default-on, javascript-patterns default-off                                                                             | user-confirmed |
 | DEC-004'' | SKILL.md = catalog + verbatim refs + MIT header + **Trigger Model + Scope + Ambiguity Protocol blocks** — DEC-004 superseded bởi manual-only + 3 success criteria                | user-confirmed |
