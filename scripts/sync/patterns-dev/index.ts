@@ -97,9 +97,12 @@ async function main(): Promise<void> {
     }
   }
 
+  // Auto-cleanup the temp clone on success. On failure we leave it for debugging —
+  // the next run's cloneUpstream() rmSync handles stale dirs anyway.
+  rmSync(TMP_DIR, { recursive: true, force: true });
+
   console.log(`\n✓ Synced ${folders.length} patterns × 4 tools.`);
   console.log(`  Review diff: git diff packages/templates/patterns-dev/javascript-patterns/`);
-  console.log(`  Clean up: rm -rf "${TMP_DIR}"`);
 }
 
 if (import.meta.main) {
