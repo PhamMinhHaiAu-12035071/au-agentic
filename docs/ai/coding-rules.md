@@ -127,3 +127,13 @@ Expected: empty output. If anything matches, translate it before committing. (Pa
 **Output:** Single bundle `dist/index.js`. Externalize `@clack/prompts`, `@clack/core`, `picocolors`. Preserve shebang `#!/usr/bin/env bun`. Do not commit `dist/` (gitignored).
 
 **Rebuild** after `src/` or `templates/` changes and before publish: `bun run build`.
+
+## Bench logging (ADR-0011)
+
+Inside `packages/cursor-agent-bench`, `console.*`, `consola.*`, and
+`@clack/prompts` calls are **phase-scoped**. Consola is allowed only
+outside the fixture × model × run loop. Clack is allowed only inside
+the loop. Runner code emits `BenchUI.*` methods and never imports
+either logger directly.
+
+See [ADR-0011](../adr/0011-consola-for-bench-semantic-logging.md).

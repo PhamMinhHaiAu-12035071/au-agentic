@@ -366,6 +366,23 @@ Framework tự nó cần test:
 | DEC-021 | Reproducibility metadata: git SHA + skill checksum trong Summary + JSONL (C10) | user-confirmed |
 | DEC-022 | JSONL size control: truncate 8KB per turn + full dump file khi fail (C11) | user-confirmed |
 | DEC-023 | Env metadata: bun + cursor-agent + platform (C12) | user-confirmed |
+| DEC-024 | Realtime UI mode = Hybrid (progress + taskLog streaming) | 2026-04-18 spec |
+| DEC-025 | Bump @clack/prompts repo-wide; add consola devDep bench-only | 2026-04-18 spec |
+| DEC-026 | Strict phase isolation: consola outside loop, clack in-loop | 2026-04-18 spec |
+| DEC-027 | Auto-detect TTY via process.stdout.isTTY; zero new flags | 2026-04-18 spec |
+| DEC-028 | DoD must include heartbeat + CLI regression + ADR-0011 | 2026-04-18 spec |
+| DEC-029 | HARD NO-STUCK: ≤1s TTY / ≤30s non-TTY | 2026-04-18 spec |
+| DEC-030 | BenchUI interface = method-based | 2026-04-18 interview |
+| DEC-031 | Heartbeat = adapter self-ticks | 2026-04-18 interview |
+| DEC-032 | runCmd refactor = optional callbacks (backward-compat) | 2026-04-18 interview |
+| DEC-033 | CLI regression = smoke wizard + no-unused-exports | 2026-04-18 interview |
+
+## V1.1 Addendum — Realtime UX
+
+See [spec 2026-04-18-bench-realtime-ux-design.md](./2026-04-18-bench-realtime-ux-design.md)
+for the `BenchUI` adapter architecture, streaming `runCmd`, and
+NO-STUCK guarantee (DEC-029). The V1 runner/report/JSONL shape is
+unchanged; V1.1 is purely additive UI.
 
 ## Open Follow-ups (deferred, not blocking)
 
