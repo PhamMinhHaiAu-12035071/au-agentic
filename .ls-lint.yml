@@ -96,3 +96,6 @@ ignore:
 
   # Package-level README.md follows community UPPERCASE convention
   - packages/cursor-agent-bench/README.md
+
+  # Bench tracker directory README follows community UPPERCASE convention
+  - docs/superpowers/bench/README.md
