@@ -18,7 +18,8 @@ ls:
   packages/cli/src/__tests__:
     .ts: regex:^[a-z0-9-]+\.test\.ts$
 
-  # __tests__ is a double-underscore convention — exempt from kebab
+  # __tests__ is a double-underscore convention — exempt from kebab.
+  # NOTE: this override is not recursive; add a matching entry for each new packages/*/src.
   packages/cli/src:
     .dir: regex:^(__tests__|[a-z0-9-]+)$
 
