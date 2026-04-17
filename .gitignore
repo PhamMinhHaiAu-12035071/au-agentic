@@ -12,6 +12,9 @@ lcov.info
 # Project-scope cache (Phase 4 introduces .cache/; ignore now to avoid accidental commits)
 .cache/
 
+# Upstream clone workspace for sync:upstream-patterns script — never commit.
+.tmp/
+
 # Turbo per-package cache artifacts
 .turbo/
 

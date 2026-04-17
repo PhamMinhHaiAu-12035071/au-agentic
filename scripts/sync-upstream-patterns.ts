@@ -5,6 +5,9 @@
  *   bun run sync:upstream-patterns
  * Does NOT commit; dev reviews diff manually.
  */
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
 const UPSTREAM_REPO = "https://github.com/PatternsDev/skills";
 const UPSTREAM_BRANCH = "main";
 
@@ -21,4 +24,77 @@ export function transformUpstreamRef(upstreamContent: string, upstreamFolder: st
   return header + body.replace(/^\s+/, "");
 }
 
-// Remaining orchestration logic added in Task 3
+const REPO_ROOT = join(import.meta.dir, "..");
+const TMP_DIR = join(REPO_ROOT, ".tmp/upstream-patterns");
+const TARGET_ROOT = join(REPO_ROOT, "packages/templates/javascript-patterns");
+
+function sh(cmd: string): string {
+  const result = Bun.spawnSync({ cmd: ["sh", "-c", cmd], stderr: "inherit" });
+  if (result.exitCode !== 0) throw new Error(`Command failed: ${cmd}`);
+  return new TextDecoder().decode(result.stdout);
+}
+
+function cloneUpstream(): void {
+  if (existsSync(TMP_DIR)) sh(`rm -rf "${TMP_DIR}"`);
+  mkdirSync(TMP_DIR, { recursive: true });
+  sh(`git clone --depth=1 --branch=${UPSTREAM_BRANCH} ${UPSTREAM_REPO} "${TMP_DIR}"`);
+}
+
+function writeRef(
+  tool: "claude" | "cursor" | "codex" | "copilot",
+  slug: string,
+  body: string,
+): void {
+  const path =
+    tool === "copilot"
+      ? join(TARGET_ROOT, "copilot/javascript-patterns", `${slug}.md`)
+      : join(TARGET_ROOT, tool, "references", `${slug}.md`);
+  mkdirSync(join(path, ".."), { recursive: true });
+  writeFileSync(path, body);
+}
+
+function syncLicense(): void {
+  const upstreamLicense = join(TMP_DIR, "LICENSE");
+  if (!existsSync(upstreamLicense)) throw new Error("Upstream LICENSE missing");
+  writeFileSync(join(TARGET_ROOT, "LICENSE"), readFileSync(upstreamLicense, "utf8"));
+}
+
+async function main(): Promise<void> {
+  console.log("→ Cloning upstream…");
+  cloneUpstream();
+
+  console.log("→ Copying LICENSE…");
+  syncLicense();
+
+  const jsDir = join(TMP_DIR, "javascript");
+  const folders = readdirSync(jsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+
+  if (folders.length === 0) throw new Error("No pattern folders found in upstream");
+
+  console.log(`→ Transforming ${folders.length} patterns…`);
+  for (const folder of folders) {
+    const slug = slugifyPattern(folder);
+    const skillPath = join(jsDir, folder, "SKILL.md");
+    if (!existsSync(skillPath)) {
+      console.warn(`  ⚠ skipping ${folder} — no SKILL.md`);
+      continue;
+    }
+    const body = transformUpstreamRef(readFileSync(skillPath, "utf8"), folder);
+    for (const tool of ["claude", "cursor", "codex", "copilot"] as const) {
+      writeRef(tool, slug, body);
+    }
+  }
+
+  console.log(`\n✓ Synced ${folders.length} patterns × 4 tools.`);
+  console.log(`  Review diff: git diff packages/templates/javascript-patterns/`);
+  console.log(`  Clean up: rm -rf "${TMP_DIR}"`);
+}
+
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

@@ -18,7 +18,8 @@
     "clean:coverage": "rm -f coverage/.lcov.info.*.tmp 2>/dev/null || true",
     "verify": "./scripts/cache-env.sh bunx turbo run lint typecheck test",
     "perf": "./scripts/cache-env.sh bun scripts/benchmark.ts",
-    "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build"
+    "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build",
+    "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync-upstream-patterns.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
