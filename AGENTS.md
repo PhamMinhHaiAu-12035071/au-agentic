@@ -16,6 +16,7 @@ All agents must internalize these principles before starting any task. Project-s
 - Update docs in same task — code without docs = incomplete
 - No blind edits in sensitive zones (templates.ts, package.json build config)
 - Always invoke commands as `bun run <script>` (which routes through `scripts/cache-env.sh`) — `bun run setup` for re-installing deps, `bun run verify` for lint+typecheck+test, etc. Raw `bun install` is allowed only on a first clone; subsequent re-installs must go through `bun run setup` to share cache across worktrees. Never run raw `bunx turbo` or `bun test` — they bypass cache and force cold rebuilds. Read `docs/ai/performance-policy.md` for the full "time is GOLD" ruleset.
+- **Project-scope dependencies only.** New tooling MUST install via `bun add -D` into `node_modules`. Do NOT propose `brew install`, `apt install`, `npm install -g`, `pip install --user`, or any global/user-scope installer. The only permitted system prerequisites are **Bun** (the runtime) and **git**. If a tool has no npm/bun distribution, pick an alternative or reject it. Read `docs/ai/dependency-scope-policy.md` for the full ruleset.
 
 # Source of Truth
 
@@ -45,7 +46,7 @@ Compact version — see docs/ai/routing.md for full table:
 - **Docs-only?** Read docs-policy.md
 - **CI/Deploy?** Read deployment-policy.md
 - **Security?** Read security-policy.md
-- **Dependency?** Read coding-rules.md
+- **Dependency?** Read dependency-scope-policy.md + coding-rules.md
 - **Unclear / Mixed?** Read repo-map.md + docs-policy.md; if still unclear, stop and ask user
 
 Apply modifier overlays when task also involves API change, migration/data change, legacy area, or auth-sensitive area.

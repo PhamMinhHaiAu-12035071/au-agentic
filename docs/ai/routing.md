@@ -28,7 +28,7 @@
 | **Docs-only** | docs-policy.md | - | - | - |
 | **CI/Deploy** | deployment-policy.md | docs/deployment/deployment.md | - | docs/deployment/* |
 | **Security** | security-policy.md | docs/reference/configuration.md | `bun run lint`<br>`bun run test` | SECURITY.md if needed |
-| **Dependency** | coding-rules.md | docs/development/dependency-policy.md | `bun run verify` | docs/reference/techstack.md |
+| **Dependency** | dependency-scope-policy.md<br>coding-rules.md | docs/development/dependency-policy.md | `bun run verify` | docs/reference/techstack.md |
 | **Unclear / Mixed change** | repo-map.md<br>docs-policy.md | docs/reference/project-structure.md<br>docs/explanations/architecture.md | Expand 1 layer minimal context;<br>if still unclear stop and ask user | Identify nearest source-of-truth then sync docs |
 
 ## Modifier Overlays
