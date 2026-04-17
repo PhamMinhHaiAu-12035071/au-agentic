@@ -5,8 +5,8 @@
  *   bun run sync:upstream-patterns
  * Does NOT commit; dev reviews diff manually.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 const UPSTREAM_REPO = "https://github.com/PatternsDev/skills";
 const UPSTREAM_BRANCH = "main";
@@ -28,16 +28,20 @@ const REPO_ROOT = join(import.meta.dir, "..");
 const TMP_DIR = join(REPO_ROOT, ".tmp/upstream-patterns");
 const TARGET_ROOT = join(REPO_ROOT, "packages/templates/javascript-patterns");
 
-function sh(cmd: string): string {
-  const result = Bun.spawnSync({ cmd: ["sh", "-c", cmd], stderr: "inherit" });
-  if (result.exitCode !== 0) throw new Error(`Command failed: ${cmd}`);
+/**
+ * Run a command with explicit argv (no shell interpretation).
+ * Intentionally does NOT support string-form — prevents shell-injection by design.
+ */
+function sh(argv: string[]): string {
+  const result = Bun.spawnSync({ cmd: argv, stderr: "inherit" });
+  if (result.exitCode !== 0) throw new Error(`Command failed: ${argv.join(" ")}`);
   return new TextDecoder().decode(result.stdout);
 }
 
 function cloneUpstream(): void {
-  if (existsSync(TMP_DIR)) sh(`rm -rf "${TMP_DIR}"`);
+  if (existsSync(TMP_DIR)) rmSync(TMP_DIR, { recursive: true, force: true });
   mkdirSync(TMP_DIR, { recursive: true });
-  sh(`git clone --depth=1 --branch=${UPSTREAM_BRANCH} ${UPSTREAM_REPO} "${TMP_DIR}"`);
+  sh(["git", "clone", "--depth=1", `--branch=${UPSTREAM_BRANCH}`, UPSTREAM_REPO, TMP_DIR]);
 }
 
 function writeRef(
@@ -49,7 +53,7 @@ function writeRef(
     tool === "copilot"
       ? join(TARGET_ROOT, "copilot/javascript-patterns", `${slug}.md`)
       : join(TARGET_ROOT, tool, "references", `${slug}.md`);
-  mkdirSync(join(path, ".."), { recursive: true });
+  mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, body);
 }
 
