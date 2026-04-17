@@ -19,7 +19,7 @@
     "prebuild": "bun run gen:manifest",
     "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=picocolors",
     "test": "bun run gen:manifest && ../../scripts/run-bun-test.sh --concurrent src/__tests__/",
-    "typecheck": "bun run gen:manifest && tsc --noEmit",
+    "typecheck": "bun run gen:manifest && tsc --noEmit && tsc --noEmit -p scripts/",
     "lint": "biome lint .",
     "format": "biome format --write ."
   },
