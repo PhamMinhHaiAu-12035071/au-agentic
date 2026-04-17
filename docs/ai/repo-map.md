@@ -145,7 +145,12 @@ package.json              # Monorepo root, workspaces, scripts, devDependencies
 tsconfig.json             # TypeScript base config (extended by every package)
 bunfig.toml               # Bun test coverage settings (LCOV, 70% per-file threshold)
 .editorconfig             # Editor consistency (UTF-8, LF, indent 2 space)
-eslint.config.ts          # ESLint config (Phase 1 only — superseded in Phase 2)
+biome.json                # Biome lint + format config (supersedes ESLint/Prettier)
+turbo.json                # Turborepo task graph and cache config
+knip.json                 # Knip dead-code / unused-export config
+.markdownlint-cli2.jsonc  # markdownlint-cli2 rule overrides
+lefthook.yml              # Git hook orchestration (parallel pre-commit)
+.gitleaks.toml            # gitleaks secret-scan rules and allowlist
 commitlint.config.ts      # Conventional Commits enforcement config
 bun.lock                  # Bun lockfile for dependency resolution
 ```
@@ -153,7 +158,7 @@ bun.lock                  # Bun lockfile for dependency resolution
 **Purpose by category:**
 - **AGENTS.md / CLAUDE.md** — Always-loaded shims (≤5KB total), JIT routing to docs/ai/
 - **CONTRIBUTING.md** — Links to docs/development/* for workflows and testing
-- **Configuration files** — Runtime (Bun), type checking (tsc), linting (eslint), commit messages (commitlint)
+- **Configuration files** — Runtime (Bun), type checking (tsc), lint/format (Biome), task cache (Turbo), commit messages (commitlint)
 
 ## Sensitive Zones
 

@@ -31,7 +31,7 @@ This runs `typecheck`, then `lint`, then `test` (see `package.json` scripts).
 | Command | When to Use | Expected |
 |---------|-------------|----------|
 | `bun run typecheck` | Check types only | Exit code 0, no TypeScript errors |
-| `bun run lint` | Check code style only | Exit code 0, no ESLint errors |
+| `bun run lint` | Check code style only | Exit code 0, no Biome errors |
 | `bun run test` | Run tests only | All tests pass |
 | `bun run verify` | **Full verification** (prefer this) | All three commands pass |
 | `bun run build` | After verify passes | Dist files created successfully |
@@ -42,7 +42,7 @@ This runs `typecheck`, then `lint`, then `test` (see `package.json` scripts).
 - Ignoring VSCode Problems tab errors
 - Merging or opening a PR with `verify` failing
 - Assuming "build works" means types are clean (build is lenient versus full verify)
-- Treating ESLint green as a substitute for `typecheck`
+- Treating Biome green as a substitute for `typecheck`
 
 ## Why Full Verify Matters
 
@@ -68,7 +68,7 @@ Unit tests for pure functions (`copyFilesToProject`, path utilities). No Clack/T
 
 ## Pre-commit Hook
 
-On `git commit`, lint-staged runs `eslint --fix` and `tsc --noEmit` on staged `.ts` files. This catches many issues early; if the hook fails, fix before committing.
+On `git commit`, Lefthook runs (in parallel): Biome check + organize imports on staged files, `tsc --noEmit` (typecheck) via Turbo, gitleaks secret scan, and Knip unused-export warning. If the hook fails, fix before committing — never bypass with `--no-verify`.
 
 ## VSCode Integration
 

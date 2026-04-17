@@ -31,10 +31,13 @@
 | Category | Tool | Version | Purpose |
 |----------|------|---------|---------|
 | Type Checking | TypeScript Compiler | 5.7.2 | `tsc --noEmit` |
-| Linting | ESLint | 9.17.0 | @typescript-eslint plugins |
-| Testing | Bun Test | 1.3.10 | Unit + integration tests |
-| Git Hooks | Husky | 9.1.7 | Enforce quality gates |
-| Pre-commit | lint-staged | 15.3.0 | Auto-fix + type check staged files |
+| Lint + Format | Biome | 2.x | Unified linter and formatter (supersedes ESLint/Prettier) |
+| Task Cache | Turborepo | 2.x | Per-task graph cache; shared across worktrees |
+| Testing | Bun Test | 1.3.10 | Unit + integration tests with coverage |
+| Git Hooks | Lefthook | latest | Parallel pre-commit orchestration |
+| Secret Scan | gitleaks | 8.x | Pre-commit + pre-push secret detection |
+| Dead Code | Knip | 5.x | Unused exports / dependencies detection |
+| Markdown | markdownlint-cli2 | 0.13+ | Docs style + structure enforcement |
 | Commit Messages | commitlint | 19.6.1 | Conventional Commits enforcement |
 
 ## Build & Distribution

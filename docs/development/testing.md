@@ -71,7 +71,7 @@ Run before claiming work complete, opening PRs, or merging:
 | Command | Purpose |
 |---------|---------|
 | `bun run typecheck` | TypeScript (`tsc --noEmit`) |
-| `bun run lint` | ESLint over `packages/` |
+| `bun run lint` | Biome lint over `packages/` (via Turbo) |
 | `bun run test` | Package tests |
 | `bun run verify` | **Preferred:** typecheck + lint + test |
 | `bun run build` | Bundle CLI (lenient; run after verify passes) |
