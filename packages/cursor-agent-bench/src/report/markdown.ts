@@ -90,7 +90,7 @@ function renderSection(result: BenchResult): { heading: string; body: string } {
 }
 
 function replaceOrAppendSection(existing: string, heading: string, body: string): string {
-  const pattern = new RegExp(`${escapeRegExp(heading)}[\\s\\S]*?(?=\\n## |$)`);
+  const pattern = new RegExp(`${escapeRegExp(heading)}(?=\\n|$)[\\s\\S]*?(?=\\n## |$)`);
   const normalized = `${body.trimEnd()}\n`;
   if (pattern.test(existing)) {
     return existing.replace(pattern, normalized);

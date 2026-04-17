@@ -120,6 +120,35 @@ test("renderTracker replaces existing Latest Smoke, preserves Latest Matrix", as
   });
 });
 
+test("renderTracker does not over-match when heading has suffix", async () => {
+  await withTmp(async (dir) => {
+    const file = join(dir, "tracker.md");
+    // Pre-existing file has a `## Latest Smoke More` section (heading with a suffix).
+    // When we render a NEW `## Latest Smoke` section, the old regex without an
+    // end-of-line anchor would match `## Latest Smoke` as a prefix of the existing
+    // heading and clobber its content. The fixed regex must leave it intact.
+    const existing = [
+      "# Interview Skill — Bench Tracker",
+      "",
+      "## Latest Smoke More",
+      "",
+      "SUFFIXED_SECTION_UNIQUE_TOKEN",
+      "",
+    ].join("\n");
+    await writeFile(file, existing);
+
+    const turns = [mk("m1", "f1", true, 50, 0)];
+    await renderTracker(file, "interview", mkResult(turns));
+
+    const content = await readFile(file, "utf8");
+    // Suffixed section + its content must be preserved.
+    expect(content).toContain("## Latest Smoke More");
+    expect(content).toContain("SUFFIXED_SECTION_UNIQUE_TOKEN");
+    // New `## Latest Smoke` section must have been appended (no prior match).
+    expect(content).toContain("## Latest Smoke\n");
+  });
+});
+
 test("renderTracker matrix mode writes 'Runs per cell: 3'", async () => {
   await withTmp(async (dir) => {
     const file = join(dir, "tracker.md");
