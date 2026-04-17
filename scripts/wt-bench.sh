@@ -14,20 +14,20 @@ case "${1:-help}" in
     [[ -d "$BENCH_WT" ]] || git worktree add --detach "$BENCH_WT" HEAD
     ;;
   install)
-    cd "$BENCH_WT" && bun run install >/dev/null 2>&1
+    cd "$BENCH_WT" && bun run setup >/dev/null 2>&1
     ;;
   verify)
     cd "$BENCH_WT" && bun run verify >/dev/null 2>&1
     ;;
   loop)
-    cd "$BENCH_WT" && bun run install >/dev/null 2>&1 && bun run verify >/dev/null 2>&1
+    cd "$BENCH_WT" && bun run setup >/dev/null 2>&1 && bun run verify >/dev/null 2>&1
     ;;
   cold-cycle)
     UNIQ="$MAIN_WORKTREE/.worktrees/.cold-$$"
     git worktree add --detach "$UNIQ" HEAD >/dev/null 2>&1
     trap 'git worktree remove --force "$UNIQ" 2>/dev/null || true' EXIT
     cd "$UNIQ"
-    bun run install >/dev/null 2>&1
+    bun run setup >/dev/null 2>&1
     bun run verify >/dev/null 2>&1
     ;;
   teardown)

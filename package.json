@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "bun run packages/cli/src/index.ts",
-    "install": "./scripts/cache-env.sh bun install",
+    "setup": "./scripts/cache-env.sh bun install",
     "build": "./scripts/cache-env.sh bunx turbo run build",
     "test": "./scripts/cache-env.sh bunx turbo run test",
     "typecheck": "./scripts/cache-env.sh bunx turbo run typecheck",

@@ -34,7 +34,7 @@ Defined in `docs/explanations/design-principles.md` "Speed budgets" section:
 
 ## Cache discipline
 
-**Problem:** Running `bunx turbo run test` from a detached worktree or raw `bun install` without env vars bypasses shared cache and forces cold rebuilds.
+**Problem:** Running `bunx turbo run test` from a detached worktree or raw `bun install` after the first clone bypasses the shared cache and forces cold rebuilds. (The re-install script is named `setup` — not `install` — because npm/bun lifecycle semantics would recurse if an `install` script ran `bun install`.)
 
 **Solution:** Every Bun and Turbo invocation must route through `scripts/cache-env.sh`, which sets:
 
@@ -45,7 +45,7 @@ export TURBO_CACHE_DIR="$MAIN_WORKTREE/.cache/turbo"
 
 Where `MAIN_WORKTREE` is resolved from `git rev-parse --git-common-dir`.
 
-**Agent rule:** Always invoke `bun run <script>`, which uses `cache-env.sh` internally. Never run raw `bun install`, `bunx turbo`, or `bun test` — they bypass cache and trigger cold rebuilds.
+**Agent rule:** Always invoke `bun run <script>` (e.g. `bun run setup`, `bun run verify`), which uses `cache-env.sh` internally. Raw `bun install` is allowed only on first clone; for every subsequent re-install use `bun run setup`. Never run raw `bunx turbo` or `bun test` — they bypass cache and trigger cold rebuilds.
 
 **Exception:** One-off debug commands (`bun test --watch` in local shell). For anything in CI, commit scripts, or agent commands, route through `bun run <script>` or wrap with `./scripts/cache-env.sh`.
 
