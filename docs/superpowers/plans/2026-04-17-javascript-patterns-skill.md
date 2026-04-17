@@ -4,7 +4,7 @@
 
 **Goal:** Port 30 patterns.dev JavaScript skills (MIT) into `au-agentic` as a single hub-and-spoke skill `javascript-patterns`, scaffold-able to Claude Code, Cursor, Codex CLI, GitHub Copilot.
 
-**Architecture:** Hub-and-spoke per tool — 1 catalog `SKILL.md` (or `.instructions.md` for Copilot) + 30 progressive-disclosure reference files. Paths mirror existing `interview/` convention (`.{tool}/skills/`) except Copilot uses native `.github/instructions/`. CLI gains a "Select skills" multi-select step. 125 template files loaded via codegen-generated static import manifest (no runtime I/O).
+**Architecture:** Hub-and-spoke per tool — 1 catalog `SKILL.md` (or `.prompt.md` for Copilot) + 30 progressive-disclosure reference files. **Manual-trigger-only** (DEC-011): catalogs declare `disable-model-invocation: true`; Copilot uses slash-popup `.github/prompts/javascript-patterns.prompt.md` instead of auto-attach `.github/instructions/`. Scope restricted to JS/TS + test/spec files (DEC-012); ambiguous tasks delegate to `/interview` (DEC-013). Paths mirror existing `interview/` convention (`.{tool}/skills/`) for Claude/Cursor/Codex. CLI gains a "Select skills" multi-select step. 125 template files loaded via codegen-generated static import manifest (no runtime I/O).
 
 **Tech Stack:** Bun 1.3.10+, TypeScript, `@clack/prompts` (wizard UI), turbo pipeline, biome lint+format, markdownlint-cli2. No new runtime deps.
 
@@ -26,14 +26,15 @@
 - `claude/references/*.md` (30) — verbatim upstream + attribution header
 - `cursor/SKILL.md` + `cursor/references/*.md` (1 + 30)
 - `codex/SKILL.md` + `codex/references/*.md` (1 + 30)
-- `copilot/javascript-patterns.instructions.md` (1) — catalog + applyTo: frontmatter
-- `copilot/javascript-patterns/*.md` (30) — plain refs, not auto-attach
+- `copilot/javascript-patterns.prompt.md` (1) — catalog, slash `/javascript-patterns` manual-only (DEC-011)
+- `copilot/javascript-patterns/*.md` (30) — plain refs, reachable via `#file:`
 
 **New files — CLI:**
 - `packages/cli/src/steps/skills.ts` — step "Select skills"
 - `packages/cli/src/generated/template-manifest.ts` — codegen output (gitignored)
-- `packages/cli/src/__tests__/template-manifest.test.ts` — manifest snapshot
-- `packages/cli/src/__tests__/scaffold-golden.test.ts` — golden file tier
+- `packages/cli/src/__tests__/template-manifest.test.ts` — Tier 1 manifest snapshot
+- `packages/cli/src/__tests__/scaffold-golden.test.ts` — Tier 2 golden file
+- `packages/cli/src/__tests__/skill-contract.test.ts` — Tier 4 success-criteria contract (DEC-011/012/013)
 
 **New files — docs:**
 - `docs/adr/0009-javascript-patterns-skill.md`
@@ -407,9 +408,8 @@ Use this template, fill rows from Task 5 inventory:
 ```markdown
 ---
 name: javascript-patterns
-description: 30 JavaScript design, performance, and loading patterns from patterns.dev. Auto-activates on JS/TS files. Use when implementing shared state (singleton), pub-sub (observer), object creation (factory), code splitting (dynamic-import), asset loading (prefetch/preload), or other common JS patterns.
-paths:
-  - "**/*.{js,ts,jsx,tsx,mjs,cjs}"
+description: 30 JavaScript design, performance, and loading patterns from patterns.dev. Use when user invokes `/javascript-patterns`, says "active skill javascript-patterns", or explicitly asks to apply a named pattern (singleton, observer, factory, proxy, etc.). Only applies to JS/TS source + test/spec files.
+disable-model-invocation: true
 license: MIT
 metadata:
   author: au-agentic
@@ -419,12 +419,40 @@ metadata:
 
 # JavaScript Patterns Catalog
 
+## Trigger Model
+
+**Manual-only.** Skill này KHÔNG tự active. Chỉ kích hoạt khi:
+
+- User gõ slash `/javascript-patterns` (Cursor/Claude/Copilot/Codex popup)
+- User explicit prompt: "active skill javascript-patterns", "dùng javascript-patterns", v.v.
+- User yêu cầu áp dụng 1 pattern có trong catalog bằng tên
+
+Nếu không có trigger ở trên, **KHÔNG** apply pattern — tiếp tục theo convention repo hiện tại.
+
+## Scope
+
+Chỉ áp dụng trên file:
+
+- `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs`
+- File test & spec tương ứng: `*.test.{js,ts,jsx,tsx}`, `*.spec.{js,ts,jsx,tsx}`
+
+File ngoài scope (`.py`, `.rb`, `.go`, `.md`, config, …) → skill KHÔNG áp dụng kể cả khi được trigger.
+
 ## How to Use
 
 1. Bảng bên dưới liệt kê 30 pattern + 1 dòng "when to use"
-2. Khi task khớp cột "when to use", `Read` file tương ứng trong `references/` **TRƯỚC** khi viết code
+2. Khi task khớp cột "when to use" rõ ràng, `Read` file tương ứng trong `references/` **TRƯỚC** khi viết code
 3. Copy code ví dụ từ reference, không phải tự nhớ
 4. KHÔNG load tất cả references cùng lúc (tốn context)
+
+## Ambiguity Protocol
+
+Nếu task **không khớp rõ ràng** 1 pattern trong bảng (mơ hồ, multi-pattern, pattern không có trong catalog):
+
+- **KHÔNG đoán** — đoán sai dẫn đến refactor sai hướng.
+- **Delegate sang `/interview` skill** để phỏng vấn user về ý định, constraints, file scope.
+- Sau khi interview ra spec rõ ràng, quay lại catalog này và chọn pattern khớp (nếu có).
+- Nếu interview cho thấy task nằm ngoài scope của catalog, thông báo user và không áp dụng skill.
 
 ## Catalog
 
@@ -474,7 +502,7 @@ metadata:
 
 ## Notes
 
-- Catalog là lớp routing duy nhất luôn auto-load; reference chi tiết chỉ nạp khi cần.
+- Catalog là lớp routing duy nhất load khi skill được trigger; reference chi tiết chỉ nạp khi pattern khớp rõ.
 - Nếu task không khớp rõ pattern nào, đừng đoán — hỏi user hoặc implement theo convention repo hiện tại.
 
 ## Attribution
@@ -536,28 +564,59 @@ git add packages/templates/javascript-patterns/cursor/SKILL.md \
 git commit -m "feat(templates): add Cursor + Codex catalog SKILL.md"
 ```
 
-### Task 8: Write Copilot catalog `.instructions.md`
+### Task 8: Write Copilot catalog `.prompt.md` (slash-triggered manual-only)
 
 **Files:**
-- Create: `packages/templates/javascript-patterns/copilot/javascript-patterns.instructions.md`
+- Create: `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`
+
+Per DEC-011/DEC-002'': Copilot catalog is at `.github/prompts/` (slash popup manual) not `.github/instructions/` (auto-attach). Uses `.prompt.md` convention.
 
 - [ ] **Step 8.1: Write Copilot catalog**
 
-Copy the Claude catalog body, replace frontmatter with `applyTo:`. File content:
+Create file `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`:
 
 ```markdown
 ---
-applyTo: "**/*.{js,ts,jsx,tsx,mjs,cjs}"
+description: "Use 30 JavaScript design/performance/loading patterns from patterns.dev. Slash-triggered — manual only."
+mode: "agent"
 ---
 
 # JavaScript Patterns Catalog
 
+## Trigger Model
+
+**Manual-only.** Skill này KHÔNG tự active. Chỉ kích hoạt khi:
+
+- User gõ slash `/javascript-patterns` trong Copilot Chat
+- User explicit prompt: "active skill javascript-patterns", "dùng javascript-patterns"
+- User yêu cầu áp dụng 1 pattern có trong catalog bằng tên
+
+Nếu không có trigger ở trên, **KHÔNG** apply pattern — tiếp tục theo convention repo hiện tại.
+
+## Scope
+
+Chỉ áp dụng trên file:
+
+- `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs`
+- File test & spec tương ứng: `*.test.{js,ts,jsx,tsx}`, `*.spec.{js,ts,jsx,tsx}`
+
+File ngoài scope (`.py`, `.rb`, `.go`, `.md`, config, …) → skill KHÔNG áp dụng kể cả khi được trigger.
+
 ## How to Use
 
 1. Bảng bên dưới liệt kê 30 pattern + 1 dòng "when to use"
-2. Khi task khớp cột "when to use", dùng `#file:.github/instructions/javascript-patterns/<slug>.md` **TRƯỚC** khi viết code
+2. Khi task khớp cột "when to use" rõ ràng, dùng `#file:.github/prompts/javascript-patterns/<slug>.md` **TRƯỚC** khi viết code
 3. Copy code ví dụ từ reference, không phải tự nhớ
 4. KHÔNG pull tất cả references cùng lúc (tốn context)
+
+## Ambiguity Protocol
+
+Nếu task **không khớp rõ ràng** 1 pattern trong bảng (mơ hồ, multi-pattern, pattern không có trong catalog):
+
+- **KHÔNG đoán** — đoán sai dẫn đến refactor sai hướng.
+- **Delegate sang `/interview` skill** để phỏng vấn user về ý định, constraints, file scope.
+- Sau khi interview ra spec rõ ràng, quay lại catalog này và chọn pattern khớp (nếu có).
+- Nếu interview cho thấy task nằm ngoài scope của catalog, thông báo user và không áp dụng skill.
 
 ## Catalog
 
@@ -574,7 +633,7 @@ applyTo: "**/*.{js,ts,jsx,tsx,mjs,cjs}"
 Refs phái sinh từ [patterns.dev](https://patterns.dev) (MIT) — xem `LICENSE`.
 ```
 
-Use this sed transform on an existing Claude catalog as a starting point:
+Generate catalog body by running this transform on the Claude catalog:
 
 ```bash
 sed -E 's|`references/|`javascript-patterns/|g' \
@@ -582,22 +641,29 @@ sed -E 's|`references/|`javascript-patterns/|g' \
   > /tmp/copilot-catalog-body.md
 ```
 
-Then hand-edit: replace frontmatter block (everything between first `---` and second `---`) with just `applyTo: "**/*.{js,ts,jsx,tsx,mjs,cjs}"`, and replace "Read file" language with `#file:` Copilot syntax as shown above. Save to `packages/templates/javascript-patterns/copilot/javascript-patterns.instructions.md`.
+Then replace the YAML frontmatter (everything between first `---` and second `---`) with the `description + mode: agent` block shown above. Save to `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`.
 
 - [ ] **Step 8.2: Verify Copilot catalog refs**
 
 ```bash
-grep -oE 'javascript-patterns/[a-z0-9-]+\.md' packages/templates/javascript-patterns/copilot/javascript-patterns.instructions.md | sort -u > /tmp/copilot-catalog-refs.txt
+grep -oE 'javascript-patterns/[a-z0-9-]+\.md' packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md | sort -u > /tmp/copilot-catalog-refs.txt
 ls packages/templates/javascript-patterns/copilot/javascript-patterns/ | sed 's/^/javascript-patterns\//' | sort -u > /tmp/copilot-actual-refs.txt
 diff /tmp/copilot-catalog-refs.txt /tmp/copilot-actual-refs.txt
 ```
 Expected: no diff.
 
-- [ ] **Step 8.3: Commit**
+- [ ] **Step 8.3: Verify NO `applyTo:` frontmatter (manual-only contract)**
 
 ```bash
-git add packages/templates/javascript-patterns/copilot/javascript-patterns.instructions.md
-git commit -m "feat(templates): add Copilot catalog instructions with applyTo glob"
+grep -c "^applyTo:" packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md
+```
+Expected: `0` (zero). If >0, remove — Copilot must stay manual.
+
+- [ ] **Step 8.4: Commit**
+
+```bash
+git add packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md
+git commit -m "feat(templates): Copilot slash-triggered catalog prompt (manual-only, DEC-011)"
 ```
 
 ---
@@ -638,7 +704,10 @@ describe("TEMPLATE_MANIFEST", () => {
       expect(refKeys).toHaveLength(EXPECTED_JS_PATTERNS_COUNT);
     }
 
-    expect(js.copilot["javascript-patterns.instructions.md"]).toContain("applyTo:");
+    // DEC-011: Copilot uses .prompt.md (slash-triggered manual), NOT .instructions.md (auto-attach)
+    expect(js.copilot["javascript-patterns.prompt.md"]).toBeDefined();
+    expect(js.copilot["javascript-patterns.instructions.md"]).toBeUndefined();
+    expect(js.copilot["javascript-patterns.prompt.md"]).not.toContain("applyTo:");
     const copilotRefs = Object.keys(js.copilot).filter((k) => k.startsWith("javascript-patterns/"));
     expect(copilotRefs).toHaveLength(EXPECTED_JS_PATTERNS_COUNT);
   });
@@ -955,28 +1024,28 @@ const TOOL_META: Record<Tool, ToolMeta> = {
     nextStep: (s) =>
       s === "interview"
         ? "Mở Cursor → Chat panel → Gõ /interview"
-        : "Cursor Agent tự Read .cursor/skills/javascript-patterns/SKILL.md khi đụng file JS/TS",
+        : "Cursor Chat → Gõ /javascript-patterns (manual-only, chỉ trên file .js/.ts + test/spec)",
   },
   claude: {
     label: "Claude Code",
     nextStep: (s) =>
       s === "interview"
         ? "Chạy `claude` → Gõ /interview"
-        : "Claude Code auto-load .claude/skills/javascript-patterns/SKILL.md khi paths: khớp",
+        : "Chạy `claude` → Gõ /javascript-patterns (manual-only, chỉ trên file .js/.ts + test/spec)",
   },
   copilot: {
     label: "GitHub Copilot",
     nextStep: (s) =>
       s === "interview"
         ? "VS Code → Copilot Chat → Gõ /interview"
-        : "Copilot auto-attach .github/instructions/javascript-patterns.instructions.md khi mở JS/TS",
+        : "VS Code → Copilot Chat → Gõ /javascript-patterns (slash popup, manual-only)",
   },
   codex: {
     label: "Codex CLI",
     nextStep: (s) =>
       s === "interview"
         ? "Chạy `codex` → Gõ $interview hoặc /interview"
-        : "Codex đọc .agents/skills/javascript-patterns/SKILL.md khi session có file JS/TS",
+        : "Chạy `codex` → Gõ $javascript-patterns hoặc /javascript-patterns (manual-only)",
   },
 };
 
@@ -1029,9 +1098,9 @@ function targetFor(skill: Skill, tool: Tool, key: string): string {
     case "codex":
       return `.agents/skills/javascript-patterns/${key}`;
     case "copilot":
-      // copilot source keys are "javascript-patterns.instructions.md" (catalog)
-      // or "javascript-patterns/<slug>.md" (ref). Preserve.
-      return `.github/instructions/${key}`;
+      // copilot source keys are "javascript-patterns.prompt.md" (catalog,
+      // slash-triggered manual per DEC-011) or "javascript-patterns/<slug>.md" (ref).
+      return `.github/prompts/${key}`;
   }
 }
 
@@ -1046,7 +1115,7 @@ function sharedTargetsFor(skill: Skill, tool: Tool, key: string): string {
       case "codex":
         return `.agents/skills/javascript-patterns/LICENSE`;
       case "copilot":
-        return `.github/instructions/javascript-patterns/LICENSE`;
+        return `.github/prompts/javascript-patterns/LICENSE`;
     }
   }
   throw new Error(`Unknown shared file for ${skill}: ${key}`);
@@ -1475,7 +1544,7 @@ cp /tmp/au-golden/.claude/skills/javascript-patterns/references/singleton.md \
 cp /tmp/au-golden/.claude/skills/javascript-patterns/references/observer.md \
    packages/cli/src/__tests__/__golden__/claude-observer.md
 # Repeat for copilot:
-cp /tmp/au-golden/.github/instructions/javascript-patterns/singleton.md \
+cp /tmp/au-golden/.github/prompts/javascript-patterns/singleton.md \
    packages/cli/src/__tests__/__golden__/copilot-singleton.md
 ```
 
@@ -1547,6 +1616,121 @@ git add packages/cli/src/__tests__/scaffold-golden.test.ts \
 git commit -m "test(cli): golden file coverage for javascript-patterns scaffold"
 ```
 
+### Task 17b: Skill contract test (Tier 4 — 3 success criteria per DEC-011/012/013)
+
+**Files:**
+- Create: `packages/cli/src/__tests__/skill-contract.test.ts`
+
+This tier is dedicated to the 3 manual-only success criteria. Fails if any future edit silently regresses trigger-manual-only, scope, or ambiguity-delegation behavior.
+
+- [ ] **Step 17b.1: Write contract test**
+
+Create `packages/cli/src/__tests__/skill-contract.test.ts`:
+
+```ts
+import { describe, expect, test } from "bun:test";
+import { TEMPLATE_MANIFEST } from "#generated/template-manifest";
+
+const JS = TEMPLATE_MANIFEST["javascript-patterns"];
+const AGENT_TOOLS = ["claude", "cursor", "codex"] as const;
+
+describe("javascript-patterns skill contract", () => {
+  describe("DEC-011: manual-trigger-only", () => {
+    for (const tool of AGENT_TOOLS) {
+      test(`${tool} SKILL.md declares disable-model-invocation: true`, () => {
+        const skillMd = JS[tool]["SKILL.md"];
+        expect(skillMd).toContain("disable-model-invocation: true");
+      });
+
+      test(`${tool} SKILL.md does NOT declare paths: frontmatter`, () => {
+        const skillMd = JS[tool]["SKILL.md"];
+        // paths: at start-of-line within frontmatter would auto-activate
+        expect(skillMd).not.toMatch(/^paths:\s*$/m);
+        expect(skillMd).not.toMatch(/^paths:\s*\n\s*-/m);
+      });
+
+      test(`${tool} SKILL.md body contains Trigger Model block`, () => {
+        const skillMd = JS[tool]["SKILL.md"];
+        expect(skillMd).toContain("## Trigger Model");
+        expect(skillMd).toContain("Manual-only");
+        expect(skillMd).toContain("/javascript-patterns");
+      });
+    }
+
+    test("Copilot catalog is at .prompt.md (slash-triggered), NOT .instructions.md", () => {
+      expect(JS.copilot["javascript-patterns.prompt.md"]).toBeDefined();
+      expect(JS.copilot["javascript-patterns.instructions.md"]).toBeUndefined();
+    });
+
+    test("Copilot catalog does NOT declare applyTo: (manual-only)", () => {
+      const catalog = JS.copilot["javascript-patterns.prompt.md"];
+      expect(catalog).not.toMatch(/^applyTo:/m);
+    });
+  });
+
+  describe("DEC-012: scope = JS/TS source + test/spec files only", () => {
+    const catalogs = [
+      ...AGENT_TOOLS.map((t) => ({ tool: t, content: JS[t]["SKILL.md"] })),
+      { tool: "copilot", content: JS.copilot["javascript-patterns.prompt.md"] },
+    ];
+
+    for (const { tool, content } of catalogs) {
+      test(`${tool} catalog declares Scope block listing JS + TS + test + spec`, () => {
+        expect(content).toContain("## Scope");
+        expect(content).toContain(".js");
+        expect(content).toContain(".ts");
+        expect(content).toMatch(/\.test\./);
+        expect(content).toMatch(/\.spec\./);
+      });
+
+      test(`${tool} catalog Scope block precedes Catalog table`, () => {
+        const scopeIdx = content.indexOf("## Scope");
+        const catalogIdx = content.indexOf("## Catalog");
+        expect(scopeIdx).toBeGreaterThan(-1);
+        expect(catalogIdx).toBeGreaterThan(-1);
+        expect(scopeIdx).toBeLessThan(catalogIdx);
+      });
+    }
+  });
+
+  describe("DEC-013: ambiguity → delegate /interview", () => {
+    const catalogs = [
+      ...AGENT_TOOLS.map((t) => ({ tool: t, content: JS[t]["SKILL.md"] })),
+      { tool: "copilot", content: JS.copilot["javascript-patterns.prompt.md"] },
+    ];
+
+    for (const { tool, content } of catalogs) {
+      test(`${tool} catalog contains Ambiguity Protocol referencing /interview`, () => {
+        expect(content).toContain("## Ambiguity Protocol");
+        expect(content).toContain("/interview");
+        expect(content).toMatch(/KHÔNG đoán|do not guess|don't guess/i);
+      });
+
+      test(`${tool} catalog delegation block appears before Catalog table`, () => {
+        const ambIdx = content.indexOf("## Ambiguity Protocol");
+        const catalogIdx = content.indexOf("## Catalog");
+        expect(ambIdx).toBeGreaterThan(-1);
+        expect(ambIdx).toBeLessThan(catalogIdx);
+      });
+    }
+  });
+});
+```
+
+- [ ] **Step 17b.2: Run — should PASS if Task 6 + 8 catalogs were written correctly**
+
+```bash
+cd packages/cli && bun test src/__tests__/skill-contract.test.ts
+```
+Expected: PASS. If any test fails, fix the corresponding catalog section (Task 6 for Claude/Cursor/Codex, Task 8 for Copilot) and re-run.
+
+- [ ] **Step 17b.3: Commit**
+
+```bash
+git add packages/cli/src/__tests__/skill-contract.test.ts
+git commit -m "test(cli): skill contract — trigger/scope/ambiguity (DEC-011/012/013)"
+```
+
 ---
 
 ## Phase 9 — Docs Tier 1 (mandatory)
@@ -1569,7 +1753,7 @@ Replace existing table with:
 | interview | Codex CLI | `.agents/skills/interview/SKILL.md` (+ `references/`) |
 | javascript-patterns | Cursor | `.cursor/skills/javascript-patterns/{SKILL.md, LICENSE, references/*.md}` |
 | javascript-patterns | Claude Code | `.claude/skills/javascript-patterns/{SKILL.md, LICENSE, references/*.md}` |
-| javascript-patterns | GitHub Copilot | `.github/instructions/{javascript-patterns.instructions.md, javascript-patterns/*.md, javascript-patterns/LICENSE}` |
+| javascript-patterns | GitHub Copilot | `.github/prompts/{javascript-patterns.prompt.md, javascript-patterns/*.md, javascript-patterns/LICENSE}` |
 | javascript-patterns | Codex CLI | `.agents/skills/javascript-patterns/{SKILL.md, LICENSE, references/*.md}` |
 ```
 
@@ -1584,7 +1768,7 @@ Change the "The wizard will:" list to:
 4. Copy the selected skill files to the right locations
 ```
 
-- [ ] **Step 18.3: Add "Attribution" section**
+- [ ] **Step 18.3: Add "Attribution" + "Activation model" sections**
 
 Add before "Requirements" section:
 
@@ -1592,6 +1776,15 @@ Add before "Requirements" section:
 ## Attribution
 
 The `javascript-patterns` skill bundles 30 JavaScript pattern skills derived from [patterns.dev](https://patterns.dev) (MIT licensed). Upstream: [PatternsDev/skills](https://github.com/PatternsDev/skills). Full MIT text is copied into each scaffolded skill folder.
+
+## Activation model
+
+Both shipped skills (`interview` and `javascript-patterns`) are **manual-trigger-only** — they never self-activate. Invoke them via:
+
+- Slash popup: `/interview`, `/javascript-patterns`
+- Explicit prompt: "active skill interview", "dùng javascript-patterns"
+
+`javascript-patterns` additionally constrains itself to `.js`, `.ts` (+ `.test.*`, `.spec.*`) files; it delegates to `/interview` if the task doesn't map cleanly to a catalog pattern.
 ```
 
 - [ ] **Step 18.4: Commit**
@@ -1623,8 +1816,8 @@ templates/
     │   ├── SKILL.md                          → .<tool>/skills/javascript-patterns/SKILL.md
     │   └── references/*.md (30)              → .<tool>/skills/javascript-patterns/references/
     └── copilot/
-        ├── javascript-patterns.instructions.md → .github/instructions/
-        └── javascript-patterns/*.md (30)     → .github/instructions/javascript-patterns/
+        ├── javascript-patterns.prompt.md     → .github/prompts/ (slash-triggered, DEC-011)
+        └── javascript-patterns/*.md (30)     → .github/prompts/javascript-patterns/
 ```
 
 - [ ] **Step 19.2: Add codegen manifest mention**
@@ -1764,9 +1957,10 @@ Append:
    # Select tools: claude
    # Select skills: javascript-patterns
    ```
-2. Open a JS/TS file in Claude Code — the catalog auto-loads via `paths:` glob.
-3. Ask Claude to "refactor this global state into a Singleton" — Claude reads the catalog, finds the "Singleton" row, then `Read`s `.claude/skills/javascript-patterns/references/singleton.md` for the full pattern before coding.
-4. Add more patterns: edit upstream OR run `bun run sync:upstream-patterns`, then commit the diff.
+2. Open a JS/TS file in Claude Code.
+3. Trigger manually: type `/javascript-patterns` in the slash popup, or ask "active skill javascript-patterns, refactor this global state into a Singleton".
+4. Claude reads the catalog, finds the "Singleton" row, then `Read`s `.claude/skills/javascript-patterns/references/singleton.md` before coding. If the task were ambiguous, Claude would delegate to `/interview` first.
+5. Add more patterns: edit upstream OR run `bun run sync:upstream-patterns`, then commit the diff.
 ```
 
 - [ ] **Step 21.4: Commit Tier 2**
@@ -1805,36 +1999,58 @@ We want to port 30 JavaScript patterns from patterns.dev (MIT) into au-agentic a
 
 ## Decision
 
-Adopt hub-and-spoke shape (1 catalog `SKILL.md` + 30 `references/*.md`) per tool. Copilot uses 1 catalog `.instructions.md` + 30 plain `.md` refs under `.github/instructions/javascript-patterns/` to avoid `applyTo` auto-attaching all 30 (~150KB context). Target paths mirror existing `interview/` convention for Claude/Cursor/Codex; Copilot uses native `.github/instructions/` for auto-attach-by-glob.
+Adopt hub-and-spoke shape (1 catalog `SKILL.md` + 30 `references/*.md`) per tool, with **manual-trigger-only activation** (DEC-011). Catalog frontmatter declares `disable-model-invocation: true` on Claude/Cursor/Codex; Copilot uses `.github/prompts/javascript-patterns.prompt.md` (slash `/javascript-patterns`) instead of `.github/instructions/` (auto-attach). Refs live under `.github/prompts/javascript-patterns/` for Copilot, reachable via `#file:`.
 
-We introduce a codegen manifest script (`packages/cli/scripts/generate-template-manifest.ts`) to emit static imports for ~125 template files without bloating `templates.ts`. Manifest is gitignored and regenerated on `prebuild` via turbo pipeline.
+Catalog body enforces 2 additional guardrails: **Scope restriction to JS/TS + test/spec files** (DEC-012) and **Ambiguity → delegate `/interview`** (DEC-013). A Tier 4 contract test (`skill-contract.test.ts`) asserts all 3 success criteria programmatically.
+
+Target paths mirror existing `interview/` convention for Claude/Cursor/Codex (`.{tool}/skills/javascript-patterns/`). We introduce a codegen manifest script (`packages/cli/scripts/generate-template-manifest.ts`) to emit static imports for ~125 template files without bloating `templates.ts`. Manifest is gitignored and regenerated on `prebuild` via turbo pipeline.
 
 We keep upstream sync manual via `scripts/sync-upstream-patterns.ts` to preserve git diff review and avoid network at build/runtime.
 
 ## Consequences
 
 **Positive:**
-- Progressive disclosure: catalog ~4KB auto-loads; refs lazy-loaded only when task matches a pattern
+- Predictable activation: skill fires only on explicit user trigger — no surprise auto-pattern-application
+- Progressive disclosure: catalog ~4KB loads on trigger; refs lazy-loaded only when task matches a pattern
+- Ambiguity has a defined escape hatch (`/interview` delegation) instead of agent guessing
 - CLI wizard stays clean with a new "Select skills" step (multi-select, interview default-on)
 - Adding a new skill (e.g. react-patterns) = drop folder, run codegen; no `templates.ts` churn
 - MIT compliance via `LICENSE` + per-ref attribution header + README section
+- 3 success criteria protected by dedicated contract test (Tier 4) against regression
 
 **Negative:**
 - 125 files in one PR is large — mitigated via phased commits within the PR
-- Cursor/Codex auto-invoke via `paths:` frontmatter is assumed but not fully verified — fallback is agent `Read` on context
+- Manual-only means user must know the skill exists and when to invoke — discoverability tradeoff; mitigated by README "Activation model" section + wizard skill-select labels
 - Upstream drift if we don't rerun sync script — acceptable tradeoff for review-before-apply safety
 
 ## Alternatives Considered
 
 - **30 standalone skills:** rejected — floods CLI wizard and user context on Copilot
 - **Flat 30-template layout:** rejected — doesn't scale when adding react/vue later
+- **Auto-activation via `paths:` / `applyTo:`:** rejected (DEC-011) — user wants predictable manual trigger matching `interview/` skill semantics
 - **Auto-sync at build:** rejected — violates no-runtime-I/O policy (AGENTS.md)
 - **Vite `import.meta.glob()`:** rejected — not Bun-native API
 - **Bun macros:** considered — codegen is stabler and grep-friendly
 
-## Decision Log (from spec brainstorm, Round 10)
+## Decision Log (from spec brainstorm, Rounds 1–11)
 
-See [docs/superpowers/specs/2026-04-17-javascript-patterns-skill-design.md](../superpowers/specs/2026-04-17-javascript-patterns-skill-design.md) for full decision log (DEC-001..010).
+| ID        | Decision |
+| --------- | -------- |
+| DEC-001   | Hub-and-spoke shape |
+| DEC-002'' | Copilot `.prompt.md` (slash) instead of `.instructions.md` |
+| DEC-003   | Wizard "Select skills" multi-select |
+| DEC-004'' | Catalog + verbatim refs + MIT header + Trigger/Scope/Ambiguity blocks |
+| DEC-005   | Path convention mirrors `interview/` for Claude/Cursor/Codex |
+| DEC-006'  | Codegen template-manifest.ts |
+| DEC-007   | One-time import + manual sync script |
+| DEC-008'  | 4-tier test (manifest + golden + integration + contract) |
+| DEC-009   | LICENSE + per-ref header + README attribution |
+| DEC-010   | Docs Tier 1+2+3 + ADR same PR |
+| DEC-011   | **Manual-trigger-only activation** (disable-model-invocation + Copilot `.prompt.md`) |
+| DEC-012   | **Scope = JS/TS + test/spec files only**, declared in catalog body |
+| DEC-013   | **Ambiguity → delegate `/interview`**, enforced in catalog body + Tier 4 test |
+
+Full context in [docs/superpowers/specs/2026-04-17-javascript-patterns-skill-design.md](../superpowers/specs/2026-04-17-javascript-patterns-skill-design.md).
 ```
 
 - [ ] **Step 22.2: Commit ADR**
@@ -1881,7 +2097,7 @@ bun /Users/phamau/Desktop/projects/me/au-agentic/packages/cli/dist/index.js
 # Interactively: path=., tools=claude + copilot, skills=interview + javascript-patterns
 find . -type f | sort | head -40
 ```
-Expected: `.claude/skills/interview/SKILL.md`, `.claude/skills/javascript-patterns/{SKILL.md, LICENSE}`, `.claude/skills/javascript-patterns/references/*.md` (30), `.github/prompts/interview.prompt.md`, `.github/instructions/javascript-patterns.instructions.md`, `.github/instructions/javascript-patterns/*.md` (30 + LICENSE).
+Expected: `.claude/skills/interview/SKILL.md`, `.claude/skills/javascript-patterns/{SKILL.md, LICENSE}`, `.claude/skills/javascript-patterns/references/*.md` (30), `.github/prompts/interview.prompt.md`, `.github/prompts/javascript-patterns.prompt.md`, `.github/prompts/javascript-patterns/*.md` (30 + LICENSE).
 
 ### Task 24: Create PR
 
@@ -1897,10 +2113,13 @@ git push -u origin HEAD
 gh pr create --title "feat: javascript-patterns skill (30 patterns.dev JS patterns, hub-and-spoke)" --body "$(cat <<'EOF'
 ## Summary
 - Add `javascript-patterns` skill: 30 JS patterns from patterns.dev (MIT), hub-and-spoke shape
-- Scaffold-able to Claude Code, Cursor, Codex CLI, GitHub Copilot
+- **Manual-trigger-only** (DEC-011): `/javascript-patterns` slash or explicit prompt; never self-activates
+- **Scope**: `.js`/`.ts` + `.test.*`/`.spec.*` files only (DEC-012)
+- **Ambiguity → `/interview`** delegation (DEC-013)
+- Scaffold-able to Claude Code, Cursor, Codex CLI, GitHub Copilot (Copilot uses `.github/prompts/` slash, not `.github/instructions/` auto-attach)
 - Wizard gains Step 3 "Select skills" (multi-select, interview default-on)
 - Codegen manifest avoids bloating templates.ts with 150+ static imports
-- 3-tier focused tests (manifest snapshot + golden + integration)
+- 4-tier focused tests (manifest snapshot + golden + integration + skill contract)
 
 Spec: [docs/superpowers/specs/2026-04-17-javascript-patterns-skill-design.md](docs/superpowers/specs/2026-04-17-javascript-patterns-skill-design.md)
 ADR: [docs/adr/0009-javascript-patterns-skill.md](docs/adr/0009-javascript-patterns-skill.md)
@@ -1908,8 +2127,9 @@ ADR: [docs/adr/0009-javascript-patterns-skill.md](docs/adr/0009-javascript-patte
 ## Test plan
 - [ ] `bun run verify` passes (lint + typecheck + test)
 - [ ] Manual scaffold in `/tmp/smoke`: javascript-patterns for all 4 tools → 125 files + LICENSE fan-out
-- [ ] Opens a JS file in Claude Code → skill auto-activates, catalog visible
-- [ ] Copilot: catalog auto-attaches on JS file, refs NOT auto-attached (confirmed via `#file:` referencing them manually)
+- [ ] Opens a JS file in Claude Code and types `/javascript-patterns` → catalog loads; without the trigger, skill stays dormant (manual-only contract)
+- [ ] Copilot: `/javascript-patterns` slash popup loads the prompt; catalog does NOT auto-attach to JS files (confirmed by opening a JS file with no trigger — no javascript-patterns context)
+- [ ] Ambiguous prompt like "make this code better" → agent does not pick a pattern; delegates to `/interview` or asks clarifying question
 - [ ] `bun run sync:upstream-patterns` runs to completion against real upstream (opt-in, not in CI)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -1929,17 +2149,20 @@ EOF
 - [ ] Every commit step shows exact message and files
 - [ ] Types consistent: `Skill`, `Tool`, `ScaffoldFile`, `FileResult` defined once and reused
 - [ ] No TODO/TBD/FIXME/"similar to above"
-- [ ] Spec coverage: every DEC-001..010 decision is implemented by at least one task
+- [ ] Spec coverage: every DEC-001..013 decision is implemented by at least one task
   - DEC-001 hub-and-spoke → Phase 2–3 (sync + catalogs)
-  - DEC-002' Copilot catalog+plain refs → Task 8 + Task 12 (path mapping)
+  - DEC-002'' Copilot `.prompt.md` slash-triggered → Task 8 + Task 12 (path mapping)
   - DEC-003 skill-select step → Phase 6
-  - DEC-004 catalog + verbatim + MIT header → Tasks 2, 6–8
+  - DEC-004'' catalog + verbatim + MIT header + trigger/scope/ambiguity blocks → Tasks 2, 6–8
   - DEC-005 path convention → Task 12 (targetFor)
   - DEC-006' codegen manifest → Phase 4
   - DEC-007 sync script → Phase 1–2
-  - DEC-008 3-tier tests → Tasks 9, 16, 17
+  - DEC-008' 4-tier tests → Tasks 9 (Tier 1), 16 (Tier 3), 17 (Tier 2), 17b (Tier 4)
   - DEC-009 LICENSE + header + README → Tasks 4, 17.2 checks, 18.3
   - DEC-010 Tier 1+2+3 docs → Phase 9–11
+  - **DEC-011 manual-trigger-only** → Task 6 frontmatter + Trigger Model block; Task 8 `.prompt.md` path; Task 17b contract test assertions
+  - **DEC-012 scope JS/TS + test/spec** → Task 6 Scope block; Task 17b Scope contract assertions
+  - **DEC-013 ambiguity → /interview** → Task 6 Ambiguity Protocol block; Task 17b delegation contract assertions
 
 ---
 
