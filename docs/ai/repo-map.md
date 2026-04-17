@@ -65,14 +65,15 @@ templates/
 │   ├── claude/SKILL.md   → .claude/skills/interview/SKILL.md
 │   ├── copilot.md        → .github/prompts/interview.prompt.md
 │   └── codex/SKILL.md    → .agents/skills/interview/SKILL.md (+ references/)
-└── javascript-patterns/
-    ├── LICENSE                                   → fans out per tool (DEC-009)
-    ├── {claude,cursor,codex}/
-    │   ├── SKILL.md                              → .<tool>/skills/javascript-patterns/SKILL.md
-    │   └── references/*.md (29)                  → .<tool>/skills/javascript-patterns/references/
-    └── copilot/
-        ├── javascript-patterns.prompt.md         → .github/prompts/ (slash-triggered, DEC-011)
-        └── javascript-patterns/*.md (29)         → .github/prompts/javascript-patterns/
+└── patterns-dev/
+    └── javascript-patterns/
+        ├── LICENSE                                   → fans out per tool (DEC-009)
+        ├── {claude,cursor,codex}/
+        │   ├── SKILL.md                              → .<tool>/skills/javascript-patterns/SKILL.md
+        │   └── references/*.md (29)                  → .<tool>/skills/javascript-patterns/references/
+        └── copilot/
+            ├── javascript-patterns.prompt.md         → .github/prompts/ (slash-triggered, DEC-011)
+            └── javascript-patterns/*.md (29)         → .github/prompts/javascript-patterns/
 ```
 
 **Import mechanism:** Templates imported at build time as static text via Bun's `with { type: 'text' }` import attribute. No runtime file I/O.
@@ -195,9 +196,9 @@ bun.lock                  # Bun lockfile for dependency resolution
 - Changes require running `bun run gen:manifest` and committing manifest contract tests
 - Manifest shape is part of CLI test contract
 
-**scripts/sync-upstream-patterns.ts:**
+**scripts/sync/patterns-dev/index.ts:**
 - Manual-run only (no auto/network at build time)
-- Overwrites `packages/templates/javascript-patterns/` refs
+- Overwrites `packages/templates/patterns-dev/javascript-patterns/` refs
 - LICENSE is self-authored (upstream has no root LICENSE) and NOT overwritten by sync
 
 ## Test Coverage

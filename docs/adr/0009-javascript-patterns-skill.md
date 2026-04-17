@@ -21,7 +21,7 @@ Catalog body enforces 2 additional guardrails: **Scope restriction to JS/TS + te
 
 Target paths mirror existing `interview/` convention for Claude/Cursor/Codex (`.{tool}/skills/javascript-patterns/`). We introduce a codegen manifest script (`packages/cli/scripts/generate-template-manifest.ts`) to emit static imports for ~121 template files without bloating `templates.ts`. Manifest is gitignored and regenerated on `prebuild` via turbo pipeline.
 
-We keep upstream sync manual via `scripts/sync-upstream-patterns.ts` to preserve git diff review and avoid network at build/runtime.
+We keep upstream sync manual via `scripts/sync/patterns-dev/index.ts` to preserve git diff review and avoid network at build/runtime.
 
 ## Consequences
 

@@ -223,9 +223,9 @@ packages/templates/
 
 **Total source files:** 1 LICENSE + 3 SKILL.md + 87 refs (Claude/Cursor/Codex) + 1 catalog + 29 refs (Copilot) = **121 file** trong folder skill mới.
 
-**LICENSE source:** Upstream `PatternsDev/skills` repo **không có** LICENSE file tại root (xác nhận tại Task 4 khi chạy sync). Từng `SKILL.md` upstream có frontmatter `license: MIT` (self-declared per-file) nhưng repo-level không explicit. Để không rely on ambiguous grant, **au-agentic tự viết `packages/templates/javascript-patterns/LICENSE`** chứa MIT License template + attribution section tới patterns.dev authors. Sync script tolerate-missing upstream LICENSE (warn, không throw).
+**LICENSE source:** Upstream `PatternsDev/skills` repo **không có** LICENSE file tại root (xác nhận tại Task 4 khi chạy sync). Từng `SKILL.md` upstream có frontmatter `license: MIT` (self-declared per-file) nhưng repo-level không explicit. Để không rely on ambiguous grant, **au-agentic tự viết `packages/templates/patterns-dev/javascript-patterns/LICENSE`** chứa MIT License template + attribution section tới patterns.dev authors. Sync script tolerate-missing upstream LICENSE (warn, không throw).
 
-**LICENSE fan-out rule:** 1 LICENSE source tại `packages/templates/javascript-patterns/LICENSE` được scaffold ra 4 target paths (một bản per tool đã chọn) để user-project-scope MIT compliance đầy đủ:
+**LICENSE fan-out rule:** 1 LICENSE source tại `packages/templates/patterns-dev/javascript-patterns/LICENSE` được scaffold ra 4 target paths (một bản per tool đã chọn) để user-project-scope MIT compliance đầy đủ:
 
 - `.claude/skills/javascript-patterns/LICENSE`
 - `.cursor/skills/javascript-patterns/LICENSE`
@@ -275,7 +275,7 @@ Snapshot test: run `gen:manifest`, assert manifest chứa đúng expected shape.
 
 ## Upstream Sync Script
 
-Script `scripts/sync-upstream-patterns.ts` (runs locally khi muốn refresh):
+Script `scripts/sync/patterns-dev/index.ts` (runs locally khi muốn refresh):
 
 1. `git clone https://github.com/PatternsDev/skills.git` vào tmp dir (hoặc `gh api` contents)
 2. Với mỗi folder `javascript/<slug>`:
@@ -283,7 +283,7 @@ Script `scripts/sync-upstream-patterns.ts` (runs locally khi muốn refresh):
   - Strip upstream frontmatter
   - Prepend attribution header
   - Write vào cả 4 tool folder (Claude/Cursor/Codex refs + Copilot refs)
-3. ~~Copy upstream LICENSE~~ → **Skip**: upstream has no LICENSE. LICENSE file ở `packages/templates/javascript-patterns/LICENSE` được viết riêng bởi au-agentic (MIT template + attribution) — không phụ thuộc sync.
+3. ~~Copy upstream LICENSE~~ → **Skip**: upstream has no LICENSE. LICENSE file ở `packages/templates/patterns-dev/javascript-patterns/LICENSE` được viết riêng bởi au-agentic (MIT template + attribution) — không phụ thuộc sync.
 4. Report divergence nếu local ref đã có modifications lệch upstream (warn, không auto-overwrite)
 5. Không tự commit — dev review diff rồi commit
 
@@ -341,7 +341,7 @@ Threshold: 70% per-file (giữ nguyên `bunfig.toml`). Không chạy 480 asserti
 
 ## Attribution & Legal
 
-- LICENSE file tại `packages/templates/javascript-patterns/LICENSE` chứa full MIT text + copyright của patterns.dev authors
+- LICENSE file tại `packages/templates/patterns-dev/javascript-patterns/LICENSE` chứa full MIT text + copyright của patterns.dev authors
 - Per-ref header: `<!-- Source: https://github.com/PatternsDev/skills/tree/main/javascript/<slug>-pattern | MIT — see ../LICENSE -->`
 - Section "Attribution" mới trong root README nêu upstream + license
 - Scaffold duplicate LICENSE vào user project khi scaffold — user cũng tuân MIT khi commit vào repo họ
@@ -401,7 +401,7 @@ Theo bảng mapping trong [docs/ai/docs-policy.md](docs/ai/docs-policy.md):
 | DEC-004'' | SKILL.md = catalog + verbatim refs + MIT header + **Trigger Model + Scope + Ambiguity Protocol blocks** — DEC-004 superseded bởi manual-only + 3 success criteria                | user-confirmed |
 | DEC-005   | Giữ path convention với interview cho Claude/Cursor/Codex (`.cursor/skills/`, `.agents/skills/`, `.claude/skills/`); Copilot theo DEC-002''                                      | user-confirmed |
 | DEC-006'  | Codegen `scripts/generate-template-manifest.ts` → `template-manifest.ts` (DEC-006 superseded — `import.meta.glob()` không phải Bun API)                                          | user-confirmed |
-| DEC-007   | One-time import + `scripts/sync-upstream-patterns.ts` manual resync                                                                                                              | user-confirmed |
+| DEC-007   | One-time import + `scripts/sync/patterns-dev/index.ts` manual resync                                                                                                              | user-confirmed |
 | DEC-008'  | 4-tier focused test (Tier 1–3 cũ + Tier 4 `skill-contract.test.ts`) — DEC-008 extended cho 3 success criteria                                                                    | user-confirmed |
 | DEC-009   | LICENSE tại folder skill + 1-line header per ref + README attribution section                                                                                                    | user-confirmed |
 | DEC-010   | Docs update Tier 1 + 2 + 3 (kể cả ADR) cùng PR với code                                                                                                                          | user-confirmed |

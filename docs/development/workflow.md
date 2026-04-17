@@ -42,5 +42,5 @@ To temporarily skip a hook (use sparingly): `git commit --no-verify`. CI will st
 
 | Script | Purpose |
 |---|---|
-| `bun run sync:upstream-patterns` | Manually re-sync patterns.dev content into `packages/templates/javascript-patterns/`. Review diff before committing. |
+| `bun run sync:upstream-patterns` | Manually re-sync patterns.dev content into `packages/templates/patterns-dev/javascript-patterns/`. Review diff before committing. |
 | `bun run --cwd packages/cli gen:manifest` | Regenerate `src/generated/template-manifest.ts`. Auto-runs on prebuild. |

@@ -17,10 +17,10 @@
 ## File Structure (locked upfront)
 
 **New files — scripts:**
-- `scripts/sync-upstream-patterns.ts` — manual upstream sync (DEC-007)
+- `scripts/sync/patterns-dev/index.ts` — manual upstream sync (DEC-007)
 - `packages/cli/scripts/generate-template-manifest.ts` — codegen (DEC-006')
 
-**New files — templates (121 total in `packages/templates/javascript-patterns/`):**
+**New files — templates (121 total in `packages/templates/patterns-dev/javascript-patterns/`):**
 - `LICENSE` (1) — full MIT, patterns.dev copyright
 - `claude/SKILL.md` (1) — catalog + paths: frontmatter
 - `claude/references/*.md` (29) — verbatim upstream + attribution header
@@ -66,7 +66,7 @@
 ### Task 1: Write sync script TDD fixture + transform test
 
 **Files:**
-- Create: `scripts/__tests__/sync-upstream-patterns.test.ts`
+- Create: `scripts/__tests__/sync-patterns-dev.test.ts`
 - Create: `scripts/__tests__/fixtures/sample-upstream-SKILL.md`
 
 - [ ] **Step 1.1: Create fixture mimicking upstream SKILL.md shape**
@@ -99,7 +99,7 @@ Singletons are classes which can be instantiated once...
 
 - [ ] **Step 1.2: Write failing test for `transformUpstreamRef`**
 
-Create `scripts/__tests__/sync-upstream-patterns.test.ts`:
+Create `scripts/__tests__/sync-patterns-dev.test.ts`:
 
 ```ts
 import { describe, expect, test } from "bun:test";
@@ -153,14 +153,14 @@ describe("slugifyPattern", () => {
 Run:
 ```bash
 cd /Users/phamau/Desktop/projects/me/au-agentic
-bun test scripts/__tests__/sync-upstream-patterns.test.ts
+bun test scripts/__tests__/sync-patterns-dev.test.ts
 ```
 Expected: FAIL with "Cannot find module '../sync-upstream-patterns'"
 
 ### Task 2: Implement transform functions
 
 **Files:**
-- Create: `scripts/sync-upstream-patterns.ts`
+- Create: `scripts/sync/patterns-dev/index.ts`
 
 - [ ] **Step 2.1: Write minimal implementation**
 
@@ -168,7 +168,7 @@ Expected: FAIL with "Cannot find module '../sync-upstream-patterns'"
 #!/usr/bin/env bun
 /**
  * Manual sync of upstream PatternsDev/skills/javascript into
- * packages/templates/javascript-patterns. Run on demand:
+ * packages/templates/patterns-dev/javascript-patterns. Run on demand:
  *   bun run sync:upstream-patterns
  * Does NOT commit; dev reviews diff manually.
  */
@@ -196,31 +196,31 @@ export function transformUpstreamRef(upstreamContent: string, upstreamFolder: st
 
 Run:
 ```bash
-bun test scripts/__tests__/sync-upstream-patterns.test.ts
+bun test scripts/__tests__/sync-patterns-dev.test.ts
 ```
 Expected: PASS (6 tests pass)
 
 - [ ] **Step 2.3: Commit**
 
 ```bash
-git add scripts/sync-upstream-patterns.ts scripts/__tests__/
+git add scripts/sync/patterns-dev/index.ts scripts/__tests__/
 git commit -m "feat(sync): transform + slugify helpers for upstream patterns"
 ```
 
 ### Task 3: Add orchestration + clone logic
 
 **Files:**
-- Modify: `scripts/sync-upstream-patterns.ts`
+- Modify: `scripts/sync/patterns-dev/index.ts`
 - Modify: `package.json` (root)
 
 - [ ] **Step 3.1: Append orchestration code**
 
-Append to `scripts/sync-upstream-patterns.ts`:
+Append to `scripts/sync/patterns-dev/index.ts`:
 
 ```ts
 const REPO_ROOT = join(import.meta.dir, "..");
 const TMP_DIR = join(REPO_ROOT, ".tmp/upstream-patterns");
-const TARGET_ROOT = join(REPO_ROOT, "packages/templates/javascript-patterns");
+const TARGET_ROOT = join(REPO_ROOT, "packages/templates/patterns-dev/javascript-patterns");
 
 function sh(cmd: string): string {
   const result = Bun.spawnSync({ cmd: ["sh", "-c", cmd], stderr: "inherit" });
@@ -278,7 +278,7 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n✓ Synced ${folders.length} patterns × 4 tools.`);
-  console.log(`  Review diff: git diff packages/templates/javascript-patterns/`);
+  console.log(`  Review diff: git diff packages/templates/patterns-dev/javascript-patterns/`);
   console.log(`  Clean up: rm -rf "${TMP_DIR}"`);
 }
 
@@ -295,7 +295,7 @@ if (import.meta.main) {
 Edit `/Users/phamau/Desktop/projects/me/au-agentic/package.json`. Under `"scripts"`, add:
 
 ```json
-"sync:upstream-patterns": "bun scripts/sync-upstream-patterns.ts"
+"sync:upstream-patterns": "bun scripts/sync/patterns-dev/index.ts"
 ```
 
 - [ ] **Step 3.3: Add `.tmp/` to `.gitignore`**
@@ -318,7 +318,7 @@ Expected: No errors (scripts dir may not be tsc-checked — OK if excluded).
 - [ ] **Step 3.5: Commit**
 
 ```bash
-git add scripts/sync-upstream-patterns.ts package.json .gitignore
+git add scripts/sync/patterns-dev/index.ts package.json .gitignore
 git commit -m "feat(sync): orchestration + CLI entry for upstream pattern sync"
 ```
 
@@ -329,8 +329,8 @@ git commit -m "feat(sync): orchestration + CLI entry for upstream pattern sync"
 ### Task 4: Execute sync script against upstream
 
 **Files:**
-- Create: `packages/templates/javascript-patterns/LICENSE` (via script)
-- Create: `packages/templates/javascript-patterns/{claude,cursor,codex,copilot}/...` × 116 refs (via script: 29 patterns × 4 tools)
+- Create: `packages/templates/patterns-dev/javascript-patterns/LICENSE` (via script)
+- Create: `packages/templates/patterns-dev/javascript-patterns/{claude,cursor,codex,copilot}/...` × 116 refs (via script: 29 patterns × 4 tools)
 
 - [ ] **Step 4.1: Run sync**
 
@@ -343,30 +343,30 @@ Expected output: `✓ Synced 29 patterns × 4 tools.`
 - [ ] **Step 4.2: Verify file tree**
 
 ```bash
-find packages/templates/javascript-patterns -type f -name "*.md" | wc -l
+find packages/templates/patterns-dev/javascript-patterns -type f -name "*.md" | wc -l
 ```
 Expected: `116` (29 × 4)
 
 ```bash
-ls packages/templates/javascript-patterns/LICENSE
+ls packages/templates/patterns-dev/javascript-patterns/LICENSE
 ```
 Expected: file exists, contains "MIT License" and a "Copyright" line referencing patterns.dev contributors.
 
 - [ ] **Step 4.3: Spot-check one ref**
 
 ```bash
-head -5 packages/templates/javascript-patterns/claude/references/singleton.md
+head -5 packages/templates/patterns-dev/javascript-patterns/claude/references/singleton.md
 ```
 Expected: First line is `<!-- Source: https://github.com/PatternsDev/skills/tree/main/javascript/singleton-pattern | MIT — see ../LICENSE -->`, second line empty, third `# Singleton Pattern`.
 
 - [ ] **Step 4.4: Commit (content only — catalogs + CLI come later)**
 
 ```bash
-git add packages/templates/javascript-patterns/LICENSE \
-        packages/templates/javascript-patterns/claude/references/ \
-        packages/templates/javascript-patterns/cursor/references/ \
-        packages/templates/javascript-patterns/codex/references/ \
-        packages/templates/javascript-patterns/copilot/javascript-patterns/
+git add packages/templates/patterns-dev/javascript-patterns/LICENSE \
+        packages/templates/patterns-dev/javascript-patterns/claude/references/ \
+        packages/templates/patterns-dev/javascript-patterns/cursor/references/ \
+        packages/templates/patterns-dev/javascript-patterns/codex/references/ \
+        packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns/
 git commit -m "feat(templates): import 29 patterns.dev JS skills (self-authored MIT LICENSE)"
 ```
 
@@ -382,7 +382,7 @@ git commit -m "feat(templates): import 29 patterns.dev JS skills (self-authored 
 - [ ] **Step 5.1: Extract description + slug from each synced ref**
 
 ```bash
-for f in packages/templates/javascript-patterns/claude/references/*.md; do
+for f in packages/templates/patterns-dev/javascript-patterns/claude/references/*.md; do
   slug=$(basename "$f" .md)
   title=$(grep -m 1 '^# ' "$f" | sed 's/^# //')
   echo "$slug | $title"
@@ -399,7 +399,7 @@ Note: exact categorization depends on what upstream actually ships; adjust when 
 ### Task 6: Write Claude catalog `SKILL.md`
 
 **Files:**
-- Create: `packages/templates/javascript-patterns/claude/SKILL.md`
+- Create: `packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md`
 
 - [ ] **Step 6.1: Write full catalog**
 
@@ -513,8 +513,8 @@ Refs phái sinh từ [patterns.dev](https://patterns.dev) (MIT) — xem `LICENSE
 - [ ] **Step 6.2: Verify catalog refs match synced files**
 
 ```bash
-grep -oE 'references/[a-z0-9-]+\.md' packages/templates/javascript-patterns/claude/SKILL.md | sort -u > /tmp/catalog-refs.txt
-ls packages/templates/javascript-patterns/claude/references/ | sed 's/^/references\//' | sort -u > /tmp/actual-refs.txt
+grep -oE 'references/[a-z0-9-]+\.md' packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md | sort -u > /tmp/catalog-refs.txt
+ls packages/templates/patterns-dev/javascript-patterns/claude/references/ | sed 's/^/references\//' | sort -u > /tmp/actual-refs.txt
 diff /tmp/catalog-refs.txt /tmp/actual-refs.txt
 ```
 Expected: no diff (empty output). If any upstream folder slug doesn't appear in catalog, add a row. If catalog references a slug that doesn't exist, fix the slug.
@@ -522,36 +522,36 @@ Expected: no diff (empty output). If any upstream folder slug doesn't appear in 
 - [ ] **Step 6.3: Commit**
 
 ```bash
-git add packages/templates/javascript-patterns/claude/SKILL.md
+git add packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md
 git commit -m "feat(templates): add Claude catalog SKILL.md for javascript-patterns"
 ```
 
 ### Task 7: Duplicate catalog for Cursor + Codex (identical content)
 
 **Files:**
-- Create: `packages/templates/javascript-patterns/cursor/SKILL.md`
-- Create: `packages/templates/javascript-patterns/codex/SKILL.md`
+- Create: `packages/templates/patterns-dev/javascript-patterns/cursor/SKILL.md`
+- Create: `packages/templates/patterns-dev/javascript-patterns/codex/SKILL.md`
 
 - [ ] **Step 7.1: Copy Claude catalog to Cursor (identical — same frontmatter works)**
 
 ```bash
-cp packages/templates/javascript-patterns/claude/SKILL.md \
-   packages/templates/javascript-patterns/cursor/SKILL.md
+cp packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md \
+   packages/templates/patterns-dev/javascript-patterns/cursor/SKILL.md
 ```
 
 - [ ] **Step 7.2: Copy to Codex**
 
 ```bash
-cp packages/templates/javascript-patterns/claude/SKILL.md \
-   packages/templates/javascript-patterns/codex/SKILL.md
+cp packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md \
+   packages/templates/patterns-dev/javascript-patterns/codex/SKILL.md
 ```
 
 - [ ] **Step 7.3: Verify catalogs scaffold-parity with refs**
 
 ```bash
 for tool in cursor codex; do
-  diff <(grep -oE 'references/[a-z0-9-]+\.md' packages/templates/javascript-patterns/$tool/SKILL.md | sort -u) \
-       <(ls packages/templates/javascript-patterns/$tool/references/ | sed 's/^/references\//' | sort -u)
+  diff <(grep -oE 'references/[a-z0-9-]+\.md' packages/templates/patterns-dev/javascript-patterns/$tool/SKILL.md | sort -u) \
+       <(ls packages/templates/patterns-dev/javascript-patterns/$tool/references/ | sed 's/^/references\//' | sort -u)
 done
 ```
 Expected: no output for either tool.
@@ -559,21 +559,21 @@ Expected: no output for either tool.
 - [ ] **Step 7.4: Commit**
 
 ```bash
-git add packages/templates/javascript-patterns/cursor/SKILL.md \
-        packages/templates/javascript-patterns/codex/SKILL.md
+git add packages/templates/patterns-dev/javascript-patterns/cursor/SKILL.md \
+        packages/templates/patterns-dev/javascript-patterns/codex/SKILL.md
 git commit -m "feat(templates): add Cursor + Codex catalog SKILL.md"
 ```
 
 ### Task 8: Write Copilot catalog `.prompt.md` (slash-triggered manual-only)
 
 **Files:**
-- Create: `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`
+- Create: `packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md`
 
 Per DEC-011/DEC-002'': Copilot catalog is at `.github/prompts/` (slash popup manual) not `.github/instructions/` (auto-attach). Uses `.prompt.md` convention.
 
 - [ ] **Step 8.1: Write Copilot catalog**
 
-Create file `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`:
+Create file `packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md`:
 
 ```markdown
 ---
@@ -637,17 +637,17 @@ Generate catalog body by running this transform on the Claude catalog:
 
 ```bash
 sed -E 's|`references/|`javascript-patterns/|g' \
-    packages/templates/javascript-patterns/claude/SKILL.md \
+    packages/templates/patterns-dev/javascript-patterns/claude/SKILL.md \
   > /tmp/copilot-catalog-body.md
 ```
 
-Then replace the YAML frontmatter (everything between first `---` and second `---`) with the `description + mode: agent` block shown above. Save to `packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md`.
+Then replace the YAML frontmatter (everything between first `---` and second `---`) with the `description + mode: agent` block shown above. Save to `packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md`.
 
 - [ ] **Step 8.2: Verify Copilot catalog refs**
 
 ```bash
-grep -oE 'javascript-patterns/[a-z0-9-]+\.md' packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md | sort -u > /tmp/copilot-catalog-refs.txt
-ls packages/templates/javascript-patterns/copilot/javascript-patterns/ | sed 's/^/javascript-patterns\//' | sort -u > /tmp/copilot-actual-refs.txt
+grep -oE 'javascript-patterns/[a-z0-9-]+\.md' packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md | sort -u > /tmp/copilot-catalog-refs.txt
+ls packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns/ | sed 's/^/javascript-patterns\//' | sort -u > /tmp/copilot-actual-refs.txt
 diff /tmp/copilot-catalog-refs.txt /tmp/copilot-actual-refs.txt
 ```
 Expected: no diff.
@@ -655,14 +655,14 @@ Expected: no diff.
 - [ ] **Step 8.3: Verify NO `applyTo:` frontmatter (manual-only contract)**
 
 ```bash
-grep -c "^applyTo:" packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md
+grep -c "^applyTo:" packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md
 ```
 Expected: `0` (zero). If >0, remove — Copilot must stay manual.
 
 - [ ] **Step 8.4: Commit**
 
 ```bash
-git add packages/templates/javascript-patterns/copilot/javascript-patterns.prompt.md
+git add packages/templates/patterns-dev/javascript-patterns/copilot/javascript-patterns.prompt.md
 git commit -m "feat(templates): Copilot slash-triggered catalog prompt (manual-only, DEC-011)"
 ```
 
@@ -1840,9 +1840,9 @@ Find "## Sensitive Zones" section and extend:
 - Changes require running `bun run gen:manifest` and committing manifest contract tests
 - Manifest shape is part of CLI test contract
 
-**scripts/sync-upstream-patterns.ts:**
+**scripts/sync/patterns-dev/index.ts:**
 - Manual-run only (no auto/network at build time)
-- Overwrites `packages/templates/javascript-patterns/{refs, LICENSE}`
+- Overwrites `packages/templates/patterns-dev/javascript-patterns/{refs, LICENSE}`
 - Warn-and-stop if local refs diverge from upstream
 ```
 
@@ -1871,7 +1871,7 @@ Add a new "Skills" subsection mirroring the structure tree from Task 19.
 Add to Scripts table / Development commands section:
 
 ```markdown
-| `bun run sync:upstream-patterns` | Manually re-sync patterns.dev content into `packages/templates/javascript-patterns/`. Review diff before committing. |
+| `bun run sync:upstream-patterns` | Manually re-sync patterns.dev content into `packages/templates/patterns-dev/javascript-patterns/`. Review diff before committing. |
 | `bun run --cwd packages/cli gen:manifest` | Regenerate `src/generated/template-manifest.ts`. Auto-runs on prebuild. |
 ```
 
@@ -1906,7 +1906,7 @@ Add under an `## [Unreleased]` section (or create one):
 ### Added
 - `javascript-patterns` skill (hub-and-spoke, 29 patterns from patterns.dev). Scaffold-able to Claude Code, Cursor, Codex CLI, GitHub Copilot. Self-authored MIT LICENSE with attribution (upstream repo has no root LICENSE).
 - Wizard now includes a skill-select step (multi-select; `interview` default-on).
-- `scripts/sync-upstream-patterns.ts` for manual upstream re-sync.
+- `scripts/sync/patterns-dev/index.ts` for manual upstream re-sync.
 - `packages/cli/scripts/generate-template-manifest.ts` codegen (auto-runs on prebuild).
 ```
 
@@ -2005,7 +2005,7 @@ Catalog body enforces 2 additional guardrails: **Scope restriction to JS/TS + te
 
 Target paths mirror existing `interview/` convention for Claude/Cursor/Codex (`.{tool}/skills/javascript-patterns/`). We introduce a codegen manifest script (`packages/cli/scripts/generate-template-manifest.ts`) to emit static imports for ~121 template files without bloating `templates.ts`. Manifest is gitignored and regenerated on `prebuild` via turbo pipeline.
 
-We keep upstream sync manual via `scripts/sync-upstream-patterns.ts` to preserve git diff review and avoid network at build/runtime.
+We keep upstream sync manual via `scripts/sync/patterns-dev/index.ts` to preserve git diff review and avoid network at build/runtime.
 
 ## Consequences
 
