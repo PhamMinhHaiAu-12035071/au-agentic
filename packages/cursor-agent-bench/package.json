@@ -9,7 +9,6 @@
   },
   "scripts": {
     "bench": "bun run src/index.ts",
-    "bench:smoke-real": "bun run src/index.ts --real",
     "test": "../../scripts/run-bun-test.sh --concurrent src/__tests__/",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ."

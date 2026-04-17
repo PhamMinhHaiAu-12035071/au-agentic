@@ -21,8 +21,7 @@
     "perf": "./scripts/cache-env.sh bun scripts/benchmark.ts",
     "prepublish": "bun run verify && ./scripts/cache-env.sh bunx turbo run build",
     "sync:upstream-patterns": "./scripts/cache-env.sh bun scripts/sync/patterns-dev/index.ts",
-    "skill:bench": "bun --filter @au-agentic/cursor-agent-bench bench",
-    "skill:bench:smoke-real": "bun --filter @au-agentic/cursor-agent-bench bench:smoke-real"
+    "skill:bench": "bun --filter @au-agentic/cursor-agent-bench bench"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",

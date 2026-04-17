@@ -7,7 +7,6 @@ test("default args parse to smoke mode with no overrides", () => {
   expect(args.model).toBeUndefined();
   expect(args.runs).toBeUndefined();
   expect(args.fixture).toBeUndefined();
-  expect(args.real).toBe(false);
   expect(args.help).toBe(false);
 });
 
@@ -37,11 +36,6 @@ test("--fixture <id> captures fixture id", () => {
   expect(args.fixture).toBe("brainstorm-smoke");
 });
 
-test("--real sets real=true", () => {
-  const args = parseCliArgs(["--real"]);
-  expect(args.real).toBe(true);
-});
-
 test("combined flags parse correctly", () => {
   const args = parseCliArgs([
     "--matrix",
@@ -51,13 +45,11 @@ test("combined flags parse correctly", () => {
     "2",
     "--fixture",
     "brainstorm-smoke",
-    "--real",
   ]);
   expect(args.mode).toBe("matrix");
   expect(args.model).toBe("claude-4.5-sonnet");
   expect(args.runs).toBe(2);
   expect(args.fixture).toBe("brainstorm-smoke");
-  expect(args.real).toBe(true);
 });
 
 test("--help sets help=true", () => {
