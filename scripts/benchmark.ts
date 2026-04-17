@@ -1,4 +1,6 @@
 #!/usr/bin/env bun
+export {};
+
 interface Bench {
   name: string;
   cmd: string[];
