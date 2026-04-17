@@ -26,10 +26,15 @@ export async function loadAllFixtures(dir: string): Promise<Fixture[]> {
   const fixtures: Fixture[] = [];
   for (const file of entries) {
     if (!file.endsWith(".ts")) continue;
-    const mod = await import(join(abs, file));
-    const f = mod.default as Fixture;
-    validateFixture(f);
-    fixtures.push(f);
+    try {
+      const mod = await import(join(abs, file));
+      const f = mod.default as Fixture | undefined;
+      if (!f) throw new Error("missing default export");
+      validateFixture(f);
+      fixtures.push(f);
+    } catch (e) {
+      throw new Error(`${file}: ${(e as Error).message}`);
+    }
   }
   return fixtures;
 }

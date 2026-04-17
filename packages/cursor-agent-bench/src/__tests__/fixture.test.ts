@@ -1,5 +1,8 @@
 import { expect, test } from "bun:test";
-import { validateFixture } from "#src/fixture";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { loadAllFixtures, validateFixture } from "#src/fixture";
 import type { Fixture } from "#src/types";
 
 test("validateFixture accepts minimal valid fixture", () => {
@@ -62,4 +65,27 @@ test("validateFixture rejects maxTurns < turns.length", () => {
       ],
     }),
   ).toThrow(/maxTurns/);
+});
+
+test("loadAllFixtures wraps validation error with filename context (I-1)", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "bench-fx-"));
+  try {
+    await writeFile(
+      join(dir, "broken.ts"),
+      'export default { skill: "s", description: "d", turns: [] };',
+    );
+    await expect(loadAllFixtures(dir)).rejects.toThrow(/broken\.ts.+id is required/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("loadAllFixtures wraps missing default export with filename context (I-1)", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "bench-fx-"));
+  try {
+    await writeFile(join(dir, "no-default.ts"), "export const x = 1;");
+    await expect(loadAllFixtures(dir)).rejects.toThrow(/no-default\.ts.+missing default export/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
