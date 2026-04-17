@@ -4,7 +4,10 @@ import type { BenchUI, CellLabel, CellOutcome, TurnLabel, TurnOutcome } from "#s
 /** Interval between heartbeat ticks in TTY mode (DEC-029: ≤1s). */
 const HEARTBEAT_MS = 1_000;
 
-type ProgressHandle = { advance: (n: number, label?: string) => void; stop: (msg?: string) => void };
+type ProgressHandle = {
+  advance: (n: number, label?: string) => void;
+  stop: (msg?: string) => void;
+};
 type TaskLogHandle = {
   message: (line: string) => void;
   success: (msg?: string) => void;
@@ -40,7 +43,9 @@ export function createClackUI(): BenchUI {
       progress?.advance(1, line);
     },
     async turnStart(label: TurnLabel): Promise<void> {
-      task = p.taskLog({ title: `Turn ${label.turn}: "${truncatePrompt(label.prompt)}"` }) as unknown as TaskLogHandle;
+      task = p.taskLog({
+        title: `Turn ${label.turn}: "${truncatePrompt(label.prompt)}"`,
+      }) as unknown as TaskLogHandle;
       turnStartedAt = Date.now();
       heartbeat = setInterval(() => {
         const elapsed = Math.round((Date.now() - turnStartedAt) / 1000);

@@ -24,7 +24,9 @@ export function createConsolaUI(): BenchUI {
       log.info(`Running ${opts.max} cells`);
     },
     async cellStart(label: CellLabel): Promise<void> {
-      log.start(`[${label.idx}/${label.total}] ${label.fixture} / ${label.model} / run ${label.runIndex}`);
+      log.start(
+        `[${label.idx}/${label.total}] ${label.fixture} / ${label.model} / run ${label.runIndex}`,
+      );
     },
     async turnStart(label: TurnLabel): Promise<void> {
       log.info(`Turn ${label.turn}: ${label.prompt}`);

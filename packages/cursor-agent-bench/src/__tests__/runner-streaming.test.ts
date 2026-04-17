@@ -92,10 +92,5 @@ test("runner invokes ui.turnStart / turnLine / turnEnd in order", async () => {
   } finally {
     await rm(dumpDir, { recursive: true, force: true });
   }
-  expect(events).toEqual([
-    "turnStart(0)",
-    "turnLine(alpha)",
-    "turnLine(ok line)",
-    "turnEnd(true)",
-  ]);
+  expect(events).toEqual(["turnStart(0)", "turnLine(alpha)", "turnLine(ok line)", "turnEnd(true)"]);
 });

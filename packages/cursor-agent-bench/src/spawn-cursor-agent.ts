@@ -45,10 +45,7 @@ export async function runCmd(cmd: string[], opts: RunCmdOpts): Promise<SpawnResu
     ? consumeStream(proc.stdout, opts.onStdoutLine)
     : new Response(proc.stdout).text();
 
-  const [stdout, stderr] = await Promise.all([
-    consumeStdout,
-    new Response(proc.stderr).text(),
-  ]);
+  const [stdout, stderr] = await Promise.all([consumeStdout, new Response(proc.stderr).text()]);
   const exitCode = await proc.exited;
   clearTimeout(timer);
   const durationMs = Math.round(performance.now() - start);
