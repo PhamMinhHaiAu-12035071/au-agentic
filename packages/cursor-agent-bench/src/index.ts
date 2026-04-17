@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { consola } from "consola";
 import { HELP_TEXT, parseCliArgs } from "#src/cli-parse";
 import { loadAllFixtures, loadFixtureById } from "#src/fixture";
 import { collectMetadata, defaultDeps as metadataDeps } from "#src/metadata";
@@ -15,26 +16,36 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function formatMs(ms: number): string {
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  const m = Math.floor(ms / 60_000);
+  const s = Math.round((ms % 60_000) / 1000);
+  return `${m}m ${s}s`;
+}
+
 async function main(): Promise<number> {
+  // ---- Phase A: consola (before loop) ---------------------------------
   let args: ReturnType<typeof parseCliArgs>;
   try {
     args = parseCliArgs(process.argv.slice(2));
   } catch (e) {
-    console.error(`error: ${(e as Error).message}`);
-    console.error(HELP_TEXT);
+    consola.error(`arg parse: ${(e as Error).message}`);
+    consola.info(HELP_TEXT);
     return 4;
   }
-
   if (args.help) {
-    console.log(HELP_TEXT);
+    consola.info(HELP_TEXT);
     return 0;
   }
 
+  const preflightLog = consola.withTag("preflight");
+  preflightLog.start("Checking cursor-agent CLI + login");
   const pre = await preflightCheck();
   if (!pre.ok) {
-    console.error(`preflight: ${pre.message}`);
+    preflightLog.error(pre.message ?? "preflight failed");
     return pre.exitCode;
   }
+  preflightLog.success("OK");
 
   const fixturesDir = resolve(import.meta.dirname, "..", config.fixturesDir);
   let fixtures: Fixture[];
@@ -43,14 +54,24 @@ async function main(): Promise<number> {
       ? [await loadFixtureById(fixturesDir, args.fixture)]
       : await loadAllFixtures(fixturesDir);
   } catch (e) {
-    console.error(`fixture error: ${(e as Error).message}`);
+    consola.error(`fixture load: ${(e as Error).message}`);
     return 4;
   }
 
   const models = args.mode === "matrix" ? config.models : [args.model ?? config.defaultModel];
   const runs = args.runs ?? (args.mode === "matrix" ? config.matrixRuns : config.defaultRuns);
+  const totalCells = fixtures.length * models.length * runs;
 
-  const ui = createBenchUI({ isTty: process.stdout.isTTY ?? false });
+  consola
+    .withTag("config")
+    .info(
+      `mode=${args.mode} models=[${models.join(",")}] runs=${runs} fixtures=${fixtures.length} totalCells=${totalCells}`,
+    );
+
+  // ---- Phase B: adapter (in-loop) -------------------------------------
+  const ui = createBenchUI({ isTty: Boolean(process.stdout.isTTY) });
+  await ui.intro("⚡ cursor-agent-bench");
+  await ui.progressStart({ max: totalCells });
 
   const startedAt = new Date();
   const startTs = Date.now();
@@ -59,6 +80,7 @@ async function main(): Promise<number> {
   const jsonlRoot = resolve(import.meta.dirname, "..", config.jsonlDir);
   let passCount = 0;
   let totalCount = 0;
+  let cellIdx = 0;
 
   for (const fx of fixtures) {
     let meta = metadataBySkill.get(fx.skill);
@@ -78,6 +100,15 @@ async function main(): Promise<number> {
 
     for (const model of models) {
       for (let r = 0; r < runs; r++) {
+        cellIdx++;
+        await ui.cellStart({
+          idx: cellIdx,
+          total: totalCells,
+          fixture: fx.id,
+          model,
+          runIndex: r,
+        });
+
         const turns = await runFixture(fx, {
           config,
           model,
@@ -89,6 +120,11 @@ async function main(): Promise<number> {
           sleep,
           ui,
         });
+
+        const cellPass = turns.every((t) => t.pass);
+        const cellMs = turns.reduce((s, t) => s + t.durationMs, 0);
+        await ui.cellEnd({ pass: cellPass, durationMs: cellMs });
+
         totalCount += turns.length;
         passCount += turns.filter((t) => t.pass).length;
         const arr = bySkill.get(fx.skill) ?? [];
@@ -98,6 +134,10 @@ async function main(): Promise<number> {
     }
   }
 
+  await ui.progressStop("Bench finished");
+  await ui.outro(`Tracker dir: ${config.trackerDir}`);
+
+  // ---- Phase C: consola (after loop) ----------------------------------
   const finishedAt = new Date();
   const wallClockMs = Date.now() - startTs;
   const trackerRoot = resolve(import.meta.dirname, "..", config.trackerDir);
@@ -122,7 +162,12 @@ async function main(): Promise<number> {
     await renderTracker(`${trackerRoot}/${skill}.md`, skill, result);
   }
 
-  console.log(`bench: ${passCount}/${totalCount} pass (${args.mode} mode)`);
+  consola.box(
+    `Result: ${passCount}/${totalCount} pass | ${formatMs(wallClockMs)} | mode=${args.mode}`,
+  );
+  if (passCount === totalCount) consola.success("All cells pass");
+  else consola.error(`${totalCount - passCount} cells failed`);
+
   return passCount === totalCount ? 0 : 1;
 }
 
