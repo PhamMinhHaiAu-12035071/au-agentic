@@ -26,7 +26,9 @@ export function buildCursorAgentCmd(args: SpawnArgs): string[] {
 export async function runCmd(cmd: string[], timeoutMs: number): Promise<SpawnResult> {
   const start = performance.now();
   const proc = Bun.spawn({ cmd, stdout: "pipe", stderr: "pipe" });
+  let killedByTimer = false;
   const timer = setTimeout(() => {
+    killedByTimer = true;
     try {
       proc.kill();
     } catch {
@@ -40,7 +42,7 @@ export async function runCmd(cmd: string[], timeoutMs: number): Promise<SpawnRes
   const exitCode = await proc.exited;
   clearTimeout(timer);
   const durationMs = Math.round(performance.now() - start);
-  const timedOut = durationMs >= timeoutMs && exitCode !== 0;
+  const timedOut = killedByTimer;
   const sessionId = extractSessionId(stdout, stderr);
   return { stdout, stderr, exitCode, durationMs, timedOut, sessionId };
 }

@@ -38,3 +38,15 @@ test("runCmd captures stdout and exitCode from a real command", async () => {
   expect(r.stdout).toMatch(/hello/);
   expect(r.timedOut).toBe(false);
 });
+
+test("runCmd marks timedOut=true when timer fires (I-1)", async () => {
+  const r = await runCmd(["sh", "-c", "sleep 1"], 200);
+  expect(r.timedOut).toBe(true);
+  expect(r.exitCode).not.toBe(0);
+});
+
+test("runCmd marks timedOut=false on fast nonzero exit (I-1)", async () => {
+  const r = await runCmd(["sh", "-c", "exit 1"], 5000);
+  expect(r.timedOut).toBe(false);
+  expect(r.exitCode).toBe(1);
+});
