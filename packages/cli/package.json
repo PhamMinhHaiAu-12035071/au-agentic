@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "bun build src/index.ts --target=node --outdir=dist --format=esm --banner='#!/usr/bin/env node' --external=@clack/prompts --external=picocolors",
-    "test": "bun test --concurrent src/__tests__/",
+    "test": "../../scripts/run-bun-test.sh --concurrent src/__tests__/",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint .",
     "format": "biome format --write ."
