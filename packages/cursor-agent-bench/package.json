@@ -1,0 +1,21 @@
+{
+  "name": "@au-agentic/cursor-agent-bench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#src/*": "./src/*.ts",
+    "#fixtures/*": "./fixtures/*.ts"
+  },
+  "scripts": {
+    "bench": "bun run src/index.ts",
+    "bench:smoke-real": "bun run src/index.ts --real",
+    "test": "../../scripts/run-bun-test.sh --concurrent src/__tests__/",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  }
+}

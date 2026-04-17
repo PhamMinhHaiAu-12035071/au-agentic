@@ -83,3 +83,8 @@ ignore:
   # Nested package artifacts (workspace hoisting does not cover these paths)
   - packages/cli/node_modules
   - packages/cli/.turbo
+  - packages/cursor-agent-bench/node_modules
+  - packages/cursor-agent-bench/.turbo
+
+  # Package-level README.md follows community UPPERCASE convention
+  - packages/cursor-agent-bench/README.md
