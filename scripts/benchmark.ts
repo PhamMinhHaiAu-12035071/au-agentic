@@ -50,6 +50,12 @@ const benches: Bench[] = [
     ceilingMs: 1500,
   },
   {
+    name: "bun test (cursor-agent-bench unit)",
+    cmd: ["bun", "--filter", "@au-agentic/cursor-agent-bench", "test"],
+    targetMs: 200,
+    ceilingMs: 500,
+  },
+  {
     name: "bun typecheck (warm)",
     cmd: ["bun", "run", "typecheck"],
     targetMs: 1000,
