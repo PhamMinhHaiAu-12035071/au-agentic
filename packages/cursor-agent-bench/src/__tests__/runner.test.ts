@@ -144,7 +144,7 @@ test("runner marks timedOut when spawn reports it", async () => {
 
 test("runner kills fixture when per-fixture deadline exceeded (C4, DEC-017)", async () => {
   await withTmp(async (dumpDir) => {
-    const shortDeadlineConfig: BenchConfig = { ...baseConfig, perFixtureDeadlineMs: 50 };
+    const shortDeadlineConfig: BenchConfig = { ...baseConfig, perFixtureDeadlineMs: 20 };
     const fx3: Fixture = {
       id: "fx3",
       skill: "s1",
@@ -156,7 +156,7 @@ test("runner kills fixture when per-fixture deadline exceeded (C4, DEC-017)", as
       ],
     };
     const spawn: SpawnFn = async () => {
-      await new Promise((r) => setTimeout(r, 80));
+      await new Promise((r) => setTimeout(r, 30));
       return ok("ok");
     };
     const results = await runFixture(fx3, {
