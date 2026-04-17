@@ -18,5 +18,7 @@ Placeholder commands (today):
 
 ```bash
 bun install
-bun run verify
+bunx lefthook install   # one-time hook setup
+bun run verify          # lint + typecheck + test
+bun run perf            # benchmark gate
 ```
