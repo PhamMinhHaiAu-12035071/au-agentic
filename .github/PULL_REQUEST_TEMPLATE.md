@@ -8,7 +8,12 @@ Closes #
 
 ## Test Evidence
 
-<!-- Output from `bun run verify` -->
+<!-- 
+Paste output from:
+- `bun run verify` (lint + typecheck + test)
+- `bun run perf` (if tooling/config change)
+- `bunx knip` (strict mode, runs on pre-push)
+-->
 
 ## Docs Updated?
 
