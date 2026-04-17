@@ -45,6 +45,8 @@ Nothing else.
 
 Everything else MUST live inside `node_modules`.
 
+**Narrow exception — cursor-agent-bench only:** Cursor CLI (`cursor-agent`) is permitted as a system prerequisite for the `@au-agentic/cursor-agent-bench` workspace package. It is not a runtime dependency of any shipped artifact. See [ADR-0010](../adr/0010-cursor-cli-system-prereq.md).
+
 ## Agent algorithm
 
 Before proposing any new tool to the user:
