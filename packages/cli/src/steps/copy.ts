@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { fileExists, writeTemplate } from "../utils/files.js";
-import { getTargetPath, getTemplateContent, TOOL_LABELS, type Tool } from "../utils/templates.js";
+import { fileExists, writeTemplate } from "#utils/files";
+import { getTargetPath, getTemplateContent, TOOL_LABELS, type Tool } from "#utils/templates";
 
 type CopyResult = "copied" | "skipped" | "failed";
 

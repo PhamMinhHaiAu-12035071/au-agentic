@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
-import { hasWritePermission, isDirectory } from "../utils/files.js";
-import { resolvePath } from "../utils/paths.js";
+import { hasWritePermission, isDirectory } from "#utils/files";
+import { resolvePath } from "#utils/paths";
 
 export async function stepInputPath(): Promise<string> {
   while (true) {

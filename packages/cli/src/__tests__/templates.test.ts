@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getTemplateContent } from "../utils/templates";
+import { getTemplateContent } from "#utils/templates";
 
 describe("template frontmatter", () => {
   it("cursor template declares name and description", () => {

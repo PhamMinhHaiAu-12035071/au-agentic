@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { TOOL_LABELS, TOOLS, type Tool } from "../utils/templates.js";
+import { TOOL_LABELS, TOOLS, type Tool } from "#utils/templates";
 
 export async function stepSelectTools(): Promise<Tool[]> {
   const selected = await p.multiselect<Tool>({

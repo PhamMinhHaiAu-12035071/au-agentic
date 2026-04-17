@@ -8,7 +8,7 @@ import {
   hasWritePermission,
   isDirectory,
   writeTemplate,
-} from "../utils/files";
+} from "#utils/files";
 
 let tmpDir: string;
 

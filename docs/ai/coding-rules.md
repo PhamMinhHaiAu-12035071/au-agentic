@@ -28,12 +28,16 @@ Templates are static text at build time; no runtime file I/O for templates.
 
 - **External packages** (`@clack/prompts`, `picocolors`): use the bare specifier.
 - **Cross-package** (between `cli` and `templates`): use the workspace alias `@au-agentic/templates/...`.
-- **Intra-package** (inside `packages/cli/src/`): use the `imports` field aliases declared in `packages/cli/package.json`:
+- **Intra-package** (inside `packages/cli/src/` — including `__tests__/`): you **MUST** use the `imports` field aliases declared in `packages/cli/package.json`:
     - `#utils/*` resolves to `./src/utils/*.ts`
     - `#steps/*` resolves to `./src/steps/*.ts`
-- **Relative imports** are still allowed for siblings within the same directory (e.g., `./helpers`), but prefer `#alias/*` for anything reaching across more than one directory.
+- **No `.js` extension on aliases.** Write `#utils/files`, not `#utils/files.js` — the wildcard expands to the `.ts` source so adding `.js` produces `files.js.ts` which fails to resolve.
+- **Relative imports are forbidden once a path leaves the current directory.** `../anything` and `./sub/anything` MUST be rewritten as `#alias/...`. Same-directory siblings (`./helpers`) are the only allowed relative form.
+- **Build-time JSON/text imports** (`../package.json`, template files) are exempt — they live outside `src/` and aliases do not cover them.
 
 The `tsconfig.json` `paths` block mirrors the `imports` field for editor support; the runtime source of truth is always the `imports` field. See `docs/adr/0005-imports-field-alias-pattern.md` for rationale.
+
+**Verifying compliance:** `rg "from ['\"]\.\./" packages/*/src` must return zero matches except for build-time JSON imports. Run this before claiming refactor work complete.
 
 ## Naming Conventions
 

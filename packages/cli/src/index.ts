@@ -1,9 +1,9 @@
 import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { stepCopy } from "#steps/copy";
+import { stepInputPath } from "#steps/path";
+import { stepSelectTools } from "#steps/tools";
 import pkg from "../package.json" with { type: "json" };
-import { stepCopy } from "./steps/copy.js";
-import { stepInputPath } from "./steps/path.js";
-import { stepSelectTools } from "./steps/tools.js";
 
 // Non-TTY check — must run before any Clack call
 if (!process.stdout.isTTY) {
