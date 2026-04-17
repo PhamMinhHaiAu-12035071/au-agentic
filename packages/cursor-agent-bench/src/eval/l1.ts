@@ -34,11 +34,19 @@ export function evalAssertion(a: Assertion, ctx: Context): AssertionResult {
       };
     }
     case "exitCode": {
-      const ok = ctx.exitCode === Number(a.pattern);
+      const expected = Number(a.pattern);
+      if (!Number.isFinite(expected)) {
+        return {
+          ...base,
+          ok: false,
+          reason: `exitCode pattern must be numeric, got: ${String(a.pattern)}`,
+        };
+      }
+      const ok = ctx.exitCode === expected;
       return {
         ...base,
         ok,
-        reason: ok ? undefined : `exitCode ${ctx.exitCode} !== ${a.pattern}`,
+        reason: ok ? undefined : `exitCode ${ctx.exitCode} !== ${expected}`,
       };
     }
     default:

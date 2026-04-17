@@ -54,3 +54,20 @@ test("unknown kind returns ok=false with reason", () => {
   expect(r.ok).toBe(false);
   expect(r.reason).toMatch(/unknown/i);
 });
+
+test("exitCode matcher rejects non-numeric pattern with clear reason (I-2)", () => {
+  const r = evalAssertion(
+    { kind: "exitCode", pattern: "abc" },
+    { output: "", exitCode: 0 },
+  );
+  expect(r.ok).toBe(false);
+  expect(r.reason).toMatch(/must be numeric.+abc/);
+});
+
+test("exitCode matcher accepts numeric-string pattern (e.g. '0')", () => {
+  const r = evalAssertion(
+    { kind: "exitCode", pattern: "0" },
+    { output: "", exitCode: 0 },
+  );
+  expect(r.ok).toBe(true);
+});
