@@ -84,7 +84,7 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
     const timeoutMs = Math.min(turn.timeoutMs ?? config.perTurnTimeoutMs, remaining);
     if (timeoutMs === 0) {
       results.push(budgetExceededResult(i, prompt));
-      break;
+      break; // no turnStart emitted → no turnEnd needed (same as deadline guard above)
     }
 
     await opts.ui.turnStart({
@@ -173,6 +173,7 @@ export async function runFixture(fixture: Fixture, opts: RunFixtureOpts): Promis
           output: finalSpawn.stdout,
         });
       } catch {
+        // best-effort dump; disk full / permission errors must not crash the runner
         outputDumpPath = undefined;
       }
     }
