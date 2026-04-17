@@ -18,3 +18,8 @@ lcov.info
 # Worktree benchmark scratch (Phase 4 introduces .worktrees/.bench)
 .worktrees/.bench/
 .worktrees/.cold-*/
+
+# Scaffolded by au-agentic — re-install on demand via the CLI, never commit
+.cursor/
+.claude/
+.agents/
