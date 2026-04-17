@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Manual sync of upstream PatternsDev/skills/javascript into
- * packages/templates/javascript-patterns. Run on demand:
+ * packages/templates/patterns-dev/javascript-patterns. Run on demand:
  *   bun run sync:upstream-patterns
  * Does NOT commit; dev reviews diff manually.
  */
@@ -62,7 +62,7 @@ function syncLicense(): void {
   const upstreamLicense = join(TMP_DIR, "LICENSE");
   if (!existsSync(upstreamLicense)) {
     console.warn(
-      "  ⚠ upstream has no LICENSE — keeping local packages/templates/javascript-patterns/LICENSE as source of truth",
+      "  ⚠ upstream has no LICENSE — keeping local packages/templates/patterns-dev/javascript-patterns/LICENSE as source of truth",
     );
     return;
   }
@@ -98,7 +98,7 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n✓ Synced ${folders.length} patterns × 4 tools.`);
-  console.log(`  Review diff: git diff packages/templates/javascript-patterns/`);
+  console.log(`  Review diff: git diff packages/templates/patterns-dev/javascript-patterns/`);
   console.log(`  Clean up: rm -rf "${TMP_DIR}"`);
 }
 
