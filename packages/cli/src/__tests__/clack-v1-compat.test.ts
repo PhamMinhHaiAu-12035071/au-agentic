@@ -8,8 +8,7 @@ import * as clack from "@clack/prompts";
  */
 
 describe("clack v1 compat — no unused exports", () => {
-  // Symbols the wizard imports today. Grep guard:
-  //   rg -o "p\\.\\w+" packages/cli/src --no-filename | sort -u
+  // Symbols the wizard imports today (see: rg -oh "p\\.\\w+" packages/cli/src --no-filename | sort -u).
   const requiredSymbols = [
     "intro",
     "outro",
@@ -19,8 +18,6 @@ describe("clack v1 compat — no unused exports", () => {
     "multiselect",
     "confirm",
     "isCancel",
-    "spinner",
-    "note",
     "log",
   ] as const;
 
@@ -30,13 +27,11 @@ describe("clack v1 compat — no unused exports", () => {
     });
   }
 
-  test("log has error method", () => {
+  test("log has all methods the wizard uses", () => {
     expect(clack.log.error).toBeTypeOf("function");
-  });
-
-  test("spinner returns start/stop handle", () => {
-    const s = clack.spinner();
-    expect(s.start).toBeTypeOf("function");
-    expect(s.stop).toBeTypeOf("function");
+    expect(clack.log.message).toBeTypeOf("function");
+    expect(clack.log.info).toBeTypeOf("function");
+    expect(clack.log.warn).toBeTypeOf("function");
+    expect(clack.log.success).toBeTypeOf("function");
   });
 });
