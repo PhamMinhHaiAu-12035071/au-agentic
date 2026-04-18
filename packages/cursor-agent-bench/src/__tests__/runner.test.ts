@@ -4,6 +4,37 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runFixture, type SpawnFn, type SpawnResult } from "#src/runner";
 import type { BenchConfig, Fixture, ReproMetadata } from "#src/types";
+import type { BenchUI } from "#src/ui/types";
+
+const noopUI: BenchUI = {
+  async intro() {
+    return;
+  },
+  async progressStart() {
+    return;
+  },
+  async cellStart() {
+    return;
+  },
+  async turnStart() {
+    return;
+  },
+  turnLine() {
+    return;
+  },
+  async turnEnd() {
+    return;
+  },
+  async cellEnd() {
+    return;
+  },
+  async progressStop() {
+    return;
+  },
+  async outro() {
+    return;
+  },
+};
 
 const fakeMeta: ReproMetadata = {
   commit: "deadbeef",
@@ -65,6 +96,7 @@ test("runner returns passing TurnResult when spawn output matches", async () => 
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     expect(results).toHaveLength(1);
     expect(results[0]?.pass).toBe(true);
@@ -89,6 +121,7 @@ test("runner retries once on spawn error, then succeeds", async () => {
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     expect(calls).toBe(2);
     expect(results[0]?.pass).toBe(true);
@@ -112,6 +145,7 @@ test("runner marks turn failed on assertion mismatch, no retry", async () => {
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     expect(results[0]?.pass).toBe(false);
     expect(calls).toBe(1);
@@ -136,6 +170,7 @@ test("runner marks timedOut when spawn reports it", async () => {
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     expect(results[0]?.pass).toBe(false);
     expect(results[0]?.timedOut).toBe(true);
@@ -168,6 +203,7 @@ test("runner kills fixture when per-fixture deadline exceeded (C4, DEC-017)", as
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     const last = results[results.length - 1];
     expect(last?.reason).toBe("budget-exceeded");
@@ -200,6 +236,7 @@ test("runner respects fixture.maxTurns override", async () => {
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     expect(calls).toBe(2);
   });
@@ -218,6 +255,7 @@ test("runner survives writeDump failure, still emits result with outputDumpPath=
     startedAt: new Date(),
     spawn,
     sleep: noSleep,
+    ui: noopUI,
   });
   expect(results).toHaveLength(1);
   expect(results[0]?.pass).toBe(false);
@@ -248,6 +286,7 @@ test("runner embeds metadata + truncates long output + dumps on fail", async () 
       startedAt: new Date(),
       spawn,
       sleep: noSleep,
+      ui: noopUI,
     });
     const r = results[0];
     if (!r) throw new Error("expected result");

@@ -23,7 +23,12 @@ export function buildCursorAgentCmd(args: SpawnArgs): string[] {
   ];
 }
 
-export async function runCmd(cmd: string[], timeoutMs: number): Promise<SpawnResult> {
+export interface RunCmdOpts {
+  timeoutMs: number;
+  onStdoutLine?: (line: string) => void;
+}
+
+export async function runCmd(cmd: string[], opts: RunCmdOpts): Promise<SpawnResult> {
   const start = performance.now();
   const proc = Bun.spawn({ cmd, stdout: "pipe", stderr: "pipe" });
   let killedByTimer = false;
@@ -34,19 +39,57 @@ export async function runCmd(cmd: string[], timeoutMs: number): Promise<SpawnRes
     } catch {
       // best-effort kill; process may have already exited
     }
-  }, timeoutMs);
-  const [stdout, stderr] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-  ]);
+  }, opts.timeoutMs);
+
+  const consumeStdout = opts.onStdoutLine
+    ? consumeStream(proc.stdout, opts.onStdoutLine)
+    : new Response(proc.stdout).text();
+
+  const [stdout, stderr] = await Promise.all([consumeStdout, new Response(proc.stderr).text()]);
   const exitCode = await proc.exited;
   clearTimeout(timer);
   const durationMs = Math.round(performance.now() - start);
-  const timedOut = killedByTimer;
   const sessionId = extractSessionId(stdout, stderr);
-  return { stdout, stderr, exitCode, durationMs, timedOut, sessionId };
+  return { stdout, stderr, exitCode, durationMs, timedOut: killedByTimer, sessionId };
+}
+
+async function consumeStream(
+  stream: ReadableStream<Uint8Array>,
+  onLine: (line: string) => void,
+): Promise<string> {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+  let buffer = "";
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      chunks.push(chunk);
+      buffer += chunk;
+      for (;;) {
+        const nl = buffer.indexOf("\n");
+        if (nl === -1) break;
+        onLine(buffer.slice(0, nl));
+        buffer = buffer.slice(nl + 1);
+      }
+    }
+    const tail = decoder.decode();
+    if (tail) {
+      chunks.push(tail);
+      buffer += tail;
+    }
+    if (buffer.length > 0) onLine(buffer);
+    return chunks.join("");
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 export const spawnCursorAgent: SpawnFn = async (args) => {
-  return runCmd(buildCursorAgentCmd(args), args.timeoutMs);
+  return runCmd(buildCursorAgentCmd(args), {
+    timeoutMs: args.timeoutMs,
+    onStdoutLine: args.onStdoutLine,
+  });
 };

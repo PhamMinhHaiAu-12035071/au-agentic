@@ -42,3 +42,27 @@ unintended changes with `git checkout -- <files>` / `rm` before committing.
 
 Follow-up: run the bench from an isolated git worktree or a copy of the
 repo to prevent LLM-induced code pollution.
+
+## Realtime UX
+
+When the terminal is a TTY, `bun run skill:bench` renders:
+
+- `clack.intro` — header
+- `clack.progress` — overall cell counter (`[idx/total] fixture / model / run N`)
+- `clack.taskLog` — per-turn stream with line-by-line stdout and a
+  heartbeat tick every ≈1s so the run never appears stuck
+- `clack.outro` — "Tracker dir: …"
+- `consola.box` — final result summary
+
+When stdout is **not** a TTY (e.g. `bun run skill:bench > bench.log 2>&1`),
+a consola-based adapter replaces the in-loop UI with plain tagged log
+lines. Heartbeat cadence drops to 30s to avoid log bloat. Output is
+ANSI-free and `grep`-able:
+
+```bash
+bun run skill:bench > bench.log 2>&1
+grep $'\x1b' bench.log   # → no matches, safe to commit / share
+```
+
+See [ADR-0011](../../docs/adr/0011-consola-for-bench-semantic-logging.md)
+for the phase-isolation rule.
